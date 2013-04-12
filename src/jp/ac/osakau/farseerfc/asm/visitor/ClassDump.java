@@ -25,7 +25,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.tree.analysis.Frame;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
@@ -111,9 +110,9 @@ public class ClassDump extends ClassVisitor{
 				super.visitEnd();
 				printf("}\n{\n");
 				DepEffect effect = new DepEffect();
-				Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effect, typeNameTable,this));
+				Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effect));
 				try {
-					Frame<DepValue> [] frames = ana.analyze("dep", this);
+					/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 				} catch (AnalyzerException e) {
 					e.printStackTrace();
 				}

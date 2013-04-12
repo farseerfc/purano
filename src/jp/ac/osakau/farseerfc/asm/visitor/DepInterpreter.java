@@ -9,12 +9,11 @@ import jp.ac.osakau.farseerfc.asm.dep.CallEffect;
 import jp.ac.osakau.farseerfc.asm.dep.DepEffect;
 import jp.ac.osakau.farseerfc.asm.dep.DepSet;
 import jp.ac.osakau.farseerfc.asm.dep.DepValue;
+import jp.ac.osakau.farseerfc.asm.dep.FieldDep;
 import jp.ac.osakau.farseerfc.asm.dep.OtherFieldEffect;
 import jp.ac.osakau.farseerfc.asm.dep.StaticFieldEffect;
 import jp.ac.osakau.farseerfc.asm.dep.ThisFieldEffect;
 import jp.ac.osakau.farseerfc.asm.dep.ThrowEffect;
-import jp.ac.osakau.farseerfc.asm.table.MethodDesc;
-import jp.ac.osakau.farseerfc.asm.table.TypeNameTable;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
@@ -25,7 +24,6 @@ import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -37,73 +35,11 @@ import com.google.common.base.Joiner;
 public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	
 	private final DepEffect effect;
-	private final TypeNameTable table;
-	private final MethodNode methodNode;
-	private final int argCount;
 	
 
-	public DepInterpreter(DepEffect effect, TypeNameTable table,
-			MethodNode methodNode) {
+	public DepInterpreter(DepEffect effect) {
 		super(ASM4);
 		this.effect = effect;
-		this.table = table;
-		this.methodNode = methodNode;
-		MethodDesc p = table.method2full(methodNode.desc);
-
-		if (((methodNode.access & ACC_STATIC) == 0)) {
-			argCount = p.getArguments().size() + 1; // for this
-		} else {
-			argCount = p.getArguments().size();
-		}
-	}
-
-	private String dumpDeps(DepSet dep){
-		List<String> argsb = new ArrayList<>();
-		List<String> localsb = new ArrayList<>();
-		boolean thisDep=false;
-		//System.err.printf("method %s ArgCount %s localV %s\n",methodNode.name,argCount,methodNode.localVariables.size());
-		if(dep.getLocals().contains(0) &&
-				((methodNode.access & ACC_STATIC) == 0) &&
-				methodNode.localVariables.size()>0){
-			thisDep = true;
-		}
-		for(int i=1;i<argCount;++i){
-			if(dep.getLocals().contains(i) && methodNode.localVariables.size()>i){
-				argsb.add(String.format("%s %s",
-						table.desc2full(methodNode.localVariables.get(i).desc) ,
-						methodNode.localVariables.get(i).name));
-			}
-		}
-		for(int i=argCount;i<methodNode.localVariables.size();++i){
-			if(dep.getLocals().contains(i) && methodNode.localVariables.size()>i){
-				localsb.add(String.format("%s %s",
-						table.desc2full(methodNode.localVariables.get(i).desc) ,
-						methodNode.localVariables.get(i).name));
-			}
-		}
-
-		List<String> result=new ArrayList<>();
-		if(thisDep){
-			result.add("this");
-		}
-		if(argsb.size() > 0){
-			result.add(String.format("Args: [%s]", 
-					Joiner.on(", ").join(argsb)));
-		}
-		if(localsb.size()>0){
-			result.add(String.format("Locals: [%s]", 
-					Joiner.on(", ").join(localsb)));
-		}
-		if(dep.getFields().size() > 0){
-			result.add(String.format("Fields: [%s]",
-					Joiner.on(", ").join(dep.getFields())));
-		}
-		if(dep.getStatics().size() > 0){
-			result.add(String.format("Statics: [%s]",
-					Joiner.on(", ").join(dep.getStatics())));
-		}
-		
-		return Joiner.on(", ").join(result);
 	}
     
     private String opcode2string(int opcode){
@@ -216,11 +152,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			{ 
 				FieldInsnNode fin = (FieldInsnNode) insn;
 				DepValue v =newValue(Type.getType(fin.desc));
-				v.getDeps().getStatics().add(String.format("%s %s.%s ",
-						table.desc2full(fin.desc),
-						table.fullClassName(fin.owner),
-						fin.name
-						));
+				v.getDeps().getStatics().add(new FieldDep(fin.desc,fin.owner,fin.name));
 				
 				return v;
 			}
@@ -322,8 +254,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			return null;
 		}
         case GETFIELD:{
-        	DepValue v =new DepValue(Type.getType(((FieldInsnNode) insn).desc), value.getDeps());
-        	v.getDeps().getFields().add(table.desc2full(((FieldInsnNode) insn).desc));
+        	FieldInsnNode fin = (FieldInsnNode) insn;
+        	DepValue v =new DepValue(Type.getType(fin.desc), value.getDeps());
+        	v.getDeps().getFields().add(new FieldDep(fin.desc,fin.owner,fin.name));
         	return v;
         }
         case NEWARRAY:
@@ -518,7 +451,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	}
 		MethodInsnNode min = (MethodInsnNode) insn;
 		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
-		
+		effect.getOther().add(ce);
 		return new DepValue(Type.getReturnType(min.desc), deps);
     }
 

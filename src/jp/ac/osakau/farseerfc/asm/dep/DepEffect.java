@@ -3,6 +3,8 @@ package jp.ac.osakau.farseerfc.asm.dep;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import jp.ac.osakau.farseerfc.asm.table.MethodDesc;
 import jp.ac.osakau.farseerfc.asm.table.TypeNameTable;
 import lombok.Getter;
@@ -10,7 +12,9 @@ import lombok.Getter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Collections2;
 
 public class DepEffect {
 	private final @Getter DepSet ret= new DepSet();
@@ -68,7 +72,7 @@ public class DepEffect {
 				Joiner.on("\n").join(deps));
 	}
 	
-	private String dumpDeps(MethodNode methodNode, DepSet dep, TypeNameTable table, int argCount){
+	private String dumpDeps(final MethodNode methodNode,final DepSet dep,final TypeNameTable table,final int argCount){
 		List<String> argsb = new ArrayList<>();
 		List<String> localsb = new ArrayList<>();
 		boolean thisDep=false;
@@ -78,7 +82,7 @@ public class DepEffect {
 				methodNode.localVariables.size()>0){
 			thisDep = true;
 		}
-		for(int i=1;i<argCount;++i){
+		for(int i=thisDep?1:0;i<argCount;++i){
 			if(dep.getLocals().contains(i) && methodNode.localVariables.size()>i){
 				argsb.add(String.format("%s %s",
 						table.desc2full(methodNode.localVariables.get(i).desc) ,
@@ -93,6 +97,13 @@ public class DepEffect {
 			}
 		}
 
+		final Function<FieldDep,String> dumper = new Function<FieldDep,String>(){
+			@Override @Nullable
+			public String apply(@Nullable FieldDep fd) {
+				return fd.dump(table);
+			}
+		};
+		
 		List<String> result=new ArrayList<>();
 		if(thisDep){
 			result.add("this");
@@ -107,11 +118,13 @@ public class DepEffect {
 		}
 		if(dep.getFields().size() > 0){
 			result.add(String.format("Fields: [%s]",
-					Joiner.on(", ").join(dep.getFields())));
+					Joiner.on(", ").join(Collections2.transform(dep.getFields(), dumper
+							))));
 		}
 		if(dep.getStatics().size() > 0){
 			result.add(String.format("Statics: [%s]",
-					Joiner.on(", ").join(dep.getStatics())));
+					Joiner.on(", ").join(Collections2.transform(dep.getStatics(), dumper
+							))));
 		}
 		
 		return Joiner.on(", ").join(result);

@@ -1,7 +1,17 @@
 package jp.ac.osakau.farseerfc.asm.test;
 
 public class TargetA {
-	public static int add(int a, int b){
+	private int c;
+	
+	public static int staticAdd(int a, int b){
 		return a+b;
+	}
+	
+	public int memberAdd(int a, int b){
+		return a+b;
+	}
+	
+	public int thisAdd(int a){
+		return a+c;
 	}
 }
