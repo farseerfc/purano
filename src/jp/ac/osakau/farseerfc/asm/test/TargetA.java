@@ -14,4 +14,9 @@ public class TargetA {
 	public int thisAdd(int a){
 		return a+c;
 	}
+	
+	public void setC(int c){
+		this.c = c;
+	}
+	
 }
