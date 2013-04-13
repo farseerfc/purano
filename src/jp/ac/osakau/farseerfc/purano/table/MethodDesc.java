@@ -1,4 +1,4 @@
-package jp.ac.osakau.farseerfc.asm.table;
+package jp.ac.osakau.farseerfc.purano.table;
 
 import java.util.List;
 

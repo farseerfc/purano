@@ -1,4 +1,4 @@
-package jp.ac.osakau.farseerfc.asm.dep;
+package jp.ac.osakau.farseerfc.purano.dep;
 
 import lombok.Getter;
 

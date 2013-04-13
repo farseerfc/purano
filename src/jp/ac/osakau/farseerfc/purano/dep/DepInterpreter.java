@@ -1,19 +1,9 @@
-package jp.ac.osakau.farseerfc.asm.visitor;
+package jp.ac.osakau.farseerfc.purano.dep;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.ac.osakau.farseerfc.asm.dep.ArrayStoreEffect;
-import jp.ac.osakau.farseerfc.asm.dep.CallEffect;
-import jp.ac.osakau.farseerfc.asm.dep.DepEffect;
-import jp.ac.osakau.farseerfc.asm.dep.DepSet;
-import jp.ac.osakau.farseerfc.asm.dep.DepValue;
-import jp.ac.osakau.farseerfc.asm.dep.FieldDep;
-import jp.ac.osakau.farseerfc.asm.dep.OtherFieldEffect;
-import jp.ac.osakau.farseerfc.asm.dep.StaticFieldEffect;
-import jp.ac.osakau.farseerfc.asm.dep.ThisFieldEffect;
-import jp.ac.osakau.farseerfc.asm.dep.ThrowEffect;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;

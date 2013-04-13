@@ -1,12 +1,12 @@
-package jp.ac.osakau.farseerfc.asm.dep;
+package jp.ac.osakau.farseerfc.purano.dep;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import jp.ac.osakau.farseerfc.asm.table.MethodDesc;
-import jp.ac.osakau.farseerfc.asm.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
+import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 import lombok.Getter;
 
 import org.objectweb.asm.Opcodes;

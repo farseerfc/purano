@@ -1,4 +1,4 @@
-package jp.ac.osakau.farseerfc.asm.test;
+package jp.ac.osakau.farseerfc.purano.test;
 
 public class TargetA {
 	private int c;

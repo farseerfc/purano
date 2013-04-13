@@ -1,4 +1,4 @@
-package jp.ac.osakau.farseerfc.asm.visitor;
+package jp.ac.osakau.farseerfc.purano.dep;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,9 +11,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import jp.ac.osakau.farseerfc.asm.dep.DepEffect;
-import jp.ac.osakau.farseerfc.asm.dep.DepValue;
-import jp.ac.osakau.farseerfc.asm.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.objectweb.asm.AnnotationVisitor;
@@ -33,18 +31,18 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 
-public class ClassDump extends ClassVisitor{
+public class ClassDepVisitor extends ClassVisitor{
 	private final TypeNameTable typeNameTable = new TypeNameTable();
 	private final PrintWriter out;
 	private final StringWriter sw = new StringWriter();
 	private final PrintWriter writer = new PrintWriter(sw);
 	
-	public ClassDump() {
+	public ClassDepVisitor() {
 		super(Opcodes.ASM4);
 		out = new PrintWriter(System.out);
 	}
 	
-	public ClassDump(PrintWriter pw){
+	public ClassDepVisitor(PrintWriter pw){
 		super(Opcodes.ASM4);
 		out = pw;
 	}
@@ -64,7 +62,7 @@ public class ClassDump extends ClassVisitor{
 				return typeNameTable.fullClassName(inter);
 			}}); 
 		printf("%s class %s extends %s %s%s {\n",
-			access2string(access),
+			TypeNameTable.access2string(access),
 			typeNameTable.fullClassName(name),
 			typeNameTable.fullClassName(superName),
 			(interfaces.length==0) ?
@@ -85,7 +83,7 @@ public class ClassDump extends ClassVisitor{
 	public FieldVisitor	visitField(int access,
 			String name, String desc, String signature, Object value){
 		printf("    %s %s %s%s%s;\n",
-			access2string(access),
+			TypeNameTable.access2string(access),
 			typeNameTable.desc2full(desc),
 			name,
 			signature==null?"":" /*" +signature+ "*/",
@@ -97,14 +95,12 @@ public class ClassDump extends ClassVisitor{
 	public MethodVisitor visitMethod(int access, String name, String desc,
 			String signature, String[] exceptions) {
 		printf("\n    %s %s%s\n{\n",
-				access2string(access),
+				TypeNameTable.access2string(access),
 				typeNameTable.dumpMethodDesc(desc, name),
 				signature==null?"":" /*"+signature+"*/ ",
 				(exceptions == null || exceptions.length == 0) ? "" : 
 					"throws "+ Joiner.on(", ").join(exceptions));
-		//return new MethodDump(typeNameTable, sb);
 		return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
-			
 			@Override
 			public void visitEnd() {
 				super.visitEnd();
@@ -140,8 +136,8 @@ public class ClassDump extends ClassVisitor{
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		ClassDump tt = new ClassDump();
-		ClassReader cr = new ClassReader("jp.ac.osakau.farseerfc.asm.test.TargetA");//readAllBytes("target/TryTree.class"));
+		ClassDepVisitor tt = new ClassDepVisitor();
+		ClassReader cr = new ClassReader("jp.ac.osakau.farseerfc.purano.test.TargetA");//readAllBytes("target/TryTree.class"));
 		//TraceClassVisitor tcv = new TraceClassVisitor(tt,new Textifier(), new PrintWriter(System.err));
 		cr.accept(tt, 0);
 	}
@@ -157,23 +153,5 @@ public class ClassDump extends ClassVisitor{
 		}
 	}
 
-	
-	private static String access2string(int access) {
-		List<String> result = new ArrayList<>();
-		for(Field f: Opcodes.class.getFields()){
-			if(f.getName().startsWith("ACC_")){
-				int v = 0;
-				try {
-					v = f.getInt(f);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
-				if((access & v) !=0){
-					result.add(String.format("%s(0x%x)",f.getName().substring(4).toLowerCase(),v));
-				}
-			}
-		}
-		return Joiner.on(" ").join(result);
-	}
 	
 }

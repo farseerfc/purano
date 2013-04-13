@@ -1,5 +1,6 @@
-package jp.ac.osakau.farseerfc.asm.table;
+package jp.ac.osakau.farseerfc.purano.table;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+
+import org.objectweb.asm.Opcodes;
 
 
 import com.google.common.base.Function;
@@ -144,5 +147,25 @@ public class TypeNameTable {
 		sb.append(Joiner.on(";\nimport ").join(getImports()));
 		sb.append(";\n\n");
 		return sb.toString();
+	}
+	
+
+	
+	public static String access2string(int access) {
+		List<String> result = new ArrayList<>();
+		for(Field f: Opcodes.class.getFields()){
+			if(f.getName().startsWith("ACC_")){
+				int v = 0;
+				try {
+					v = f.getInt(f);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				if((access & v) !=0){
+					result.add(String.format("%s(0x%x)",f.getName().substring(4).toLowerCase(),v));
+				}
+			}
+		}
+		return Joiner.on(" ").join(result);
 	}
 }

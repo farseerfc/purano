@@ -1,6 +1,6 @@
-package jp.ac.osakau.farseerfc.asm.dep;
+package jp.ac.osakau.farseerfc.purano.dep;
 
-import jp.ac.osakau.farseerfc.asm.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 import lombok.Data;
 
 public @Data class FieldDep {

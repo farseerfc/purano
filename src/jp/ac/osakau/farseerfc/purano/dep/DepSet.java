@@ -1,4 +1,4 @@
-package jp.ac.osakau.farseerfc.asm.dep;
+package jp.ac.osakau.farseerfc.purano.dep;
 
 import java.util.HashSet;
 import java.util.Set;

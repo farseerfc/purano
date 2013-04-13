@@ -1,6 +1,6 @@
-package jp.ac.osakau.farseerfc.asm.visitor;
+package jp.ac.osakau.farseerfc.purano.visitor;
 
-import jp.ac.osakau.farseerfc.asm.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
