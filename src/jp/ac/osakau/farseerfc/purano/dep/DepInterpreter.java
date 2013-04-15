@@ -425,13 +425,13 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	case INVOKEDYNAMIC:
     		return new DepValue(Type.getReturnType(((InvokeDynamicInsnNode) insn).desc), deps);
     	case INVOKEVIRTUAL:
-    		callType="V";
+    		callType="VIRTUAL";
     	case INVOKEINTERFACE:
-    		callType="I";
+    		callType="INTERFACE";
     	case INVOKESPECIAL:
-    		callType="X";
+    		callType="SPECIAL";
     	case INVOKESTATIC:{
-    		callType="S";
+    		callType="STATIC";
     		break;
     	}
 		default:
@@ -441,7 +441,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	}
 		MethodInsnNode min = (MethodInsnNode) insn;
 		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
-		effect.getOther().add(ce);
+		effect.getCallEffects().add(ce);
 		return new DepValue(Type.getReturnType(min.desc), deps);
     }
 

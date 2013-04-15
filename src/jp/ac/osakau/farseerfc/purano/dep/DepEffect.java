@@ -21,6 +21,7 @@ public class DepEffect {
 	private final @Getter List<ThisFieldEffect> thisField = new ArrayList<>();
 	private final @Getter List<OtherFieldEffect> otherField = new ArrayList<>();
 	private final @Getter List<StaticFieldEffect> staticField = new ArrayList<>(); 
+	private final @Getter List<CallEffect> callEffects = new ArrayList<>();
 	private final @Getter List<Effect> other = new ArrayList<>();
 	
 
@@ -36,7 +37,7 @@ public class DepEffect {
 		
 		List<String> deps= new ArrayList<>();
 		for(ThisFieldEffect effect: thisField){
-			deps.add(String.format("%s this(%s).%s: [%s]",
+			deps.add(String.format("%s %s#this.%s: [%s]",
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
@@ -45,7 +46,7 @@ public class DepEffect {
 		
 		
 		for(OtherFieldEffect effect: otherField){
-			deps.add(String.format("%s %s.%s: [%s]",
+			deps.add(String.format("%s %s#%s: [%s]",
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
@@ -54,16 +55,27 @@ public class DepEffect {
 		
 		
 		for(StaticFieldEffect effect: staticField){
-			deps.add(String.format("static %s %s.%s: [%s]",
+			deps.add(String.format("static %s %s#%s: [%s]",
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
 					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
 		}
 		
+		for(CallEffect effect: callEffects){
+			deps.add(String.format("%sCALL %s: [%s]",
+					effect.getCallType(),
+					table.dumpMethodDesc(effect.getDesc(),
+							String.format("%s#%s",
+									table.fullClassName(effect.getOwner()), 
+									effect.getName())),
+					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
+		}
+		
 		
 		for(Effect effect: other){
-			deps.add(String.format("%s: [%s]",effect , 
+			deps.add(String.format("%s: [%s]",
+					table.fullClassName(effect.toString()) , 
 					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
 		}
 		
