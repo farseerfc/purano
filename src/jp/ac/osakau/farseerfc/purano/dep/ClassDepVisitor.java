@@ -11,6 +11,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.Types;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.objectweb.asm.AnnotationVisitor;
@@ -61,7 +62,7 @@ public class ClassDepVisitor extends ClassVisitor{
 				return typeNameTable.fullClassName(inter);
 			}}); 
 		printf("%s class %s extends %s %s%s {\n",
-			TypeNameTable.access2string(access),
+			Types.access2string(access),
 			typeNameTable.fullClassName(name),
 			typeNameTable.fullClassName(superName),
 			(interfaces.length==0) ?
@@ -82,7 +83,7 @@ public class ClassDepVisitor extends ClassVisitor{
 	public FieldVisitor	visitField(int access,
 			String name, String desc, String signature, Object value){
 		printf("    %s %s %s%s%s;\n",
-			TypeNameTable.access2string(access),
+				Types.access2string(access),
 			typeNameTable.desc2full(desc),
 			name,
 			signature==null?"":" /*" +signature+ "*/",
@@ -100,7 +101,7 @@ public class ClassDepVisitor extends ClassVisitor{
 		}
 		
 		printf("\n    %s %s%s\n{\n",
-				TypeNameTable.access2string(access),
+				Types.access2string(access),
 				typeNameTable.dumpMethodDesc(desc, name),
 				signature==null?"":" /*"+signature+"*/ ",
 				(exceptions == null || exceptions.length == 0) ? "" : 

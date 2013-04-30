@@ -108,9 +108,9 @@ public class TypeNameTable {
 				Joiner.on(", ").join(methodDesc.getArguments()));
 	}
 
-	public String fullClassName(String name) {
-		String className = name.substring(name.lastIndexOf('/') + 1);
-		name = name.replace('/', '.');
+	public String fullClassName(String binaryName) {
+		String name = Types.binaryName2NormalName(binaryName);
+		String className = name.substring(name.lastIndexOf('.') + 1);
 		if (fullClassNames.containsKey(className)) {
 			if (fullClassNames.get(className).equals(name)) {
 				return className;
@@ -150,22 +150,4 @@ public class TypeNameTable {
 	}
 	
 
-	
-	public static String access2string(int access) {
-		List<String> result = new ArrayList<>();
-		for(Field f: Opcodes.class.getFields()){
-			if(f.getName().startsWith("ACC_")){
-				int v = 0;
-				try {
-					v = f.getInt(f);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
-				if((access & v) !=0){
-					result.add(String.format("%s(0x%x)",f.getName().substring(4).toLowerCase(),v));
-				}
-			}
-		}
-		return Joiner.on(" ").join(result);
-	}
 }
