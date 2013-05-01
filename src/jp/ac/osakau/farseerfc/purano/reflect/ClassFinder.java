@@ -1,6 +1,5 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,17 +10,18 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 public class ClassFinder {
 	private final Map<String, ClassRep> classMap;
 	private final String prefix;
-	private final Map<Method, Class<? extends Object>> methodMap = new HashMap<>();
 	
 	public ClassFinder(String prefix){
 		this.prefix = prefix;
 		this.classMap = findClasses(prefix);
-		for(ClassRep cls : classMap.values()){
-			findMethods(cls);
+		List<ClassRep> allClass = Lists.newArrayList(classMap.values());
+		for(ClassRep cls : allClass){
+				findMethods(cls);
 		}
 	}
 	
@@ -32,30 +32,52 @@ public class ClassFinder {
         Set<Class<? extends Object>> allClasses = 
         	    reflections.getSubTypesOf(Object.class);
         for(Class<? extends Object> cls : allClasses){
-        	classMap.put(cls.getName(), new ClassRep(cls));
+        	loadClass(classMap,cls);
         }
         return classMap;
 	}
 	
+	public void loadClass(Map<String, ClassRep> classMap,Class<? extends Object> cls){
+		classMap.put(cls.getName(), new ClassRep(cls));
+	}
+	
 	private void findMethods(ClassRep cls){
-		for(Method m : cls.getReflect().getMethods()){
-			if(m.getDeclaringClass().equals(cls)){
-				methodMap.put(m, null);
-			}else{
-				methodMap.put(m, m.getDeclaringClass());
+		for (MethodRep m : cls.getMethodMap().values()) {
+			Class<? extends Object> decl = m.getReflect().getDeclaringClass();
+			if (!decl.equals(cls)) {
+				MethodRep rep;
+				try {
+					rep = new MethodRep(
+							decl.getDeclaredMethod(
+								m.getReflect().getName(),
+								m.getReflect().getParameterTypes()),
+							decl.getName());
+
+					getClass(decl.getName())
+						.getMethodMap()
+						.get(rep.getId())
+						.getOverrides().add(m);
+				} catch (NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 	}
 	
 	public List<String> dump(){
 		List<String> result = new ArrayList<>();
-		for(String className : classMap.keySet()){
-			result.add(className);
+		for(ClassRep cls : classMap.values()){
+			result.addAll(cls.dump());
 		}
-		for(Method m : methodMap.keySet()){
-			result.add(String.format("%s -> %s",m.getName(),methodMap.get(m)));
-		}
+
 		return result;
+	}
+	
+	public ClassRep getClass(String className) throws ClassNotFoundException{
+		if(!classMap.containsKey(className)){
+			loadClass(classMap, Class.forName(className));
+		}
+		return classMap.get(className);
 	}
 
 	public static void main(String [] argv){

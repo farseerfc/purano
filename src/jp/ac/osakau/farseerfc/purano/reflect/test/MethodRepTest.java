@@ -16,7 +16,7 @@ public class MethodRepTest {
 		Method method = this.getClass().getDeclaredMethod(
 				"testReflect2Node", new Class<?>[0]);
 		assertNotNull(method);
-		MethodRep rep = new MethodRep(method);
+		MethodRep rep = new MethodRep(method,this.getClass().getName());
 		assertEquals(rep.getReflect(),method);
 		assertEquals(rep.getNode().name,"testReflect2Node");
 		
@@ -27,7 +27,7 @@ public class MethodRepTest {
 	@Test
 	public void testNode2Reflect() throws NoSuchMethodException, SecurityException{
 		MethodInsnNode node = new MethodInsnNode(0,
-				"jp/ac/osakau/farseerfc/purano/reflect/ClassFinderTest",
+				"jp/ac/osakau/farseerfc/purano/reflect/test/MethodRepTest",
 				"testNode2Reflect",
 				"()V");
 		MethodRep rep = new MethodRep(node);
@@ -35,7 +35,7 @@ public class MethodRepTest {
 		assertEquals(rep.getReflect(), this.getClass().getDeclaredMethod(
 				"testNode2Reflect", new Class<?>[0]));
 		
-		MethodRep rep2= new MethodRep(rep.getReflect());
+		MethodRep rep2= new MethodRep(rep.getReflect(),rep.getNode().owner);
 		assertEquals(rep2.getNode().name, node.name);
 		assertEquals(rep2.getNode().owner, node.owner);
 		assertEquals(rep2.getNode().desc, node.desc);

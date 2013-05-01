@@ -13,11 +13,10 @@ public class Types {
 		return binaryName.replace('/', '.');
 	}
 	
-	public static String normalName2BinaryName(String binaryName){
-		return binaryName.replace('.', '/');
+	public static String normalName2BinaryName(String normalName){
+		return normalName.replace('.', '/');
 	}
 
-	
 	public static String access2string(int access) {
 		List<String> result = new ArrayList<>();
 		for(Field f: Opcodes.class.getFields()){

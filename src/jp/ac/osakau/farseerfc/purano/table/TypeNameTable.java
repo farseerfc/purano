@@ -1,6 +1,5 @@
 package jp.ac.osakau.farseerfc.purano.table;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-
-import org.objectweb.asm.Opcodes;
-
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
