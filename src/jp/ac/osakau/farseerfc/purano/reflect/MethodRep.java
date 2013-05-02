@@ -32,7 +32,11 @@ public class MethodRep extends MethodVisitor {
 	public MethodRep(MethodInsnNode methodNode){
 		super(Opcodes.ASM4);
 		this.node = methodNode;
-		this.reflect = getReflectFromNode(methodNode);
+		if(node.name.equals("<init>")){
+			this.reflect = null;
+		}else{
+			this.reflect = getReflectFromNode(methodNode);
+		}
 	}
 	
 	public MethodRep(Method reflect,String owner){
@@ -40,7 +44,6 @@ public class MethodRep extends MethodVisitor {
 		this.reflect = reflect;
 		this.node = new MethodInsnNode(0,
 				owner,
-				//Types.normalName2BinaryName(reflect.get.getName()), 
 				reflect.getName(), 
 				Type.getMethodDescriptor(reflect));
 	}
@@ -64,7 +67,7 @@ public class MethodRep extends MethodVisitor {
 			if(name.endsWith("[]")){
 				name = Types.binaryName2NormalName(t.getInternalName());
 			}
-			System.err.println(String.format("ArgumentTypes: %s",name));
+			//System.err.println(String.format("ArgumentTypes: %s",name));
 		    if (primitiveClasses.containsKey(name)) {
 		        return primitiveClasses.get(name);
 		    } else {
@@ -80,13 +83,23 @@ public class MethodRep extends MethodVisitor {
 	private Method getReflectFromNode(MethodInsnNode node) {
 		try {
 			Class<? extends Object> cls = Class.forName(Types.binaryName2NormalName(node.owner));
-			
-			return cls.getDeclaredMethod(
-					node.name,
-					Lists.transform(
-							Lists.newArrayList(
-									Type.getType(node.desc).getArgumentTypes()),
-							loadClass).toArray(new Class[0]));
+			try{
+				// Try to get the declared method, which may be private, that declared in this class
+				return cls.getDeclaredMethod(
+						node.name,
+						Lists.transform(
+								Lists.newArrayList(
+										Type.getType(node.desc).getArgumentTypes()),
+								loadClass).toArray(new Class[0]));
+			}catch(NoSuchMethodException e){
+				// Try to get the method that may be declared in superclass, must be public 
+				return cls.getMethod(
+						node.name,
+						Lists.transform(
+								Lists.newArrayList(
+										Type.getType(node.desc).getArgumentTypes()),
+								loadClass).toArray(new Class[0]));
+			}
 		} catch (NoSuchMethodException | SecurityException
 				| ClassNotFoundException e) {
 			throw new RuntimeException(e);
@@ -112,7 +125,7 @@ public class MethodRep extends MethodVisitor {
 	
 	@Override
 	public String toString(){
-		return String.format("%s %s %s", node.owner,node.name,node.desc);
+		return String.format("%s %s %s", node.name,node.owner,node.desc);
 	}
 	
 	public boolean equals(MethodRep other){
@@ -131,10 +144,10 @@ public class MethodRep extends MethodVisitor {
 		List<String> result = new ArrayList<>();
 		result.add("    "+toString());
 		for(MethodRep rep : overrides){
-			result.add(String.format("        &= %s", rep));
+			result.add(String.format("        ✍ %s", rep));
 		}
 		for(MethodInsnNode insn : calls){
-			result.add(String.format("        -> %s", new MethodRep(insn)));
+			result.add(String.format("        ☏ %s", new MethodRep(insn)));
 		}
 		return result;
 	}
