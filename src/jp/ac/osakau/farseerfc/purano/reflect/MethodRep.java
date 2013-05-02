@@ -8,12 +8,17 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
+import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
+import jp.ac.osakau.farseerfc.purano.dep.DepValue;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.analysis.Analyzer;
+import org.objectweb.asm.tree.analysis.AnalyzerException;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -28,6 +33,9 @@ public class MethodRep extends MethodVisitor {
 	private final @Getter Method reflect;
 	private final @Getter List<MethodRep> overrides = new ArrayList<>();
 	private final @Getter List<MethodInsnNode> calls = new ArrayList<>();
+	
+	private int timeStamp;
+	private DepEffect effects;
 	
 	public MethodRep(MethodInsnNode methodNode){
 		super(Opcodes.ASM4);
@@ -59,7 +67,7 @@ public class MethodRep extends MethodVisitor {
 	    primitiveClasses.put("float", float.class);
 	    primitiveClasses.put("double", double.class);
 	}
-	
+
 	public static Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
 		@Nullable @Override
 		public Class<? extends Object> apply(Type t){

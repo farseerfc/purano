@@ -16,12 +16,13 @@ public class ClassFinder {
 	private final Map<String, ClassRep> classMap;
 	private final String prefix;
 	
+	
 	public ClassFinder(String prefix){
 		this.prefix = prefix;
 		this.classMap = findClasses(prefix);
 		List<ClassRep> allClass = Lists.newArrayList(classMap.values());
 		for(ClassRep cls : allClass){
-				findMethods(cls);
+			findMethods(cls);
 		}
 	}
 	
