@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -59,11 +61,11 @@ public class ClassRep extends ClassVisitor {
 //		}
 //	}
 	
-	public List<String> dump(){
+	public List<String> dump(TypeNameTable table){
 		List<String> result = new ArrayList<>();
-		result.add(name);
+		result.add(table.fullClassName(name));
 		for(MethodRep m:methodMap.values()){
-			result.addAll(m.dump());
+			result.addAll(m.dump(table));
 		}
 		return result;
 	}

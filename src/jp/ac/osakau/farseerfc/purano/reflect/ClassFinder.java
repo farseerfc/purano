@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
+import lombok.Getter;
+
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
@@ -13,17 +16,25 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 public class ClassFinder {
-	private final Map<String, ClassRep> classMap;
+	private @Getter Map<String, ClassRep> classMap;
 	private final String prefix;
 	
 	
 	public ClassFinder(String prefix){
 		this.prefix = prefix;
 		this.classMap = findClasses(prefix);
-		List<ClassRep> allClass = Lists.newArrayList(classMap.values());
-		for(ClassRep cls : allClass){
-			findMethods(cls);
-		}
+		List<ClassRep> allClass;
+		
+		int pass=0;
+		do{
+			allClass = Lists.newArrayList(classMap.values());
+			for(ClassRep cls : allClass){
+				findMethods(cls);
+			}
+			pass++;
+		}while(allClass.size() < classMap.size());
+		System.out.println("Passes :"+pass);
+		
 	}
 	
 	private Map<String, ClassRep> findClasses(String prefix){
@@ -65,10 +76,10 @@ public class ClassFinder {
 		}
 	}
 	
-	public List<String> dump(){
+	public List<String> dump(TypeNameTable table){
 		List<String> result = new ArrayList<>();
 		for(ClassRep cls : classMap.values()){
-			result.addAll(cls.dump());
+			result.addAll(cls.dump(table));
 		}
 
 		return result;
@@ -84,7 +95,11 @@ public class ClassFinder {
 	public static void main(String [] argv){
 		String target="jp.ac.osakau.farseerfc.purano";
 		ClassFinder cf = new ClassFinder(target);
-        
-        System.out.println(Joiner.on("\n").join(cf.dump()));
+        //MethodRep rep=cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodMap().get("staticAdd(II)I");
+        //rep.resolve(1);
+        //System.out.println(rep.getEffects().dump(rep.getMethodNode(), new TypeNameTable()));
+        TypeNameTable table = new TypeNameTable();
+        System.out.println(Joiner.on("\n").join(cf.dump(table)));
+        System.out.println(table.dumpImports());
 	}
 }

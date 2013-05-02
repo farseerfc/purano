@@ -1,5 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,21 +12,25 @@ import javax.annotation.Nullable;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.dep.DepValue;
+import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 import jp.ac.osakau.farseerfc.purano.table.Types;
+import lombok.Getter;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.util.Textifier;
+import org.objectweb.asm.util.TraceMethodVisitor;
 
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
-
-import lombok.Getter;
 
 
 public class MethodRep extends MethodVisitor {
@@ -35,7 +40,8 @@ public class MethodRep extends MethodVisitor {
 	private final @Getter List<MethodInsnNode> calls = new ArrayList<>();
 	
 	private int timeStamp;
-	private DepEffect effects;
+	private @Getter DepEffect effects;
+	private @Getter MethodNode methodNode;
 	
 	public MethodRep(MethodInsnNode methodNode){
 		super(Opcodes.ASM4);
@@ -45,6 +51,8 @@ public class MethodRep extends MethodVisitor {
 		}else{
 			this.reflect = getReflectFromNode(methodNode);
 		}
+		
+		resolve(0);
 	}
 	
 	public MethodRep(Method reflect,String owner){
@@ -54,6 +62,7 @@ public class MethodRep extends MethodVisitor {
 				owner,
 				reflect.getName(), 
 				Type.getMethodDescriptor(reflect));
+		resolve(0);
 	}
 	
 	private static final Map<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>();
@@ -131,9 +140,11 @@ public class MethodRep extends MethodVisitor {
 		return false;
 	}
 	
-	@Override
-	public String toString(){
-		return String.format("%s %s %s", node.name,node.owner,node.desc);
+
+	public String toString(TypeNameTable table){
+		return String.format("%s %s",
+				table.fullClassName(node.owner),
+				table.dumpMethodDesc(node.desc, node.name));
 	}
 	
 	public boolean equals(MethodRep other){
@@ -148,20 +159,60 @@ public class MethodRep extends MethodVisitor {
 		return true;
 	}
 	
-	public List<String> dump(){
+	public List<String> dump(TypeNameTable table){
 		List<String> result = new ArrayList<>();
-		result.add("    "+toString());
+		result.add("    "+toString(table));
 		for(MethodRep rep : overrides){
-			result.add(String.format("        ✍ %s", rep));
+			result.add(String.format("        @ %s", rep.toString(table)));
 		}
 		for(MethodInsnNode insn : calls){
-			result.add(String.format("        ☏ %s", new MethodRep(insn)));
+			result.add(String.format("        > %s", new MethodRep(insn).toString(table)));
 		}
+		result.add(effects.dump(getMethodNode(), table));
 		return result;
 	}
 	
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 		calls.add(new MethodInsnNode(opcode,owner,name,desc));
+	}
+	
+	public boolean resolve(int newTimeStamp){
+		try {
+			ClassReader cr=new ClassReader(node.owner);
+			cr.accept(new ClassVisitor(Opcodes.ASM4){
+				@Override
+				public MethodVisitor visitMethod(int access, String name,
+						String desc, String signature, String[] exceptions) {
+					if(!node.name.equals(name)||!node.desc.equals(desc)){
+						return null;
+					}
+					return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
+						@Override
+						public void visitEnd() {
+							super.visitEnd();
+							//printf("}\n{\n");
+							effects = new DepEffect();
+							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effects));
+							try {
+								/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
+								methodNode = this;
+							} catch (AnalyzerException e) {
+								e.printStackTrace();
+							}
+							//printf("%s\n",effect.dump(this,new TypeNameTable()));
+							//printf("}\n");
+						}
+					},new Textifier(Opcodes.ASM4){
+						@Override public void visitMethodEnd() {
+							//print(writer); 
+						}
+					});
+				}
+			}, 0);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return true;
 	}
 }
