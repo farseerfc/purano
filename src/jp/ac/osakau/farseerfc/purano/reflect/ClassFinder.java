@@ -56,14 +56,15 @@ public class ClassFinder {
 	private void findMethods(ClassRep cls){
 		for (MethodRep m : cls.getMethodMap().values()) {
 			Class<? extends Object> decl = m.getReflect().getDeclaringClass();
-			if (!decl.equals(cls)) {
+			if (!decl.equals(cls.getReflect())) {
+				System.err.printf("Decl %s, cls %s\n",decl.getName(),cls.getName());
 				MethodRep rep;
 				try {
 					rep = new MethodRep(
-							decl.getDeclaredMethod(
+							cls.getReflect().getDeclaredMethod(
 								m.getReflect().getName(),
 								m.getReflect().getParameterTypes()),
-							decl.getName());
+							cls.getName());
 
 					getClass(decl.getName())
 						.getMethodMap()
@@ -81,7 +82,6 @@ public class ClassFinder {
 		for(ClassRep cls : classMap.values()){
 			result.addAll(cls.dump(table));
 		}
-
 		return result;
 	}
 	
@@ -93,6 +93,7 @@ public class ClassFinder {
 	}
 
 	public static void main(String [] argv){
+		long start=System.currentTimeMillis();
 		String target="jp.ac.osakau.farseerfc.purano";
 		ClassFinder cf = new ClassFinder(target);
         //MethodRep rep=cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodMap().get("staticAdd(II)I");
@@ -101,5 +102,7 @@ public class ClassFinder {
         TypeNameTable table = new TypeNameTable();
         System.out.println(Joiner.on("\n").join(cf.dump(table)));
         System.out.println(table.dumpImports());
+        
+        System.out.println("Runtime :"+(System.currentTimeMillis() - start));
 	}
 }

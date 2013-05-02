@@ -53,14 +53,6 @@ public class ClassRep extends ClassVisitor {
 		}
 	}
 	
-
-//	public void findMethods(){
-//		for(Method m : reflect.getMethods()){
-//			MethodRep rep =  new MethodRep(m, name);
-//			methodMap.put(rep.getId(),rep);
-//		}
-//	}
-	
 	public List<String> dump(TypeNameTable table){
 		List<String> result = new ArrayList<>();
 		result.add(table.fullClassName(name));

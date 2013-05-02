@@ -142,9 +142,11 @@ public class MethodRep extends MethodVisitor {
 	
 
 	public String toString(TypeNameTable table){
-		return String.format("%s %s",
-				table.fullClassName(node.owner),
-				table.dumpMethodDesc(node.desc, node.name));
+		return String.format("%s",
+				table.dumpMethodDesc(node.desc, 
+						String.format("%s#%s", 
+								table.fullClassName(node.owner),
+								node.name)));
 	}
 	
 	public boolean equals(MethodRep other){
