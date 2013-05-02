@@ -2,54 +2,57 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.Getter;
 
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class ClassFinder {
-	private @Getter Map<String, ClassRep> classMap;
+	private @Getter Map<String, ClassRep> classMap= new HashMap<>();
 	private final String prefix;
-	
 	
 	public ClassFinder(String prefix){
 		this.prefix = prefix;
-		this.classMap = findClasses(prefix);
-		List<ClassRep> allClass;
-		
+		findClasses(prefix);
+		Set<String> toLoadClass;
+		Set<String> loadedClass = new HashSet<>();
 		int pass=0;
 		do{
-			allClass = Lists.newArrayList(classMap.values());
-			for(ClassRep cls : allClass){
-				findMethods(cls);
+			toLoadClass = new HashSet<>(Sets.difference(classMap.keySet(),loadedClass));
+			loadedClass = classMap.keySet();
+			for(String clsName : toLoadClass){
+				findMethods(classMap.get(clsName));
 			}
 			pass++;
-		}while(allClass.size() < classMap.size());
-		System.out.println("Passes :"+pass);
+			System.out.println("Loaded Class :"+loadedClass.size());
+			System.out.println("Passes :"+pass);
+		}while(loadedClass.size() < classMap.size());
 		
 	}
 	
-	private Map<String, ClassRep> findClasses(String prefix){
-		final Map<String, ClassRep> classMap= new HashMap<>();
+	private void findClasses(String prefix){
 		Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));
 
         Set<Class<? extends Object>> allClasses = 
         	    reflections.getSubTypesOf(Object.class);
         for(Class<? extends Object> cls : allClasses){
-        	loadClass(classMap,cls);
+        	loadClass(cls);
         }
-        return classMap;
 	}
 	
-	public void loadClass(Map<String, ClassRep> classMap,Class<? extends Object> cls){
+	public void loadClass(Class<? extends Object> cls){
 		classMap.put(cls.getName(), new ClassRep(cls));
 	}
 	
@@ -74,6 +77,10 @@ public class ClassFinder {
 					throw new RuntimeException(e);
 				}
 			}
+			for(MethodInsnNode call : m.getCalls()){
+				System.out.println("Loading :"+call.owner);
+				loadClass(MethodRep.forName(Types.binaryName2NormalName(call.owner)));
+			}
 		}
 	}
 	
@@ -81,13 +88,14 @@ public class ClassFinder {
 		List<String> result = new ArrayList<>();
 		for(ClassRep cls : classMap.values()){
 			result.addAll(cls.dump(table));
+			//result.add(cls.getName());
 		}
 		return result;
 	}
 	
 	public ClassRep getClass(String className) throws ClassNotFoundException{
 		if(!classMap.containsKey(className)){
-			loadClass(classMap, Class.forName(className));
+			loadClass(Class.forName(className));
 		}
 		return classMap.get(className);
 	}

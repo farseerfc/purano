@@ -46,7 +46,7 @@ public class MethodRep extends MethodVisitor {
 	public MethodRep(MethodInsnNode methodNode){
 		super(Opcodes.ASM4);
 		this.node = methodNode;
-		if(node.name.equals("<init>")){
+		if(node.name.equals("<init>")||node.name.equals("<clinit>")){
 			this.reflect = null;
 		}else{
 			this.reflect = getReflectFromNode(methodNode);
@@ -75,27 +75,32 @@ public class MethodRep extends MethodVisitor {
 	    primitiveClasses.put("long", long.class);
 	    primitiveClasses.put("float", float.class);
 	    primitiveClasses.put("double", double.class);
+	    primitiveClasses.put("boolean", boolean.class);
 	}
 
-	public static Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
+	public static final Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
 		@Nullable @Override
 		public Class<? extends Object> apply(Type t){
 			String name = t.getClassName();
 			if(name.endsWith("[]")){
 				name = Types.binaryName2NormalName(t.getInternalName());
 			}
-			//System.err.println(String.format("ArgumentTypes: %s",name));
-		    if (primitiveClasses.containsKey(name)) {
-		        return primitiveClasses.get(name);
-		    } else {
-		        try {
-					return Class.forName(name);
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException(e);
-				}
-		    }
+			return forName(name);
 		}
 	};
+	
+	public static Class<? extends Object> forName(String name){
+		
+	    if (primitiveClasses.containsKey(name)) {
+	        return primitiveClasses.get(name);
+	    } else {
+	        try {
+				return Class.forName(name);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+	    }
+	}
 
 	private Method getReflectFromNode(MethodInsnNode node) {
 		try {

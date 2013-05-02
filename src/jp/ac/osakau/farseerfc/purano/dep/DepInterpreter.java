@@ -75,6 +75,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case Type.OBJECT:
             return new DepValue(Type.getObjectType("java/lang/Object"));
         default:
+        	System.err.println("Unknown type :"+type);
             throw new Error("Internal error");
         }
     }
@@ -151,8 +152,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			
 		default:
         	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
-			//throw new Error("Internal error.");
-        	return null;
+			throw new Error("Internal error.");
+        	//return null;
 		}
 	}
 
@@ -186,8 +187,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         	return value;
         default:
         	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
-			//throw new Error("Internal error.");
-        	return null;
+			throw new Error("Internal error.");
+        	//return null;
         }
     }
 
@@ -295,8 +296,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             return null;
         default:
         	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
-			//throw new Error("Internal error.");
-        	return null;
+			throw new Error("Internal error.");
+        	//return null;
         }
     }
 
@@ -381,8 +382,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
         default:
         	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
-			//throw new Error("Internal error.");
-        	return null;
+			throw new Error("Internal error.");
+        	//return null;
         }
     }
 
@@ -406,8 +407,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		return null;
         default:
         	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
-			//throw new Error("Internal error.");
-        	return null;
+			throw new Error("Internal error.");
+        	//return null;
     	}
     }
 
@@ -436,8 +437,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	}
 		default:
 			System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
-			//throw new Error("Internal error.");
-        	return null;
+			throw new Error("Internal error.");
+        	//return null;
     	}
 		MethodInsnNode min = (MethodInsnNode) insn;
 		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
