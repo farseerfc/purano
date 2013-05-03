@@ -53,6 +53,9 @@ public class ClassFinder {
 	}
 	
 	public void loadClass(Class<? extends Object> cls){
+		if(classMap.containsKey(cls.getName())){
+			return ;
+		}
 		classMap.put(cls.getName(), new ClassRep(cls));
 	}
 	
@@ -78,7 +81,7 @@ public class ClassFinder {
 				}
 			}
 			for(MethodInsnNode call : m.getCalls()){
-				System.out.println("Loading :"+call.owner);
+				//System.out.println("Loading :"+call.owner);
 				loadClass(MethodRep.forName(Types.binaryName2NormalName(call.owner)));
 			}
 		}

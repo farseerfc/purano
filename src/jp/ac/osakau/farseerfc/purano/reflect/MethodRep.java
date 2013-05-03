@@ -115,14 +115,18 @@ public class MethodRep extends MethodVisitor {
 								loadClass).toArray(new Class[0]));
 			}catch(NoSuchMethodException e){
 				// Try to get the method that may be declared in superclass, must be public 
-				return cls.getMethod(
-						node.name,
-						Lists.transform(
-								Lists.newArrayList(
-										Type.getType(node.desc).getArgumentTypes()),
-								loadClass).toArray(new Class[0]));
+				try {
+					return cls.getMethod(
+							node.name,
+							Lists.transform(
+									Lists.newArrayList(
+											Type.getType(node.desc).getArgumentTypes()),
+									loadClass).toArray(new Class[0]));
+				} catch (NoSuchMethodException e1) {
+					return null;
+				}
 			}
-		} catch (NoSuchMethodException | SecurityException
+		} catch (SecurityException
 				| ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
@@ -134,7 +138,7 @@ public class MethodRep extends MethodVisitor {
 	
 	@Override
 	public int hashCode(){
-		return Objects.hashCode(reflect, node.desc, node.name,node.owner);
+		return Objects.hashCode(node.desc, node.name,node.owner);
 	}
 	
 	@Override
@@ -155,8 +159,7 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean equals(MethodRep other){
-		if (!Objects.equal(this.reflect, other.reflect))
-			return false;
+		
 		if (!Objects.equal(this.node.desc, other.node.desc))
 			return false;
 		if (!Objects.equal(this.node.name, other.node.name))
@@ -218,7 +221,7 @@ public class MethodRep extends MethodVisitor {
 				}
 			}, 0);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Class not found :"+node.owner,e);
 		}
 		return true;
 	}
