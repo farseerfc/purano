@@ -2,12 +2,14 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 public class ClassRepTest {
 
 	@Test
-	public void testNameToReflect() throws ClassNotFoundException {
+	public void testNameToReflect() throws ClassNotFoundException, IOException {
 		String className = "jp.ac.osakau.farseerfc.purano.reflect.ClassRepTest";
 		ClassRep rep = new ClassRep(Class.forName(className));
 		assertNotNull(rep.getReflect());

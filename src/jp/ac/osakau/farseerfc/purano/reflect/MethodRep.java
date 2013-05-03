@@ -34,7 +34,7 @@ import com.google.common.collect.Lists;
 
 
 public class MethodRep extends MethodVisitor {
-	private final @Getter MethodInsnNode node;
+	private final @Getter MethodInsnNode insnNode;
 	private final @Getter Method reflect;
 	private final @Getter List<MethodRep> overrides = new ArrayList<>();
 	private final @Getter List<MethodInsnNode> calls = new ArrayList<>();
@@ -43,13 +43,13 @@ public class MethodRep extends MethodVisitor {
 	private @Getter DepEffect effects;
 	private @Getter MethodNode methodNode;
 	
-	public MethodRep(MethodInsnNode methodNode){
+	public MethodRep(MethodInsnNode methodInsnNode){
 		super(Opcodes.ASM4);
-		this.node = methodNode;
-		if(node.name.equals("<init>")||node.name.equals("<clinit>")){
+		this.insnNode = methodInsnNode;
+		if(insnNode.name.equals("<init>")||insnNode.name.equals("<clinit>")){
 			this.reflect = null;
 		}else{
-			this.reflect = getReflectFromNode(methodNode);
+			this.reflect = getReflectFromNode(methodInsnNode);
 		}
 		
 		resolve(0);
@@ -58,49 +58,13 @@ public class MethodRep extends MethodVisitor {
 	public MethodRep(Method reflect,String owner){
 		super(Opcodes.ASM4);
 		this.reflect = reflect;
-		this.node = new MethodInsnNode(0,
+		this.insnNode = new MethodInsnNode(0,
 				owner,
 				reflect.getName(), 
 				Type.getMethodDescriptor(reflect));
 		resolve(0);
 	}
 	
-	private static final Map<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>();
-
-	static {
-	    primitiveClasses.put("byte", byte.class);
-	    primitiveClasses.put("short", short.class);
-	    primitiveClasses.put("char", char.class);
-	    primitiveClasses.put("int", int.class);
-	    primitiveClasses.put("long", long.class);
-	    primitiveClasses.put("float", float.class);
-	    primitiveClasses.put("double", double.class);
-	    primitiveClasses.put("boolean", boolean.class);
-	}
-
-	public static final Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
-		@Nullable @Override
-		public Class<? extends Object> apply(Type t){
-			String name = t.getClassName();
-			if(name.endsWith("[]")){
-				name = Types.binaryName2NormalName(t.getInternalName());
-			}
-			return forName(name);
-		}
-	};
-	
-	public static Class<? extends Object> forName(String name){
-		
-	    if (primitiveClasses.containsKey(name)) {
-	        return primitiveClasses.get(name);
-	    } else {
-	        try {
-				return Class.forName(name);
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-	    }
-	}
 
 	private Method getReflectFromNode(MethodInsnNode node) {
 		try {
@@ -112,7 +76,7 @@ public class MethodRep extends MethodVisitor {
 						Lists.transform(
 								Lists.newArrayList(
 										Type.getType(node.desc).getArgumentTypes()),
-								loadClass).toArray(new Class[0]));
+								Types.loadClass).toArray(new Class[0]));
 			}catch(NoSuchMethodException e){
 				// Try to get the method that may be declared in superclass, must be public 
 				try {
@@ -121,24 +85,26 @@ public class MethodRep extends MethodVisitor {
 							Lists.transform(
 									Lists.newArrayList(
 											Type.getType(node.desc).getArgumentTypes()),
-									loadClass).toArray(new Class[0]));
+											Types.loadClass).toArray(new Class[0]));
 				} catch (NoSuchMethodException e1) {
 					return null;
 				}
 			}
 		} catch (SecurityException
-				| ClassNotFoundException e) {
-			throw new RuntimeException(e);
+				| ClassNotFoundException | NoClassDefFoundError e) {
+			System.err.printf("Warning: Error when loading \"%s#%s\"\n",node.owner,node.name);
+			//throw new RuntimeException(e);
+			return null;
 		}
 	}
 	
 	public String getId(){
-		return node.name+node.desc;
+		return insnNode.name+insnNode.desc;
 	}
 	
 	@Override
 	public int hashCode(){
-		return Objects.hashCode(node.desc, node.name,node.owner);
+		return Objects.hashCode(insnNode.desc, insnNode.name,insnNode.owner);
 	}
 	
 	@Override
@@ -151,6 +117,10 @@ public class MethodRep extends MethodVisitor {
 	
 
 	public String toString(TypeNameTable table){
+		return toString(insnNode,table);
+	}
+	
+	public String toString(MethodInsnNode node, TypeNameTable table){
 		return String.format("%s",
 				table.dumpMethodDesc(node.desc, 
 						String.format("%s#%s", 
@@ -159,12 +129,11 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean equals(MethodRep other){
-		
-		if (!Objects.equal(this.node.desc, other.node.desc))
+		if (!Objects.equal(this.insnNode.desc, other.insnNode.desc))
 			return false;
-		if (!Objects.equal(this.node.name, other.node.name))
+		if (!Objects.equal(this.insnNode.name, other.insnNode.name))
 			return false;
-		if (!Objects.equal(this.node.owner, other.node.owner))
+		if (!Objects.equal(this.insnNode.owner, other.insnNode.owner))
 			return false;
 		return true;
 	}
@@ -176,9 +145,12 @@ public class MethodRep extends MethodVisitor {
 			result.add(String.format("        @ %s", rep.toString(table)));
 		}
 		for(MethodInsnNode insn : calls){
-			result.add(String.format("        > %s", new MethodRep(insn).toString(table)));
+			result.add(String.format("        > %s", toString(insn,table)));
 		}
-		result.add(effects.dump(getMethodNode(), table));
+		
+		if(effects != null && getMethodNode() != null){
+			result.add(effects.dump(getMethodNode(), table));
+		}
 		return result;
 	}
 	
@@ -189,19 +161,18 @@ public class MethodRep extends MethodVisitor {
 	
 	public boolean resolve(int newTimeStamp){
 		try {
-			ClassReader cr=new ClassReader(node.owner);
+			ClassReader cr=new ClassReader(insnNode.owner);
 			cr.accept(new ClassVisitor(Opcodes.ASM4){
 				@Override
 				public MethodVisitor visitMethod(int access, String name,
 						String desc, String signature, String[] exceptions) {
-					if(!node.name.equals(name)||!node.desc.equals(desc)){
+					if(!insnNode.name.equals(name)||!insnNode.desc.equals(desc)){
 						return null;
 					}
-					return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
+					return new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
 						@Override
 						public void visitEnd() {
 							super.visitEnd();
-							//printf("}\n{\n");
 							effects = new DepEffect();
 							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effects));
 							try {
@@ -210,18 +181,12 @@ public class MethodRep extends MethodVisitor {
 							} catch (AnalyzerException e) {
 								e.printStackTrace();
 							}
-							//printf("%s\n",effect.dump(this,new TypeNameTable()));
-							//printf("}\n");
 						}
-					},new Textifier(Opcodes.ASM4){
-						@Override public void visitMethodEnd() {
-							//print(writer); 
-						}
-					});
+					};
 				}
 			}, 0);
 		} catch (IOException e) {
-			throw new RuntimeException("Class not found :"+node.owner,e);
+			throw new RuntimeException("Class not found :"+insnNode.owner,e);
 		}
 		return true;
 	}

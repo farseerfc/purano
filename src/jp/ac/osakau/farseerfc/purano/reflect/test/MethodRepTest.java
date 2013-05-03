@@ -18,9 +18,9 @@ public class MethodRepTest {
 		assertNotNull(method);
 		MethodRep rep = new MethodRep(method,this.getClass().getName());
 		assertEquals(rep.getReflect(),method);
-		assertEquals(rep.getNode().name,"testReflect2Node");
+		assertEquals(rep.getInsnNode().name,"testReflect2Node");
 		
-		MethodRep rep2 = new MethodRep(rep.getNode());
+		MethodRep rep2 = new MethodRep(rep.getInsnNode());
 		assertEquals(rep2.getReflect(),method);
 	}
 
@@ -31,14 +31,14 @@ public class MethodRepTest {
 				"testNode2Reflect",
 				"()V");
 		MethodRep rep = new MethodRep(node);
-		assertEquals(rep.getNode(),node);
+		assertEquals(rep.getInsnNode(),node);
 		assertEquals(rep.getReflect(), this.getClass().getDeclaredMethod(
 				"testNode2Reflect", new Class<?>[0]));
 		
-		MethodRep rep2= new MethodRep(rep.getReflect(),rep.getNode().owner);
-		assertEquals(rep2.getNode().name, node.name);
-		assertEquals(rep2.getNode().owner, node.owner);
-		assertEquals(rep2.getNode().desc, node.desc);
+		MethodRep rep2= new MethodRep(rep.getReflect(),rep.getInsnNode().owner);
+		assertEquals(rep2.getInsnNode().name, node.name);
+		assertEquals(rep2.getInsnNode().owner, node.owner);
+		assertEquals(rep2.getInsnNode().desc, node.desc);
 		
 	}
 	

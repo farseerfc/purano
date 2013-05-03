@@ -19,4 +19,11 @@ public class TargetA {
 		this.c = c;
 	}
 	
+	
+	public static void main(String [] args) throws ClassNotFoundException{
+		Class c = Class.forName("[Ljava.lang.Class;");
+		int [] a = new int [4];
+		
+		System.out.println(c.getDeclaredMethods());
+	}
 }

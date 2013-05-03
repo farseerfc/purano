@@ -101,11 +101,14 @@ public class DepEffect {
 						methodNode.localVariables.get(i).name));
 			}
 		}
-		for(int i=argCount;i<methodNode.localVariables.size();++i){
-			if(dep.getLocals().contains(i) && methodNode.localVariables.size()>i){
-				localsb.add(String.format("%s %s",
-						table.desc2full(methodNode.localVariables.get(i).desc) ,
-						methodNode.localVariables.get(i).name));
+		
+		if(methodNode.localVariables != null){
+			for(int i=argCount;i<methodNode.localVariables.size();++i){
+				if(dep.getLocals().contains(i) && methodNode.localVariables.size()>i){
+					localsb.add(String.format("%s %s",
+							table.desc2full(methodNode.localVariables.get(i).desc) ,
+							methodNode.localVariables.get(i).name));
+				}
 			}
 		}
 

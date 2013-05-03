@@ -1,5 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,7 +12,6 @@ import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.Getter;
 
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -31,7 +31,7 @@ public class ClassFinder {
 		int pass=0;
 		do{
 			toLoadClass = new HashSet<>(Sets.difference(classMap.keySet(),loadedClass));
-			loadedClass = classMap.keySet();
+			loadedClass = new HashSet<>(classMap.keySet());
 			for(String clsName : toLoadClass){
 				findMethods(classMap.get(clsName));
 			}
@@ -48,19 +48,27 @@ public class ClassFinder {
         Set<Class<? extends Object>> allClasses = 
         	    reflections.getSubTypesOf(Object.class);
         for(Class<? extends Object> cls : allClasses){
-        	loadClass(cls);
+        	try {
+				loadClass(cls);
+			} catch (IOException e) {
+				System.err.printf("Warning: Cannot load \"%s\"\n",cls.getName());
+				System.err.flush();
+			}
         }
 	}
 	
-	public void loadClass(Class<? extends Object> cls){
+	public void loadClass(Class<? extends Object> cls) throws IOException{
 		if(classMap.containsKey(cls.getName())){
 			return ;
 		}
+		System.out.println("Loading "+cls.getName());
 		classMap.put(cls.getName(), new ClassRep(cls));
 	}
 	
 	private void findMethods(ClassRep cls){
 		for (MethodRep m : cls.getMethodMap().values()) {
+			if(m.getReflect() == null) continue;
+			
 			Class<? extends Object> decl = m.getReflect().getDeclaringClass();
 			if (!decl.equals(cls.getReflect())) {
 				System.err.printf("Decl %s, cls %s\n",decl.getName(),cls.getName());
@@ -76,13 +84,19 @@ public class ClassFinder {
 						.getMethodMap()
 						.get(rep.getId())
 						.getOverrides().add(m);
-				} catch (NoSuchMethodException | SecurityException | ClassNotFoundException e) {
+				} catch (NoSuchMethodException | SecurityException | ClassNotFoundException | IOException |UnsatisfiedLinkError e) {
 					throw new RuntimeException(e);
 				}
 			}
 			for(MethodInsnNode call : m.getCalls()){
-				//System.out.println("Loading :"+call.owner);
-				loadClass(MethodRep.forName(Types.binaryName2NormalName(call.owner)));
+				String className = Types.binaryName2NormalName(call.owner);
+				try {
+					Class<?> clazz=Types.forName(className); 
+					loadClass(clazz);
+				} catch (ClassNotFoundException | NoClassDefFoundError | IOException |UnsatisfiedLinkError e) {
+					System.err.printf("Warning: Cannot load method of class \"%s\" %s\n",className,e);
+					System.err.flush();
+				}
 			}
 		}
 	}
@@ -96,7 +110,7 @@ public class ClassFinder {
 		return result;
 	}
 	
-	public ClassRep getClass(String className) throws ClassNotFoundException{
+	public ClassRep getClass(String className) throws ClassNotFoundException, IOException{
 		if(!classMap.containsKey(className)){
 			loadClass(Class.forName(className));
 		}

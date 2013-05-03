@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import jp.ac.osakau.farseerfc.purano.reflect.ArrayStub;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -17,9 +19,9 @@ import com.google.common.collect.Lists;
 public class TypeNameTable {
 	private final Map<String, String> fullClassNames = new HashMap<>();
 	private String packageName = null;
-	private final Map<Character, String> desc2type = new HashMap<>();
+	private static final Map<Character, String> desc2type = new HashMap<>();
 
-	public TypeNameTable() {
+	static {
 		desc2type.put('Z', "boolean");
 		desc2type.put('C', "char");
 		desc2type.put('B', "byte");
@@ -106,6 +108,10 @@ public class TypeNameTable {
 
 	public String fullClassName(String binaryName) {
 		String name = Types.binaryName2NormalName(binaryName);
+		if(name.startsWith("[")){
+			name = ArrayStub.class.getName();
+		}
+		
 		String className = name.substring(name.lastIndexOf('.') + 1);
 		if (fullClassNames.containsKey(className)) {
 			if (fullClassNames.get(className).equals(name)) {

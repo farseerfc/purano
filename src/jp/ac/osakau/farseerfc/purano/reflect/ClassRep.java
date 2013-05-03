@@ -41,16 +41,15 @@ public class ClassRep extends ClassVisitor {
 		
 	}
 	
-	public ClassRep(Class<? extends Object> reflect){
+	public ClassRep(Class<? extends Object> reflect) throws IOException{
 		super(Opcodes.ASM4);
 		this.reflect = reflect;
-		this.name = reflect.getName();
-		
-		try {
-			new ClassReader(reflect.getName()).accept(this, 0);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(reflect.isArray()){
+			this.name = ArrayStub.class.getName();
+		}else{
+			this.name = reflect.getName();
 		}
+		new ClassReader(this.name).accept(this, 0);
 	}
 	
 	public List<String> dump(TypeNameTable table){
