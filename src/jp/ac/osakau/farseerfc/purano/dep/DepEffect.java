@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
-import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.Getter;
 
 import org.objectweb.asm.Opcodes;
@@ -26,7 +26,7 @@ public class DepEffect {
 	
 
 
-	public String dump(MethodNode methodNode, TypeNameTable table){
+	public String dump(MethodNode methodNode, Types table){
 		int argCount;
 		MethodDesc p = table.method2full(methodNode.desc);
 		if (((methodNode.access & Opcodes.ACC_STATIC) == 0)) {
@@ -84,7 +84,7 @@ public class DepEffect {
 				Joiner.on("\n").join(deps));
 	}
 	
-	private String dumpDeps(final MethodNode methodNode,final DepSet dep,final TypeNameTable table,final int argCount){
+	private String dumpDeps(final MethodNode methodNode,final DepSet dep,final Types table,final int argCount){
 		List<String> argsb = new ArrayList<>();
 		List<String> localsb = new ArrayList<>();
 		boolean thisDep=false;

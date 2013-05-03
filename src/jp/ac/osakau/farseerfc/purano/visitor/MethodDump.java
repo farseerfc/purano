@@ -1,6 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.visitor;
 
-import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.Types;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -8,10 +8,10 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 
 public class MethodDump extends MethodVisitor {
-	private final TypeNameTable typeNameTable;
+	private final Types typeNameTable;
 	private final StringBuilder sb;
 
-	public MethodDump(TypeNameTable typeNameTable,StringBuilder sb) {
+	public MethodDump(Types typeNameTable,StringBuilder sb) {
 		super(Opcodes.ASM4, new MethodNode());
 		this.typeNameTable = typeNameTable;
 		this.sb = sb;

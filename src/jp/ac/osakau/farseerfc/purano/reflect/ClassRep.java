@@ -6,15 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
+import jp.ac.osakau.farseerfc.purano.table.Types;
+import lombok.Getter;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
-
-import lombok.Getter;
 
 public class ClassRep extends ClassVisitor {
 	private final @Getter Map<String, MethodRep> methodMap = new HashMap<>();
@@ -52,7 +51,7 @@ public class ClassRep extends ClassVisitor {
 		new ClassReader(this.name).accept(this, 0);
 	}
 	
-	public List<String> dump(TypeNameTable table){
+	public List<String> dump(Types table){
 		List<String> result = new ArrayList<>();
 		result.add(table.fullClassName(name));
 		for(MethodRep m:methodMap.values()){

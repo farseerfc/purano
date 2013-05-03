@@ -3,16 +3,11 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
 
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.dep.DepValue;
-import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.Getter;
 
@@ -25,10 +20,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
-import org.objectweb.asm.util.Textifier;
-import org.objectweb.asm.util.TraceMethodVisitor;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -116,11 +108,11 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 
-	public String toString(TypeNameTable table){
+	public String toString(Types table){
 		return toString(insnNode,table);
 	}
 	
-	public String toString(MethodInsnNode node, TypeNameTable table){
+	public String toString(MethodInsnNode node, Types table){
 		return String.format("%s",
 				table.dumpMethodDesc(node.desc, 
 						String.format("%s#%s", 
@@ -138,7 +130,7 @@ public class MethodRep extends MethodVisitor {
 		return true;
 	}
 	
-	public List<String> dump(TypeNameTable table){
+	public List<String> dump(Types table){
 		List<String> result = new ArrayList<>();
 		result.add("    "+toString(table));
 		for(MethodRep rep : overrides){

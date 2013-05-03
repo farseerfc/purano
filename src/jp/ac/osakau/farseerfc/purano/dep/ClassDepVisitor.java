@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,7 +31,7 @@ import com.google.common.collect.Lists;
 
 
 public class ClassDepVisitor extends ClassVisitor{
-	private final TypeNameTable typeNameTable = new TypeNameTable();
+	private final Types typeNameTable = new Types();
 	private final PrintWriter out;
 	private final StringWriter sw = new StringWriter();
 	private final PrintWriter writer = new PrintWriter(sw);

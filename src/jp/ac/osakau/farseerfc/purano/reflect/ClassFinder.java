@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jp.ac.osakau.farseerfc.purano.table.TypeNameTable;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.Getter;
 
@@ -101,7 +100,7 @@ public class ClassFinder {
 		}
 	}
 	
-	public List<String> dump(TypeNameTable table){
+	public List<String> dump(Types table){
 		List<String> result = new ArrayList<>();
 		for(ClassRep cls : classMap.values()){
 			result.addAll(cls.dump(table));
@@ -124,7 +123,7 @@ public class ClassFinder {
         //MethodRep rep=cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodMap().get("staticAdd(II)I");
         //rep.resolve(1);
         //System.out.println(rep.getEffects().dump(rep.getMethodNode(), new TypeNameTable()));
-        TypeNameTable table = new TypeNameTable();
+        Types table = new Types(false);
         System.out.println(Joiner.on("\n").join(cf.dump(table)));
         System.out.println(table.dumpImports());
         
