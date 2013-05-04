@@ -432,10 +432,13 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		return new DepValue(Type.getReturnType(((InvokeDynamicInsnNode) insn).desc), deps);
     	case INVOKEVIRTUAL:
     		callType="VIRTUAL";
+    		break;
     	case INVOKEINTERFACE:
     		callType="INTERFACE";
+    		break;
     	case INVOKESPECIAL:
     		callType="SPECIAL";
+    		break;
     	case INVOKESTATIC:{
     		callType="STATIC";
     		break;

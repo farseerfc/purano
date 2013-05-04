@@ -158,6 +158,10 @@ public class Types {
 	}
 
 	public String dumpImports() {
+		if(!shorten){
+			return "";
+		}
+		
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("package ");
@@ -233,4 +237,5 @@ public class Types {
 			return Class.forName(name);
 	    }
 	}
+	
 }

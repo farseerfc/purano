@@ -117,7 +117,7 @@ public class ClassDepVisitor extends ClassVisitor{
 				} catch (AnalyzerException e) {
 					e.printStackTrace();
 				}
-				printf("%s\n",effect.dump(this,typeNameTable));
+				printf("%s\n",effect.dump(this,typeNameTable,"    "));
 				printf("}\n");
 			}
 		},new Textifier(Opcodes.ASM4){
@@ -142,7 +142,7 @@ public class ClassDepVisitor extends ClassVisitor{
 	 */
 	public static void main(String[] args) throws IOException {
 		ClassDepVisitor tt = new ClassDepVisitor();
-		ClassReader cr = new ClassReader("jp.ac.osakau.farseerfc.purano.test.TargetInterface");//readAllBytes("target/TryTree.class"));
+		ClassReader cr = new ClassReader("jp.ac.osakau.farseerfc.purano.test.TargetA");//readAllBytes("target/TryTree.class"));
 		//TraceClassVisitor tcv = new TraceClassVisitor(tt,new Textifier(), new PrintWriter(System.err));
 		cr.accept(tt, 0);
 	}

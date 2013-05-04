@@ -1,7 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,7 @@ import com.google.common.collect.Lists;
 
 public class MethodRep extends MethodVisitor {
 	private final @Getter MethodInsnNode insnNode;
-	private final @Getter Method reflect;
+	//private final @Getter Method reflect;
 	private final @Getter List<MethodRep> overrides = new ArrayList<>();
 	private final @Getter List<MethodInsnNode> calls = new ArrayList<>();
 	
@@ -38,57 +37,57 @@ public class MethodRep extends MethodVisitor {
 	public MethodRep(MethodInsnNode methodInsnNode){
 		super(Opcodes.ASM4);
 		this.insnNode = methodInsnNode;
-		if(insnNode.name.equals("<init>")||insnNode.name.equals("<clinit>")){
-			this.reflect = null;
-		}else{
-			this.reflect = getReflectFromNode(methodInsnNode);
-		}
+//		if(insnNode.name.equals("<init>")||insnNode.name.equals("<clinit>")){
+//			this.reflect = null;
+//		}else{
+//			this.reflect = getReflectFromNode(methodInsnNode);
+//		}
 		
 		resolve(0);
 	}
 	
-	public MethodRep(Method reflect,String owner){
-		super(Opcodes.ASM4);
-		this.reflect = reflect;
-		this.insnNode = new MethodInsnNode(0,
-				owner,
-				reflect.getName(), 
-				Type.getMethodDescriptor(reflect));
-		resolve(0);
-	}
+//	public MethodRep(Method reflect,String owner){
+//		super(Opcodes.ASM4);
+//		this.reflect = reflect;
+//		this.insnNode = new MethodInsnNode(0,
+//				owner,
+//				reflect.getName(), 
+//				Type.getMethodDescriptor(reflect));
+//		resolve(0);
+//	}
 	
 
-	private Method getReflectFromNode(MethodInsnNode node) {
-		try {
-			Class<? extends Object> cls = Class.forName(Types.binaryName2NormalName(node.owner));
-			try{
-				// Try to get the declared method, which may be private, that declared in this class
-				return cls.getDeclaredMethod(
-						node.name,
-						Lists.transform(
-								Lists.newArrayList(
-										Type.getType(node.desc).getArgumentTypes()),
-								Types.loadClass).toArray(new Class[0]));
-			}catch(NoSuchMethodException e){
-				// Try to get the method that may be declared in superclass, must be public 
-				try {
-					return cls.getMethod(
-							node.name,
-							Lists.transform(
-									Lists.newArrayList(
-											Type.getType(node.desc).getArgumentTypes()),
-											Types.loadClass).toArray(new Class[0]));
-				} catch (NoSuchMethodException e1) {
-					return null;
-				}
-			}
-		} catch (SecurityException
-				| ClassNotFoundException | NoClassDefFoundError e) {
-			System.err.printf("Warning: Error when loading \"%s#%s\"\n",node.owner,node.name);
-			//throw new RuntimeException(e);
-			return null;
-		}
-	}
+//	private Method getReflectFromNode(MethodInsnNode node) {
+//		try {
+//			Class<? extends Object> cls = Class.forName(Types.binaryName2NormalName(node.owner));
+//			try{
+//				// Try to get the declared method, which may be private, that declared in this class
+//				return cls.getDeclaredMethod(
+//						node.name,
+//						Lists.transform(
+//								Lists.newArrayList(
+//										Type.getType(node.desc).getArgumentTypes()),
+//								Types.loadClass).toArray(new Class[0]));
+//			}catch(NoSuchMethodException e){
+//				// Try to get the method that may be declared in superclass, must be public 
+//				try {
+//					return cls.getMethod(
+//							node.name,
+//							Lists.transform(
+//									Lists.newArrayList(
+//											Type.getType(node.desc).getArgumentTypes()),
+//											Types.loadClass).toArray(new Class[0]));
+//				} catch (NoSuchMethodException e1) {
+//					return null;
+//				}
+//			}
+//		} catch (SecurityException
+//				| ClassNotFoundException | NoClassDefFoundError e) {
+//			System.err.printf("Warning: Error when loading \"%s#%s\"\n",node.owner,node.name);
+//			//throw new RuntimeException(e);
+//			return null;
+//		}
+//	}
 	
 	public String getId(){
 		return insnNode.name+insnNode.desc;
@@ -141,7 +140,7 @@ public class MethodRep extends MethodVisitor {
 		}
 		
 		if(effects != null && getMethodNode() != null){
-			result.add(effects.dump(getMethodNode(), table));
+			result.add(effects.dump(getMethodNode(), table,"            "));
 		}
 		return result;
 	}

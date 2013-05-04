@@ -26,7 +26,7 @@ public class DepEffect {
 	
 
 
-	public String dump(MethodNode methodNode, Types table){
+	public String dump(MethodNode methodNode, Types table, String prefix){
 		int argCount;
 		MethodDesc p = table.method2full(methodNode.desc);
 		if (((methodNode.access & Opcodes.ACC_STATIC) == 0)) {
@@ -37,7 +37,7 @@ public class DepEffect {
 		
 		List<String> deps= new ArrayList<>();
 		for(ThisFieldEffect effect: thisField){
-			deps.add(String.format("%s %s#this.%s: [%s]",
+			deps.add(String.format("%sThisField %s %s#this.%s: [%s]",prefix,
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
@@ -46,7 +46,7 @@ public class DepEffect {
 		
 		
 		for(OtherFieldEffect effect: otherField){
-			deps.add(String.format("%s %s#%s: [%s]",
+			deps.add(String.format("%sOtherField%s %s#%s: [%s]",prefix,
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
@@ -55,7 +55,7 @@ public class DepEffect {
 		
 		
 		for(StaticFieldEffect effect: staticField){
-			deps.add(String.format("static %s %s#%s: [%s]",
+			deps.add(String.format("%sStatic %s %s#%s: [%s]",prefix,
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
@@ -63,7 +63,7 @@ public class DepEffect {
 		}
 		
 		for(CallEffect effect: callEffects){
-			deps.add(String.format("%sCALL %s: [%s]",
+			deps.add(String.format("%s%sCALL %s: [%s]",prefix,
 					effect.getCallType(),
 					table.dumpMethodDesc(effect.getDesc(),
 							String.format("%s#%s",
@@ -74,12 +74,12 @@ public class DepEffect {
 		
 		
 		for(Effect effect: other){
-			deps.add(String.format("%s: [%s]",
+			deps.add(String.format("%s%s: [%s]",prefix,
 					table.fullClassName(effect.toString()) , 
 					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
 		}
 		
-		return String.format("Return: [%s]\n%s",
+		return String.format("%sReturn: [%s]\n%s",prefix,
 				dumpDeps(methodNode, ret,table,argCount),
 				Joiner.on("\n").join(deps));
 	}

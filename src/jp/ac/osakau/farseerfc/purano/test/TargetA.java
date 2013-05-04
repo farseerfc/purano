@@ -1,7 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.test;
 
-public class TargetA {
+
+public class TargetA implements TargetInterface{
 	private int c;
+	private int [] ma;
 	
 	public static int staticAdd(int a, int b){
 		return a+b;
@@ -19,11 +21,26 @@ public class TargetA {
 		this.c = c;
 	}
 	
+	public void allMember(){
+		setC(12);
+	}
+
+	@Override
+	public void func(int a) {
+		setC(a);
+	}
 	
-	public static void main(String [] args) throws ClassNotFoundException{
-		Class c = Class.forName("[Ljava.lang.Class;");
-		int [] a = new int [4];
-		
-		System.out.println(c.getDeclaredMethods());
+
+	public void localArrayAccess(){
+		int [] a = new int [12];
+		a[0]=1;
+	}
+	
+	public void mArrayNew(){
+		ma = new int [12];
+	}
+	
+	public void mArrayAccess(){
+		ma[1] = 1;
 	}
 }
