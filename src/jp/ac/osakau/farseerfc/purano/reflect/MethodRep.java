@@ -165,7 +165,7 @@ public class MethodRep extends MethodVisitor {
 						public void visitEnd() {
 							super.visitEnd();
 							effects = new DepEffect();
-							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effects));
+							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effects, this));
 							try {
 								/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 								methodNode = this;

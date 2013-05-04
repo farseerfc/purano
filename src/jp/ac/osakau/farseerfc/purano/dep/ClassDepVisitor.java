@@ -111,7 +111,7 @@ public class ClassDepVisitor extends ClassVisitor{
 				super.visitEnd();
 				printf("}\n{\n");
 				DepEffect effect = new DepEffect();
-				Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effect));
+				Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effect, this));
 				try {
 					/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 				} catch (AnalyzerException e) {

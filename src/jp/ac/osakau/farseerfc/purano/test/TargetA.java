@@ -37,10 +37,14 @@ public class TargetA implements TargetInterface{
 	}
 	
 	public void mArrayNew(){
-		ma = new int [12];
+		ma = new int [c];
 	}
 	
 	public void mArrayAccess(){
-		ma[1] = 1;
+		ma[1] = c;
+	}
+	
+	public void argArrayAccess(int a []){
+		a[1]= c;
 	}
 }

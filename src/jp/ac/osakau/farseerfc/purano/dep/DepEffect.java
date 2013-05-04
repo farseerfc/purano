@@ -21,27 +21,32 @@ public class DepEffect {
 	private final @Getter List<ThisFieldEffect> thisField = new ArrayList<>();
 	private final @Getter List<OtherFieldEffect> otherField = new ArrayList<>();
 	private final @Getter List<StaticFieldEffect> staticField = new ArrayList<>(); 
+	private final @Getter List<ArgumentEffect> argumentEffect = new ArrayList<>();
 	private final @Getter List<CallEffect> callEffects = new ArrayList<>();
 	private final @Getter List<Effect> other = new ArrayList<>();
 	
 
 
+
 	public String dump(MethodNode methodNode, Types table, String prefix){
-		int argCount;
-		MethodDesc p = table.method2full(methodNode.desc);
-		if (((methodNode.access & Opcodes.ACC_STATIC) == 0)) {
-			argCount = p.getArguments().size() + 1; // for this
-		} else {
-			argCount = p.getArguments().size();
+
+		List<String> deps= new ArrayList<>();
+		
+		
+		
+		for(ArgumentEffect effect: argumentEffect){
+			deps.add(String.format("%sArgument %s:[%s]",prefix,
+					methodNode.localVariables.get(effect.getArgPos()),
+					effect.getDeps().dumpDeps(methodNode, table)
+					));
 		}
 		
-		List<String> deps= new ArrayList<>();
 		for(ThisFieldEffect effect: thisField){
 			deps.add(String.format("%sThisField %s %s#this.%s: [%s]",prefix,
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
-					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
+					effect.getDeps().dumpDeps(methodNode,table)));
 		}
 		
 		
@@ -50,7 +55,7 @@ public class DepEffect {
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
-					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
+					effect.getDeps().dumpDeps(methodNode ,table)));
 		}
 		
 		
@@ -59,7 +64,7 @@ public class DepEffect {
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
-					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
+					effect.getDeps().dumpDeps(methodNode,table)));
 		}
 		
 		for(CallEffect effect: callEffects){
@@ -69,80 +74,20 @@ public class DepEffect {
 							String.format("%s#%s",
 									table.fullClassName(effect.getOwner()), 
 									effect.getName())),
-					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
+									effect.getDeps().dumpDeps(methodNode ,table)));
 		}
 		
 		
 		for(Effect effect: other){
 			deps.add(String.format("%s%s: [%s]",prefix,
 					table.fullClassName(effect.toString()) , 
-					dumpDeps(methodNode, effect.getDeps(),table,argCount)));
+					effect.getDeps().dumpDeps(methodNode,table)));
 		}
 		
 		return String.format("%sReturn: [%s]\n%s",prefix,
-				dumpDeps(methodNode, ret,table,argCount),
+				ret.dumpDeps(methodNode,table),
 				Joiner.on("\n").join(deps));
 	}
-	
-	private String dumpDeps(final MethodNode methodNode,final DepSet dep,final Types table,final int argCount){
-		List<String> argsb = new ArrayList<>();
-		List<String> localsb = new ArrayList<>();
-		boolean thisDep=false;
-		//System.err.printf("method %s ArgCount %s localV %s\n",methodNode.name,argCount,methodNode.localVariables.size());
-		if(dep.getLocals().contains(0) &&
-				((methodNode.access & Opcodes.ACC_STATIC) == 0) &&
-				methodNode.localVariables.size()>0){
-			thisDep = true;
-		}
-		for(int i=thisDep?1:0;i<argCount;++i){
-			if(dep.getLocals().contains(i) && methodNode.localVariables.size()>i){
-				argsb.add(String.format("%s %s",
-						table.desc2full(methodNode.localVariables.get(i).desc) ,
-						methodNode.localVariables.get(i).name));
-			}
-		}
-		
-		if(methodNode.localVariables != null){
-			for(int i=argCount;i<methodNode.localVariables.size();++i){
-				if(dep.getLocals().contains(i) && methodNode.localVariables.size()>i){
-					localsb.add(String.format("%s %s",
-							table.desc2full(methodNode.localVariables.get(i).desc) ,
-							methodNode.localVariables.get(i).name));
-				}
-			}
-		}
 
-		final Function<FieldDep,String> dumper = new Function<FieldDep,String>(){
-			@Override @Nullable
-			public String apply(@Nullable FieldDep fd) {
-				return fd.dump(table);
-			}
-		};
-		
-		List<String> result=new ArrayList<>();
-		if(thisDep){
-			result.add("this");
-		}
-		if(argsb.size() > 0){
-			result.add(String.format("Args: [%s]", 
-					Joiner.on(", ").join(argsb)));
-		}
-		if(localsb.size()>0){
-			result.add(String.format("Locals: [%s]", 
-					Joiner.on(", ").join(localsb)));
-		}
-		if(dep.getFields().size() > 0){
-			result.add(String.format("Fields: [%s]",
-					Joiner.on(", ").join(Collections2.transform(dep.getFields(), dumper
-							))));
-		}
-		if(dep.getStatics().size() > 0){
-			result.add(String.format("Statics: [%s]",
-					Joiner.on(", ").join(Collections2.transform(dep.getStatics(), dumper
-							))));
-		}
-		
-		return Joiner.on(", ").join(result);
-	}
 
 }

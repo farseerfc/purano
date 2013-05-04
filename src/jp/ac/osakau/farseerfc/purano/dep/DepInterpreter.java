@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.ac.osakau.farseerfc.purano.table.Types;
+
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
@@ -14,22 +16,28 @@ import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Interpreter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 
 public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	
-	private final DepEffect effect;
+	private static final Logger log = LoggerFactory.getLogger(DepInterpreter.class);
 	
+	private final DepEffect effect;
+	private final MethodNode method;
 
-	public DepInterpreter(DepEffect effect) {
+	public DepInterpreter(DepEffect effect, MethodNode method) {
 		super(ASM4);
 		this.effect = effect;
+		this.method = method;
 	}
     
     private String opcode2string(int opcode){
@@ -392,30 +400,76 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
-    @Override
-    public DepValue ternaryOperation(final AbstractInsnNode insn,
-            final DepValue value1, final DepValue value2,
-            final DepValue value3) throws AnalyzerException {
-    	DepSet deps = new DepSet(value1.getDeps());
-    	deps.merge(value2.getDeps());
-    	deps.merge(value3.getDeps());
-    	switch(insn.getOpcode()){
-    	case BASTORE:
-    	case CASTORE:
-    	case SASTORE:
-    	case IASTORE:
-    	case LASTORE:
-    	case FASTORE:
-    	case DASTORE:
-    	case AASTORE:
-    		effect.getOther().add(new ArrayStoreEffect(deps));
-    		return null;
-        default:
-        	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
+	@Override
+	public DepValue ternaryOperation(final AbstractInsnNode insn,
+			final DepValue arrayref, final DepValue index, final DepValue value)
+			throws AnalyzerException {
+		// DepSet deps = new DepSet(value1.getDeps());
+		// deps.merge(value2.getDeps());
+		// deps.merge(value3.getDeps());
+		switch (insn.getOpcode()) {
+		case BASTORE:
+		case CASTORE:
+		case SASTORE:
+		case IASTORE:
+		case LASTORE:
+		case FASTORE:
+		case DASTORE:
+		case AASTORE: {
+
+			if (arrayref.getDeps().dependOnThis(method)) {
+				// this.field [index] = value
+				DepSet deps = new DepSet(index.getDeps());
+				deps.merge(value.getDeps());
+				for (FieldDep f : arrayref.getDeps().getFields()) {
+					effect.getThisField().add(
+							new ThisFieldEffect(
+									f.getDesc(),
+									f.getOwner(),
+									f.getName(), deps));
+				}
+
+			} else if (arrayref.getDeps().dependOnlyLocal(method)) {
+				// Nothing changed ?
+			} else if (arrayref.getDeps().dependOnlyLocalArgs(method)) {
+				// arg[index] = value
+				int argCount = DepSet.argCount(method);
+				for (int local : arrayref.getDeps().getLocals()) {
+					if (local < argCount) {
+						effect.getArgumentEffect().add(
+								new ArgumentEffect(local, value.getDeps()));
+					}
+				}
+			} else {
+				// something.field[index] = value
+				// where something is argument or static or other class member
+				DepSet leftDeps = new DepSet(arrayref.getDeps());
+				leftDeps.merge(index.getDeps());
+				for (FieldDep f : arrayref.getDeps().getFields()) {
+					effect.getOtherField().add(
+							new OtherFieldEffect(f.getDesc(), f.getOwner(), f
+									.getName(), value.getDeps(), leftDeps));
+				}
+			}
+
+			Types table = new Types(false);
+			log.info("ArrayRef {} index {} value {}", arrayref.getDeps()
+					.dumpDeps(method, table),
+					index.getDeps().dumpDeps(method, table), value.getDeps()
+							.dumpDeps(method, table));
+			
+			arrayref.getDeps().merge(index.getDeps());
+			arrayref.getDeps().merge(value.getDeps());
+			// effect.getOther().add(new ArrayStoreEffect(deps));
+			return null;
+		}
+		default:
+			System.err.println("Unknow copyOperation "
+					+ opcode2string(insn.getOpcode()));
 			throw new Error("Internal error.");
-        	//return null;
-    	}
-    }
+			// return null;
+		}
+	}
 
     @Override
     public DepValue naryOperation(final AbstractInsnNode insn,
