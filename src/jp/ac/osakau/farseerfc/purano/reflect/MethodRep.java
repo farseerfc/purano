@@ -7,6 +7,7 @@ import java.util.List;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.dep.DepValue;
+import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.Getter;
 
@@ -30,6 +31,9 @@ public class MethodRep extends MethodVisitor {
 	private final @Getter List<MethodRep> overrides = new ArrayList<>();
 	private final @Getter List<MethodInsnNode> calls = new ArrayList<>();
 	
+	private @Getter boolean isStatic ;
+	private final @Getter MethodDesc desc ;
+	
 	private int timeStamp;
 	private @Getter DepEffect staticEffects;
 	private @Getter DepEffect dynamicEffects;
@@ -45,7 +49,10 @@ public class MethodRep extends MethodVisitor {
 //		}
 		
 		//resolve(0);
+		desc=new Types(false).method2full(methodInsnNode.desc);
 	}
+	
+	
 	
 //	public MethodRep(Method reflect,String owner){
 //		super(Opcodes.ASM4);
@@ -161,6 +168,9 @@ public class MethodRep extends MethodVisitor {
 					if(!insnNode.name.equals(name)||!insnNode.desc.equals(desc)){
 						return null;
 					}
+					
+					isStatic = (access & Opcodes.ACC_STATIC) > 0;
+					
 					return new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
 						@Override
 						public void visitEnd() {

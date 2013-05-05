@@ -521,17 +521,33 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			effect.getCallEffects().add(ce);
 			return new DepValue(Type.getReturnType(min.desc), deps);
     	}else{
-    		DepEffect effect = null;
+    		DepEffect callEffect = null;
+    		MethodRep rep = classFinder.loadClass(min.owner).getMethodMap().get(new MethodRep(min).getId());
     		if(min.getOpcode() == INVOKEVIRTUAL || min.getOpcode() == INVOKEINTERFACE){
     			// Dynamic invocation resolving
+       			if(rep.getDynamicEffects() == null){
+    				classFinder.getToResolve().add(rep);
+    			}else{
+    				callEffect = rep.getDynamicEffects();
+    			}
     		}else if(min.getOpcode() == INVOKESPECIAL || min.getOpcode() == INVOKESTATIC){
     			// Static invocation resolving
-    			MethodRep rep = classFinder.loadClass(min.owner).getMethodMap().get(new MethodRep(min).getId());
-//    			if(rep.getStaticEffects() == null){
-//    				classFinder.getToResolve().add(rep);
-//    			}
+    			if(rep.getStaticEffects() == null){
+    				classFinder.getToResolve().add(rep);
+    			}else{
+    				callEffect = rep.getStaticEffects();
+    			}
     		}
-    		return new DepValue(Type.getReturnType(min.desc), deps);
+    		
+    		for(ArgumentEffect ae : callEffect.getArgumentEffect()){
+    			DepValue dv = values.get(ae.getArgPos());
+    			if(dv.getDeps().dependOnlyLocal(method)){
+    				// localVariable 
+    				
+    			}
+    		}
+    		
+    		return new DepValue(Type.getReturnType(min.desc), callEffect.getRet());
     	}
     }
 
