@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jp.ac.osakau.farseerfc.purano.table.Types;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 
 import org.reflections.Reflections;

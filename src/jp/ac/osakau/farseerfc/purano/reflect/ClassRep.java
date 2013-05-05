@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import jp.ac.osakau.farseerfc.purano.table.Types;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 
 import org.objectweb.asm.ClassReader;

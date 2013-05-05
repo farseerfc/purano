@@ -11,8 +11,8 @@ import jp.ac.osakau.farseerfc.purano.effect.Effect;
 import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
-import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
-import jp.ac.osakau.farseerfc.purano.table.Types;
+import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 

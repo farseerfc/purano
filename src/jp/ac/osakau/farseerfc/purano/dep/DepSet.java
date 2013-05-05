@@ -7,8 +7,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
-import jp.ac.osakau.farseerfc.purano.table.Types;
+import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;

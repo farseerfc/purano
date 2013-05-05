@@ -10,7 +10,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import jp.ac.osakau.farseerfc.purano.table.Types;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.objectweb.asm.AnnotationVisitor;

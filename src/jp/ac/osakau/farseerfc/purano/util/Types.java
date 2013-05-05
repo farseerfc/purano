@@ -1,4 +1,4 @@
-package jp.ac.osakau.farseerfc.purano.table;
+package jp.ac.osakau.farseerfc.purano.util;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.visitor;
 
-import jp.ac.osakau.farseerfc.purano.table.Types;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;

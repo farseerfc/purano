@@ -12,7 +12,7 @@ import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ThrowEffect;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
-import jp.ac.osakau.farseerfc.purano.table.Types;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 
 
 import org.objectweb.asm.Handle;
