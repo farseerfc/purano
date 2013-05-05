@@ -47,4 +47,5 @@ public class TargetA implements TargetInterface{
 	public void argArrayAccess(int a []){
 		a[1]= c;
 	}
+	
 }

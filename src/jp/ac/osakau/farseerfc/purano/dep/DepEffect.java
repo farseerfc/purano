@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.table.Types;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import org.objectweb.asm.Opcodes;
@@ -16,6 +17,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 
+@EqualsAndHashCode(callSuper=false)
 public class DepEffect {
 	private final @Getter DepSet ret= new DepSet();
 	private final @Getter List<ThisFieldEffect> thisField = new ArrayList<>();

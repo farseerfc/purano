@@ -1,7 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+@EqualsAndHashCode(callSuper=true)
 public abstract class FieldEffect extends Effect {
 	public FieldEffect(String desc,String owner,String name, DepSet deps) {
 		super(deps);

@@ -21,6 +21,7 @@ public class ClassFinder {
 	
 	private @Getter Map<String, ClassRep> classMap= new HashMap<>();
 	private final String prefix;
+	private @Getter List<MethodRep> toResolve = new ArrayList<>(); 
 	
 	public ClassFinder(String prefix){
 		this.prefix = prefix;

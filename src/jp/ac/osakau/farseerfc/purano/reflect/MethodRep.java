@@ -31,7 +31,8 @@ public class MethodRep extends MethodVisitor {
 	private final @Getter List<MethodInsnNode> calls = new ArrayList<>();
 	
 	private int timeStamp;
-	private @Getter DepEffect effects;
+	private @Getter DepEffect staticEffects;
+	private @Getter DepEffect dynamicEffects;
 	private @Getter MethodNode methodNode;
 	
 	public MethodRep(MethodInsnNode methodInsnNode){
@@ -43,7 +44,7 @@ public class MethodRep extends MethodVisitor {
 //			this.reflect = getReflectFromNode(methodInsnNode);
 //		}
 		
-		resolve(0);
+		//resolve(0);
 	}
 	
 //	public MethodRep(Method reflect,String owner){
@@ -139,8 +140,8 @@ public class MethodRep extends MethodVisitor {
 			result.add(String.format("        > %s", toString(insn,table)));
 		}
 		
-		if(effects != null && getMethodNode() != null){
-			result.add(effects.dump(getMethodNode(), table,"            "));
+		if(staticEffects != null && getMethodNode() != null){
+			result.add(staticEffects.dump(getMethodNode(), table,"            "));
 		}
 		return result;
 	}
@@ -164,8 +165,8 @@ public class MethodRep extends MethodVisitor {
 						@Override
 						public void visitEnd() {
 							super.visitEnd();
-							effects = new DepEffect();
-							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effects, this));
+							staticEffects = new DepEffect();
+							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(staticEffects, this));
 							try {
 								/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 								methodNode = this;

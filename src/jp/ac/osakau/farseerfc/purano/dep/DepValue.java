@@ -1,12 +1,8 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
-import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
-import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.Getter;
 
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Value;
 
 public class DepValue implements Value {

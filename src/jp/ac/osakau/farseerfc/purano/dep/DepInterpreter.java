@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
+import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 
 
@@ -34,10 +36,21 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	private final DepEffect effect;
 	private final MethodNode method;
 
+	private final ClassFinder classFinder;
+
+
 	public DepInterpreter(DepEffect effect, MethodNode method) {
 		super(ASM4);
 		this.effect = effect;
 		this.method = method;
+		this.classFinder = null;
+	}
+	
+	public DepInterpreter(DepEffect effect, MethodNode method, ClassFinder classFinder) {
+		super(ASM4);
+		this.effect = effect;
+		this.method = method;
+		this.classFinder = classFinder;
 	}
     
     private String opcode2string(int opcode){
@@ -502,10 +515,24 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			throw new Error("Internal error.");
         	//return null;
     	}
-		MethodInsnNode min = (MethodInsnNode) insn;
-		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
-		effect.getCallEffects().add(ce);
-		return new DepValue(Type.getReturnType(min.desc), deps);
+    	MethodInsnNode min = (MethodInsnNode) insn;
+    	if(classFinder == null){
+			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
+			effect.getCallEffects().add(ce);
+			return new DepValue(Type.getReturnType(min.desc), deps);
+    	}else{
+    		DepEffect effect = null;
+    		if(min.getOpcode() == INVOKEVIRTUAL || min.getOpcode() == INVOKEINTERFACE){
+    			// Dynamic invocation resolving
+    		}else if(min.getOpcode() == INVOKESPECIAL || min.getOpcode() == INVOKESTATIC){
+    			// Static invocation resolving
+    			MethodRep rep = classFinder.loadClass(min.owner).getMethodMap().get(new MethodRep(min).getId());
+//    			if(rep.getStaticEffects() == null){
+//    				classFinder.getToResolve().add(rep);
+//    			}
+    		}
+    		return new DepValue(Type.getReturnType(min.desc), deps);
+    	}
     }
 
     @Override
