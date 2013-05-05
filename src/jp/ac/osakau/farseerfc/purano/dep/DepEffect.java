@@ -5,6 +5,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
+import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
+import jp.ac.osakau.farseerfc.purano.effect.Effect;
+import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
 import jp.ac.osakau.farseerfc.purano.table.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.table.Types;
 import lombok.EqualsAndHashCode;

@@ -1,5 +1,6 @@
-package jp.ac.osakau.farseerfc.purano.dep;
+package jp.ac.osakau.farseerfc.purano.effect;
 
+import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper=true)

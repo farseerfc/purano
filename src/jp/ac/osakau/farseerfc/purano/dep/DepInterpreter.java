@@ -4,6 +4,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
+import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
+import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.ThrowEffect;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.table.Types;
