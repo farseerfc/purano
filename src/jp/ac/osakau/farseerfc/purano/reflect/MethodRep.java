@@ -111,13 +111,28 @@ public class MethodRep extends MethodVisitor {
 		}
 	}
 	
+	public boolean isThis(int local){
+		return local == 0 &&
+		((getMethodNode().access & Opcodes.ACC_STATIC) == 0) &&
+		getMethodNode().localVariables.size()>0;
+	}
+	
+	public boolean isArg(int local){
+		if(isThis(local)){
+			return false;
+		}
+		if(local < argCount()){
+			return false;
+		}
+		return true;
+	}
 	
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 		calls.add(new MethodInsnNode(opcode,owner,name,desc));
 	}
 	
-	public boolean resolve(int newTimeStamp){
+	public boolean resolve(int newTimeStamp,final ClassFinder cf){
 		try {
 			ClassReader cr=new ClassReader(insnNode.owner);
 			final MethodRep thisRep = this;
@@ -137,12 +152,13 @@ public class MethodRep extends MethodVisitor {
 							super.visitEnd();
 							methodNode = this;
 							staticEffects = new DepEffect();
-							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(staticEffects, thisRep));
+							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(staticEffects, thisRep,cf));
 							try {
 								/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 							} catch (AnalyzerException e) {
 								e.printStackTrace();
 							}
+							dynamicEffects = staticEffects;
 						}
 					};
 				}

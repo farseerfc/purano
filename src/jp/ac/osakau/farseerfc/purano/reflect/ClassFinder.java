@@ -40,7 +40,14 @@ public class ClassFinder {
 //			System.out.println("Loaded Class :"+loadedClass.size());
 //			System.out.println("Passes :"+pass);
 //		}while(loadedClass.size() < classMap.size());
-//		
+
+		
+//		int timestamp = 0;
+//		for(ClassRep crep:classMap.values()){
+//			for(MethodRep mrep : crep.getMethodMap().values()){
+//				mrep.resolve(++timestamp, this);
+//			}
+//		}
 	}
 	
 	private void findClasses(String prefix){
@@ -118,6 +125,12 @@ public class ClassFinder {
         //MethodRep rep=cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodMap().get("staticAdd(II)I");
         //rep.resolve(1);
         //System.out.println(rep.getEffects().dump(rep.getMethodNode(), new TypeNameTable()));
+		ClassRep targetA = cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA");
+		MethodRep mr = targetA.getMethodMap().get("setC(I)V");
+		mr.resolve(0, cf);
+		mr=targetA.getMethodMap().get("func(I)V");
+		mr.resolve(1, cf);
+		
         Types table = new Types(true);
         System.out.println(Joiner.on("\n").join(cf.dump(table)));
         System.out.println(table.dumpImports());

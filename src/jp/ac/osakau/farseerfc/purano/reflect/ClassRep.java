@@ -124,7 +124,7 @@ public class ClassRep extends ClassVisitor {
 		this.supers.addAll(Lists.transform(Arrays.asList(interfaces), new Function<String,ClassRep>(){
 			@Override @Nullable
 			public ClassRep apply(@Nullable String name) {
-				return classFinder.loadClass(name);
+				return classFinder.loadClass(Types.binaryName2NormalName(name));
 			}}));
 	}
 }
