@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -19,6 +20,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -35,6 +37,8 @@ public class ClassDepVisitor extends ClassVisitor{
 	private final PrintWriter out;
 	private final StringWriter sw = new StringWriter();
 	private final PrintWriter writer = new PrintWriter(sw);
+	
+	private String className ;
 	
 	public ClassDepVisitor() {
 		super(Opcodes.ASM4);
@@ -53,6 +57,7 @@ public class ClassDepVisitor extends ClassVisitor{
 	@Override
 	public void visit(int version, int access, String name, String signature,
 			String superName, String[] interfaces) {
+		className = name;
 		List<String> ifs = Lists.transform(Arrays.asList(interfaces),
 				new Function<String,String>(){
 			@Override
@@ -105,19 +110,21 @@ public class ClassDepVisitor extends ClassVisitor{
 				signature==null?"":" /*"+signature+"*/ ",
 				(exceptions == null || exceptions.length == 0) ? "" : 
 					"throws "+ Joiner.on(", ").join(exceptions));
+		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc));
 		return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
 			@Override
 			public void visitEnd() {
 				super.visitEnd();
 				printf("}\n{\n");
+				rep.setMethodNode(this);
 				DepEffect effect = new DepEffect();
-				Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effect, this));
+				Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(effect, rep));
 				try {
 					/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 				} catch (AnalyzerException e) {
 					e.printStackTrace();
 				}
-				printf("%s\n",effect.dump(this,typeNameTable,"    "));
+				printf("%s\n",effect.dump(rep,typeNameTable,"    "));
 				printf("}\n");
 			}
 		},new Textifier(Opcodes.ASM4){

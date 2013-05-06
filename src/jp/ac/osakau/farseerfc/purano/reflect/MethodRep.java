@@ -10,19 +10,18 @@ import jp.ac.osakau.farseerfc.purano.dep.DepValue;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
+import lombok.Setter;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
 
 
 public class MethodRep extends MethodVisitor {
@@ -37,65 +36,14 @@ public class MethodRep extends MethodVisitor {
 	private int timeStamp;
 	private @Getter DepEffect staticEffects;
 	private @Getter DepEffect dynamicEffects;
-	private @Getter MethodNode methodNode;
+	private @Getter @Setter MethodNode methodNode;
 	
 	public MethodRep(MethodInsnNode methodInsnNode){
 		super(Opcodes.ASM4);
 		this.insnNode = methodInsnNode;
-//		if(insnNode.name.equals("<init>")||insnNode.name.equals("<clinit>")){
-//			this.reflect = null;
-//		}else{
-//			this.reflect = getReflectFromNode(methodInsnNode);
-//		}
-		
-		//resolve(0);
+
 		desc=new Types(false).method2full(methodInsnNode.desc);
 	}
-	
-	
-	
-//	public MethodRep(Method reflect,String owner){
-//		super(Opcodes.ASM4);
-//		this.reflect = reflect;
-//		this.insnNode = new MethodInsnNode(0,
-//				owner,
-//				reflect.getName(), 
-//				Type.getMethodDescriptor(reflect));
-//		resolve(0);
-//	}
-	
-
-//	private Method getReflectFromNode(MethodInsnNode node) {
-//		try {
-//			Class<? extends Object> cls = Class.forName(Types.binaryName2NormalName(node.owner));
-//			try{
-//				// Try to get the declared method, which may be private, that declared in this class
-//				return cls.getDeclaredMethod(
-//						node.name,
-//						Lists.transform(
-//								Lists.newArrayList(
-//										Type.getType(node.desc).getArgumentTypes()),
-//								Types.loadClass).toArray(new Class[0]));
-//			}catch(NoSuchMethodException e){
-//				// Try to get the method that may be declared in superclass, must be public 
-//				try {
-//					return cls.getMethod(
-//							node.name,
-//							Lists.transform(
-//									Lists.newArrayList(
-//											Type.getType(node.desc).getArgumentTypes()),
-//											Types.loadClass).toArray(new Class[0]));
-//				} catch (NoSuchMethodException e1) {
-//					return null;
-//				}
-//			}
-//		} catch (SecurityException
-//				| ClassNotFoundException | NoClassDefFoundError e) {
-//			System.err.printf("Warning: Error when loading \"%s#%s\"\n",node.owner,node.name);
-//			//throw new RuntimeException(e);
-//			return null;
-//		}
-//	}
 	
 	public String getId(){
 		return insnNode.name+insnNode.desc;
@@ -148,10 +96,21 @@ public class MethodRep extends MethodVisitor {
 		}
 		
 		if(staticEffects != null && getMethodNode() != null){
-			result.add(staticEffects.dump(getMethodNode(), table,"            "));
+			result.add(staticEffects.dump(this, table,"            "));
 		}
 		return result;
 	}
+	
+	
+	public int argCount(){
+		MethodDesc p = new Types().method2full(insnNode.desc);
+		if (((methodNode.access & Opcodes.ACC_STATIC) == 0)) {
+			return p.getArguments().size() + 1; // for this
+		} else {
+			return p.getArguments().size();
+		}
+	}
+	
 	
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
@@ -161,6 +120,7 @@ public class MethodRep extends MethodVisitor {
 	public boolean resolve(int newTimeStamp){
 		try {
 			ClassReader cr=new ClassReader(insnNode.owner);
+			final MethodRep thisRep = this;
 			cr.accept(new ClassVisitor(Opcodes.ASM4){
 				@Override
 				public MethodVisitor visitMethod(int access, String name,
@@ -175,11 +135,11 @@ public class MethodRep extends MethodVisitor {
 						@Override
 						public void visitEnd() {
 							super.visitEnd();
+							methodNode = this;
 							staticEffects = new DepEffect();
-							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(staticEffects, this));
+							Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(staticEffects, thisRep));
 							try {
 								/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
-								methodNode = this;
 							} catch (AnalyzerException e) {
 								e.printStackTrace();
 							}

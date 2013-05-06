@@ -11,6 +11,7 @@ import jp.ac.osakau.farseerfc.purano.effect.Effect;
 import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
+import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
@@ -36,16 +37,14 @@ public class DepEffect {
 
 
 
-	public String dump(MethodNode methodNode, Types table, String prefix){
+	public String dump(MethodRep rep, Types table, String prefix){
 
 		List<String> deps= new ArrayList<>();
-		
-		
-		
+
 		for(ArgumentEffect effect: argumentEffect){
 			deps.add(String.format("%sArgument %s:[%s]",prefix,
-					methodNode.localVariables.get(effect.getArgPos()),
-					effect.getDeps().dumpDeps(methodNode, table)
+					rep.getMethodNode().localVariables.get(effect.getArgPos()),
+					effect.getDeps().dumpDeps(rep, table)
 					));
 		}
 		
@@ -54,7 +53,7 @@ public class DepEffect {
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
-					effect.getDeps().dumpDeps(methodNode,table)));
+					effect.getDeps().dumpDeps(rep,table)));
 		}
 		
 		
@@ -63,7 +62,7 @@ public class DepEffect {
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
-					effect.getDeps().dumpDeps(methodNode ,table)));
+					effect.getDeps().dumpDeps(rep ,table)));
 		}
 		
 		
@@ -72,7 +71,7 @@ public class DepEffect {
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
 					effect.getName(), 
-					effect.getDeps().dumpDeps(methodNode,table)));
+					effect.getDeps().dumpDeps(rep,table)));
 		}
 		
 		for(CallEffect effect: callEffects){
@@ -82,18 +81,18 @@ public class DepEffect {
 							String.format("%s#%s",
 									table.fullClassName(effect.getOwner()), 
 									effect.getName())),
-									effect.getDeps().dumpDeps(methodNode ,table)));
+									effect.getDeps().dumpDeps(rep ,table)));
 		}
 		
 		
 		for(Effect effect: other){
 			deps.add(String.format("%s%s: [%s]",prefix,
 					table.fullClassName(effect.toString()) , 
-					effect.getDeps().dumpDeps(methodNode,table)));
+					effect.getDeps().dumpDeps(rep,table)));
 		}
 		
 		return String.format("%sReturn: [%s]\n%s",prefix,
-				ret.dumpDeps(methodNode,table),
+				ret.dumpDeps(rep,table),
 				Joiner.on("\n").join(deps));
 	}
 

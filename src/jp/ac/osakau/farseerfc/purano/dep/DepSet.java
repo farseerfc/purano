@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 
@@ -41,8 +42,9 @@ public @Data class DepSet {
 	}
 	
 
-	public String dumpDeps(final MethodNode methodNode, final Types table){
-		int argCount = argCount(methodNode);
+	public String dumpDeps(final MethodRep rep, final Types table){
+		int argCount = rep.argCount();
+		MethodNode methodNode = rep.getMethodNode();
 		
 		List<String> argsb = new ArrayList<>();
 		List<String> localsb = new ArrayList<>();
@@ -104,27 +106,18 @@ public @Data class DepSet {
 		return Joiner.on(", ").join(result);
 	}
 	
-	public boolean dependOnThis(MethodNode methodNode) {
+	public boolean dependOnThis(MethodRep rep) {
 		boolean thisDep=false;
 		if(getLocals().contains(0) &&
-				((methodNode.access & Opcodes.ACC_STATIC) == 0) &&
-				methodNode.localVariables.size()>0){
+				((rep.getMethodNode().access & Opcodes.ACC_STATIC) == 0) &&
+				rep.getMethodNode().localVariables.size()>0){
 			thisDep = true;
 		}
 		return thisDep;
 	}
-	
-	public static int argCount(MethodNode methodNode){
-		MethodDesc p = new Types().method2full(methodNode.desc);
-		if (((methodNode.access & Opcodes.ACC_STATIC) == 0)) {
-			return p.getArguments().size() + 1; // for this
-		} else {
-			return p.getArguments().size();
-		}
-	}
-	
-	public boolean dependOnlyLocal(MethodNode methodNode) {
-		int argCount = argCount(methodNode);
+
+	public boolean dependOnlyLocal(MethodRep rep) {
+		int argCount = rep.argCount();
 		
 		if(getStatics().size() > 0){
 			return false;
@@ -140,11 +133,21 @@ public @Data class DepSet {
 		return true;
 	}
 	
-	public boolean dependOnlyLocalArgs(MethodNode methodNode) {
+	public boolean dependOnlyLocalArgs() {
 		if(getStatics().size() > 0){
 			return false;
 		}
 		if(getFields().size() > 0){
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean dependOnlyArgs(MethodRep rep){
+		if(!dependOnlyLocalArgs()){
+			return false;
+		}
+		if(dependOnlyLocal(rep)){
 			return false;
 		}
 		return true;

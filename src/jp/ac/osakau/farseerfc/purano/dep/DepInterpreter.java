@@ -14,7 +14,6 @@ import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 
-
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -24,7 +23,6 @@ import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.MultiANewArrayInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -40,19 +38,19 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	private static final Logger log = LoggerFactory.getLogger(DepInterpreter.class);
 	
 	private final DepEffect effect;
-	private final MethodNode method;
+	private final MethodRep method;
 
 	private final ClassFinder classFinder;
 
 
-	public DepInterpreter(DepEffect effect, MethodNode method) {
+	public DepInterpreter(DepEffect effect, MethodRep method) {
 		super(ASM4);
 		this.effect = effect;
 		this.method = method;
 		this.classFinder = null;
 	}
 	
-	public DepInterpreter(DepEffect effect, MethodNode method, ClassFinder classFinder) {
+	public DepInterpreter(DepEffect effect, MethodRep method, ClassFinder classFinder) {
 		super(ASM4);
 		this.effect = effect;
 		this.method = method;
@@ -450,9 +448,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 
 			} else if (arrayref.getDeps().dependOnlyLocal(method)) {
 				// Nothing changed ?
-			} else if (arrayref.getDeps().dependOnlyLocalArgs(method)) {
+			} else if (arrayref.getDeps().dependOnlyLocalArgs()) {
 				// arg[index] = value
-				int argCount = DepSet.argCount(method);
+				int argCount = method.argCount();
 				for (int local : arrayref.getDeps().getLocals()) {
 					if (local < argCount) {
 						effect.getArgumentEffect().add(
@@ -549,7 +547,11 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     			DepValue dv = values.get(ae.getArgPos());
     			if(dv.getDeps().dependOnlyLocal(method)){
     				// localVariable 
-    				
+    				if(dv.getDeps().dependOnlyLocal(method)){
+    					// changing local 
+    				}else if(dv.getDeps().dependOnlyLocalArgs()){
+    					// changing args
+    				}
     			}
     		}
     		
