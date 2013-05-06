@@ -310,7 +310,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             return new DepValue(Type.INT_TYPE, value.getDeps());
         
         case ATHROW:{
-        	effect.getOther().add(new ThrowEffect(value.getDeps()));
+        	effect.getOtherEffects().add(new ThrowEffect(value.getDeps()));
             return null;
         }
         case CHECKCAST:{
@@ -450,9 +450,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				// Nothing changed ?
 			} else if (arrayref.getDeps().dependOnlyLocalArgs()) {
 				// arg[index] = value
-				int argCount = method.argCount();
 				for (int local : arrayref.getDeps().getLocals()) {
-					if (local < argCount) {
+					if (method.isArg(local)) {
 						effect.getArgumentEffect().add(
 								new ArgumentEffect(local, value.getDeps()));
 					}
@@ -469,11 +468,11 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				}
 			}
 
-			Types table = new Types(false);
-			log.info("ArrayRef {} index {} value {}", arrayref.getDeps()
-					.dumpDeps(method, table),
-					index.getDeps().dumpDeps(method, table), value.getDeps()
-							.dumpDeps(method, table));
+//			Types table = new Types(false);
+//			log.info("ArrayRef {} index {} value {}", arrayref.getDeps()
+//					.dumpDeps(method, table),
+//					index.getDeps().dumpDeps(method, table), value.getDeps()
+//							.dumpDeps(method, table));
 			
 			arrayref.getDeps().merge(index.getDeps());
 			arrayref.getDeps().merge(value.getDeps());
@@ -527,7 +526,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	}else{
     		DepEffect callEffect = null;
     		MethodRep rep = classFinder.loadClass(Types.binaryName2NormalName(min.owner))
-    				.getMethodMap().get(new MethodRep(min).getId());
+    				.getMethodVirtual(new MethodRep(min, 0).getId());
+    		
+    		log.info("Analyzing Calling {} in {}",new MethodRep(min, 0).toString(new Types(false)),method.toString(new Types(false)));
+    		
     		if(min.getOpcode() == INVOKEVIRTUAL || min.getOpcode() == INVOKEINTERFACE){
     			// Dynamic invocation resolving
        			if(rep.getDynamicEffects() == null){
@@ -544,71 +546,82 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     			}
     		}
     		
-    		DepValue otherObject = values.get(0);
-    		for(ArgumentEffect ae : callEffect.getArgumentEffect()){
-    			// ae.getArgPos  is method call is changing value of argument in position
-    			DepSet ds = values.get(ae.getArgPos()).getDeps();
-    			for(int localPos:ds.getLocals()){
-    				if(method.isArg(localPos)){
-    					DepSet newDs = new DepSet();
-    					for(int local:ae.getDeps().getLocals()){
-    						if(method.isArg(local)){
-    							newDs.merge(values.get(local).getDeps());
-    						}
-    					}
-    					for(FieldDep fd: ae.getDeps().getFields()){
-    						newDs.merge(otherObject.getDeps());
-    					}
-    					for(FieldDep fd: ae.getDeps().getStatics()){
-    						newDs.getStatics().add(fd);
-    					}
-    					effect.getArgumentEffect().add(new ArgumentEffect(localPos,newDs));
-    				}
-    			}
+    		if(callEffect == null){
+    			log.info("Need Analyze {}",rep.toString(new Types(false)));
+    			return new DepValue(Type.getReturnType(min.desc), deps);
     		}
     		
-    		if(otherObject.isThis()){
+    		if(rep.isStatic() || rep.isNative()){
     			effect.getThisField().addAll(callEffect.getThisField());
     			effect.getOtherField().addAll(callEffect.getOtherField());
     		}else{
-    			for(ThisFieldEffect tfe : callEffect.getThisField()){
- 					DepSet newDs = new DepSet();
-					for(int local:tfe.getDeps().getLocals()){
-						if(method.isArg(local)){
-							newDs.merge(values.get(local).getDeps());
+	    		DepValue otherObject = values.get(0);
+	    		for(ArgumentEffect ae : callEffect.getArgumentEffect()){
+	    			// ae.getArgPos  is method call is changing value of argument in position
+	    			DepSet ds = values.get(ae.getArgPos()).getDeps();
+	    			for(int localPos:ds.getLocals()){
+	    				if(rep.isArg(localPos)){
+	    					DepSet newDs = new DepSet();
+	    					for(int local:ae.getDeps().getLocals()){
+	    						if(method.isArg(local)){
+	    							newDs.merge(values.get(local).getDeps());
+	    						}
+	    					}
+	    					for(FieldDep fd: ae.getDeps().getFields()){
+	    						newDs.merge(otherObject.getDeps());
+	    					}
+	    					for(FieldDep fd: ae.getDeps().getStatics()){
+	    						newDs.getStatics().add(fd);
+	    					}
+	    					effect.getArgumentEffect().add(new ArgumentEffect(localPos,newDs));
+	    				}
+	    			}
+	    		}
+	    		
+	    		if(otherObject.isThis()){
+	    			effect.getThisField().addAll(callEffect.getThisField());
+	    			effect.getOtherField().addAll(callEffect.getOtherField());
+	    		}else{
+	    			for(ThisFieldEffect tfe : callEffect.getThisField()){
+	 					DepSet newDs = new DepSet();
+						for(int local:tfe.getDeps().getLocals()){
+							if(rep.isArg(local)){
+								newDs.merge(values.get(local).getDeps());
+							}
 						}
-					}
-					for(FieldDep fd: tfe.getDeps().getFields()){
-						newDs.merge(otherObject.getDeps());
-					}
-					for(FieldDep fd: tfe.getDeps().getStatics()){
-						newDs.getStatics().add(fd);
-					}
-    				effect.getOtherField().add(new OtherFieldEffect(
-    						tfe.getDesc(),tfe.getOwner() , tfe.getName(),
-    						newDs, otherObject.getDeps()));
-    			}
-    			
-    			for(OtherFieldEffect ofe: callEffect.getOtherField()){
- 					DepSet newDs = new DepSet();
-					for(int local:ofe.getDeps().getLocals()){
-						if(method.isArg(local)){
-							newDs.merge(values.get(local).getDeps());
+						for(FieldDep fd: tfe.getDeps().getFields()){
+							newDs.merge(otherObject.getDeps());
 						}
-					}
-					for(FieldDep fd: ofe.getDeps().getFields()){
-						newDs.merge(otherObject.getDeps());
-					}
-					for(FieldDep fd: ofe.getDeps().getStatics()){
-						newDs.getStatics().add(fd);
-					}
-    				effect.getOtherField().add(new OtherFieldEffect(
-    						ofe.getDesc(),ofe.getOwner() , ofe.getName(),
-    						newDs, otherObject.getDeps()));
-    			}
+						for(FieldDep fd: tfe.getDeps().getStatics()){
+							newDs.getStatics().add(fd);
+						}
+	    				effect.getOtherField().add(new OtherFieldEffect(
+	    						tfe.getDesc(),tfe.getOwner() , tfe.getName(),
+	    						newDs, otherObject.getDeps()));
+	    			}
+	    			
+	    			for(OtherFieldEffect ofe: callEffect.getOtherField()){
+	 					DepSet newDs = new DepSet();
+						for(int local:ofe.getDeps().getLocals()){
+							if(rep.isArg(local)){
+								newDs.merge(values.get(local).getDeps());
+							}
+						}
+						for(FieldDep fd: ofe.getDeps().getFields()){
+							newDs.merge(otherObject.getDeps());
+						}
+						for(FieldDep fd: ofe.getDeps().getStatics()){
+							newDs.getStatics().add(fd);
+						}
+	    				effect.getOtherField().add(new OtherFieldEffect(
+	    						ofe.getDesc(),ofe.getOwner() , ofe.getName(),
+	    						newDs, otherObject.getDeps()));
+	    			}
+	    		}
     		}
     		
     		effect.getStaticField().addAll(callEffect.getStaticField());
+    		effect.getOtherEffects().addAll(callEffect.getOtherEffects());
 
     		return new DepValue(Type.getReturnType(min.desc), callEffect.getRet());
     	}

@@ -19,7 +19,7 @@ import com.google.common.base.Joiner;
 public class ClassFinder {
 	private static final Logger log= LoggerFactory.getLogger(ClassFinder.class);
 	
-	private @Getter Map<String, ClassRep> classMap= new HashMap<>();
+	private final Map<String, ClassRep> classMap= new HashMap<>();
 	private final String prefix;
 	private @Getter List<MethodRep> toResolve = new ArrayList<>(); 
 	
@@ -41,13 +41,23 @@ public class ClassFinder {
 //			System.out.println("Passes :"+pass);
 //		}while(loadedClass.size() < classMap.size());
 
-		
-//		int timestamp = 0;
-//		for(ClassRep crep:classMap.values()){
-//			for(MethodRep mrep : crep.getMethodMap().values()){
-//				mrep.resolve(++timestamp, this);
-//			}
-//		}
+//		resolveMethods();
+
+	}
+	
+	public void resolveMethods(){
+		int timestamp = 0;
+		boolean changed = false;
+		do {
+			for (ClassRep crep : new ArrayList<>(classMap.values())) {
+				for (MethodRep mrep : crep.getAllMethods()) {
+					if (mrep.needResolve(this)) {
+						mrep.resolve(++timestamp, this);
+					}
+					changed = true;
+				}
+			}
+		} while (changed);
 	}
 	
 	private void findClasses(String prefix){
@@ -61,7 +71,11 @@ public class ClassFinder {
 	public ClassRep loadClass(String classname){
 		if(!classMap.containsKey(classname)){
 			log.info("Loading {}", classname);
-			classMap.put(classname, new ClassRep(classname, this));
+			if(classname.startsWith("[")){
+				classMap.put(classname, new ClassRep(ArrayStub.class.getName(),this));
+			}else{
+				classMap.put(classname, new ClassRep(classname, this));
+			}
 		}
 		return classMap.get(classname);
 	}
@@ -121,17 +135,19 @@ public class ClassFinder {
 	public static void main(String [] argv){
 		long start=System.currentTimeMillis();
 		String targetPackage="jp.ac.osakau.farseerfc.purano.test";
+//		String targetPackage="java.lang";
 		ClassFinder cf = new ClassFinder(targetPackage);
+		cf.resolveMethods();
         //MethodRep rep=cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodMap().get("staticAdd(II)I");
         //rep.resolve(1);
         //System.out.println(rep.getEffects().dump(rep.getMethodNode(), new TypeNameTable()));
-		ClassRep targetA = cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA");
-		MethodRep mr = targetA.getMethodMap().get("setC(I)V");
-		mr.resolve(0, cf);
-		mr=targetA.getMethodMap().get("func(I)V");
-		mr.resolve(1, cf);
-		
-        Types table = new Types(true);
+//		cf.loadClass("java.lang.AbstractStringBuilder");
+//		ClassRep targetA = cf.loadClass("java.lang.StringBuilder");
+//		MethodRep mr = targetA.getMethodVirtual("getChars(II[CI)V");
+//		System.out.println(targetA.getSupers().get(1).getName());
+
+        Types table = new Types(false);
+        
         System.out.println(Joiner.on("\n").join(cf.dump(table)));
         System.out.println(table.dumpImports());
         

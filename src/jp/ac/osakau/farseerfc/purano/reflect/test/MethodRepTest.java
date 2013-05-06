@@ -30,7 +30,7 @@ public class MethodRepTest {
 				"jp/ac/osakau/farseerfc/purano/reflect/test/MethodRepTest",
 				"testNode2Reflect",
 				"()V");
-		MethodRep rep = new MethodRep(node);
+		MethodRep rep = new MethodRep(node, 0);
 		assertEquals(rep.getInsnNode(),node);
 //		assertEquals(rep.getReflect(), this.getClass().getDeclaredMethod(
 //				"testNode2Reflect", new Class<?>[0]));
@@ -51,4 +51,6 @@ public class MethodRepTest {
 			//testNode2Reflect();
 		}
 	}
+	
+	
 }

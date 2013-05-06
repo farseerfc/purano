@@ -3,6 +3,7 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,12 +18,17 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 public class ClassRep extends ClassVisitor {
-	private final @Getter Map<String, MethodRep> methodMap = new HashMap<>();
+	private static final Logger log = LoggerFactory.getLogger(ClassRep.class);
+	
+	private final Map<String, MethodRep> methodMap = new HashMap<>();
 	
 	private final @Getter String name;
 	
@@ -59,13 +65,18 @@ public class ClassRep extends ClassVisitor {
 		MethodRep s = getMethodStatic(methodId);
 		if(s == null){
 			for(ClassRep sup: supers){
-				return sup.getMethodVirtual(methodId);
+				s = sup.getMethodVirtual(methodId);
+				if(s != null){
+					return s;
+				}
 			}
 		}
 		return s;
 	}
 	
-	
+	public Collection<MethodRep> getAllMethods(){
+		return methodMap.values();
+	}
 	
 	
 //	public ClassRep(Class<? extends Object> reflect) throws IOException{
@@ -94,7 +105,14 @@ public class ClassRep extends ClassVisitor {
 //		if(name.equals("<init>")){
 //			return null;
 //		}
-		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc));
+		
+		// Ignore bridge methods
+		if((access & Opcodes.ACC_BRIDGE) > 0){
+			return null;
+		}
+		
+		// Build method rep
+		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc), access);
 		methodMap.put(rep.getId(),rep);
 		for(ClassRep s : supers){
 			s.override(rep.getId(),rep);
@@ -117,8 +135,10 @@ public class ClassRep extends ClassVisitor {
 			String superName, String[] interfaces) {
 		//super.visit(version, access, name, signature, superName, interfaces);
 		
+		log.info("Visiting class {} super {} interfaces {}",this.name,superName,Joiner.on(",").join(interfaces));
+		
 		if(!this.name.equals(Object.class.getName())){
-			this.supers.add(classFinder.loadClass(Object.class.getName()));
+			this.supers.add(classFinder.loadClass(Types.binaryName2NormalName(superName)));
 		}
 		
 		this.supers.addAll(Lists.transform(Arrays.asList(interfaces), new Function<String,ClassRep>(){

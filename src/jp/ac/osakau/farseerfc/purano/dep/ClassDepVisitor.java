@@ -110,7 +110,7 @@ public class ClassDepVisitor extends ClassVisitor{
 				signature==null?"":" /*"+signature+"*/ ",
 				(exceptions == null || exceptions.length == 0) ? "" : 
 					"throws "+ Joiner.on(", ").join(exceptions));
-		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc));
+		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc), access);
 		return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
 			@Override
 			public void visitEnd() {
@@ -149,7 +149,7 @@ public class ClassDepVisitor extends ClassVisitor{
 	 */
 	public static void main(String[] args) throws IOException {
 		ClassDepVisitor tt = new ClassDepVisitor();
-		ClassReader cr = new ClassReader("jp.ac.osakau.farseerfc.purano.test.TargetA");//readAllBytes("target/TryTree.class"));
+		ClassReader cr = new ClassReader("java.lang.StringBuilder");//readAllBytes("target/TryTree.class"));
 		//TraceClassVisitor tcv = new TraceClassVisitor(tt,new Textifier(), new PrintWriter(System.err));
 		cr.accept(tt, 0);
 	}

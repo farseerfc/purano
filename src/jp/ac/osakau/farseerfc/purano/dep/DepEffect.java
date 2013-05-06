@@ -1,7 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -27,15 +29,24 @@ import com.google.common.collect.Collections2;
 @EqualsAndHashCode(callSuper=false)
 public class DepEffect {
 	private final @Getter DepSet ret= new DepSet();
-	private final @Getter List<ThisFieldEffect> thisField = new ArrayList<>();
-	private final @Getter List<OtherFieldEffect> otherField = new ArrayList<>();
-	private final @Getter List<StaticFieldEffect> staticField = new ArrayList<>(); 
-	private final @Getter List<ArgumentEffect> argumentEffect = new ArrayList<>();
-	private final @Getter List<CallEffect> callEffects = new ArrayList<>();
-	private final @Getter List<Effect> other = new ArrayList<>();
+	private final @Getter Set<ThisFieldEffect> thisField = new HashSet<>();
+	private final @Getter Set<OtherFieldEffect> otherField = new HashSet<>();
+	private final @Getter Set<StaticFieldEffect> staticField = new HashSet<>(); 
+	private final @Getter Set<ArgumentEffect> argumentEffect = new HashSet<>();
+	private final @Getter Set<CallEffect> callEffects = new HashSet<>();
+	private final @Getter Set<Effect> otherEffects = new HashSet<>();
 	
 
 
+	public void merge(DepEffect other){
+		ret.merge(other.ret);
+		thisField.addAll(other.getThisField());
+		otherField.addAll(other.getOtherField());
+		staticField.addAll(other.getStaticField());
+		argumentEffect.addAll(other.getArgumentEffect());
+		callEffects.addAll(other.getCallEffects());
+		otherEffects.addAll(other.getOtherEffects());
+	}
 
 	public String dump(MethodRep rep, Types table, String prefix){
 
@@ -85,7 +96,7 @@ public class DepEffect {
 		}
 		
 		
-		for(Effect effect: other){
+		for(Effect effect: otherEffects){
 			deps.add(String.format("%s%s: [%s]",prefix,
 					table.fullClassName(effect.toString()) , 
 					effect.getDeps().dumpDeps(rep,table)));
