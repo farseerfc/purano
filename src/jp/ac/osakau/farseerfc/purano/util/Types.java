@@ -224,6 +224,7 @@ public class Types {
 				return forName(name);
 			} catch (ClassNotFoundException e) {
 				System.err.printf("Cannot load \"%s\"\n",name);
+				e.printStackTrace(System.err);
 				return null;
 				//throw new RuntimeException("Cannot load "+name,e);
 			}

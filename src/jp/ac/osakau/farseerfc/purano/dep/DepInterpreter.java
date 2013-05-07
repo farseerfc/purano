@@ -528,7 +528,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		MethodRep rep = classFinder.loadClass(Types.binaryName2NormalName(min.owner))
     				.getMethodVirtual(new MethodRep(min, 0).getId());
     		
-    		log.info("Analyzing Calling {} in {}",new MethodRep(min, 0).toString(new Types(false)),method.toString(new Types(false)));
+    		log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
     		
     		if(min.getOpcode() == INVOKEVIRTUAL || min.getOpcode() == INVOKEINTERFACE){
     			// Dynamic invocation resolving
@@ -547,7 +547,6 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		}
     		
     		if(callEffect == null){
-    			log.info("Need Analyze {}",rep.toString(new Types(false)));
     			return new DepValue(Type.getReturnType(min.desc), deps);
     		}
     		
@@ -558,6 +557,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    		DepValue otherObject = values.get(0);
 	    		for(ArgumentEffect ae : callEffect.getArgumentEffect()){
 	    			// ae.getArgPos  is method call is changing value of argument in position
+	    			log.info("ArgumentEffect {} values {} rep {}",ae.getArgPos(),values,rep);
+	    			
 	    			DepSet ds = values.get(ae.getArgPos()).getDeps();
 	    			for(int localPos:ds.getLocals()){
 	    				if(rep.isArg(localPos)){
@@ -567,7 +568,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    							newDs.merge(values.get(local).getDeps());
 	    						}
 	    					}
-	    					for(FieldDep fd: ae.getDeps().getFields()){
+	    					if(ae.getDeps().getFields().size()>0){
 	    						newDs.merge(otherObject.getDeps());
 	    					}
 	    					for(FieldDep fd: ae.getDeps().getStatics()){
@@ -589,9 +590,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 								newDs.merge(values.get(local).getDeps());
 							}
 						}
-						for(FieldDep fd: tfe.getDeps().getFields()){
-							newDs.merge(otherObject.getDeps());
-						}
+						if(tfe.getDeps().getFields().size()>0){
+    						newDs.merge(otherObject.getDeps());
+    					}
 						for(FieldDep fd: tfe.getDeps().getStatics()){
 							newDs.getStatics().add(fd);
 						}
@@ -607,9 +608,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 								newDs.merge(values.get(local).getDeps());
 							}
 						}
-						for(FieldDep fd: ofe.getDeps().getFields()){
-							newDs.merge(otherObject.getDeps());
-						}
+						if(ofe.getDeps().getFields().size()>0){
+    						newDs.merge(otherObject.getDeps());
+    					}
 						for(FieldDep fd: ofe.getDeps().getStatics()){
 							newDs.getStatics().add(fd);
 						}

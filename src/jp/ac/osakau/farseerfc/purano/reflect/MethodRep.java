@@ -76,7 +76,11 @@ public class MethodRep extends MethodVisitor {
 		return false;
 	}
 	
-
+	@Override
+	public String toString(){
+		return toString(new Types(false));
+	}
+	
 	public String toString(Types table){
 		return toString(insnNode,table);
 	}
