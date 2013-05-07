@@ -4,7 +4,10 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
 
+import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
+import jp.ac.osakau.farseerfc.purano.reflect.ClassRep;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import jp.ac.osakau.farseerfc.purano.test.TargetA;
 
 import org.junit.Test;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -52,5 +55,37 @@ public class MethodRepTest {
 		}
 	}
 	
+	@Test
+	public void testStatic(){
+		ClassFinder cl = new ClassFinder("jp.ac.osakau.farseerfc.purano.reflect.test");
+		ClassRep cr = cl.loadClass(TargetA.class.getName());
+		MethodRep mr1= cr.getMethodVirtual("memberAdd(II)I");
+		assertFalse(mr1.isStatic());
+		MethodRep mr2 = cr.getMethodVirtual("staticAdd(II)I");
+		assertTrue(mr2.isStatic());
+	}
+	
+	@Test
+	public void testArgAndThis(){
+		ClassFinder cl = new ClassFinder("jp.ac.osakau.farseerfc.purano.reflect.test");
+		ClassRep cr = cl.loadClass(TargetA.class.getName());
+		MethodRep mr1= cr.getMethodVirtual("memberAdd(II)I");
+		MethodRep mr2 = cr.getMethodVirtual("staticAdd(II)I");
+		assertTrue(mr1.isThis(0));
+		assertFalse(mr2.isThis(0));
+		
+		assertEquals(mr1.argCount(),3);
+		assertEquals(mr2.argCount(),2);
+		
+		assertFalse(mr1.isArg(0));
+		assertTrue(mr1.isArg(1));
+		assertTrue(mr1.isArg(2));
+		assertFalse(mr1.isArg(3));
+		
+		assertTrue(mr2.isArg(0));
+		assertTrue(mr2.isArg(1));
+		assertFalse(mr2.isArg(2));
+		
+	}
 	
 }

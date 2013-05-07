@@ -452,6 +452,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				// arg[index] = value
 				for (int local : arrayref.getDeps().getLocals()) {
 					if (method.isArg(local)) {
+						log.info("Putting ArgumentEffect {} local {}", method, local);
 						effect.getArgumentEffect().add(
 								new ArgumentEffect(local, value.getDeps()));
 					}
@@ -530,22 +531,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		
     		log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
     		
-    		if(min.getOpcode() == INVOKEVIRTUAL || min.getOpcode() == INVOKEINTERFACE){
-    			// Dynamic invocation resolving
-       			if(rep.getDynamicEffects() == null){
-    				classFinder.getToResolve().add(rep);
-    			}else{
-    				callEffect = rep.getDynamicEffects();
-    			}
-    		}else if(min.getOpcode() == INVOKESPECIAL || min.getOpcode() == INVOKESTATIC){
-    			// Static invocation resolving
-    			if(rep.getStaticEffects() == null){
-    				classFinder.getToResolve().add(rep);
-    			}else{
-    				callEffect = rep.getStaticEffects();
-    			}
-    		}
-    		
+   			if(rep.getDynamicEffects() == null){
+				classFinder.getToResolve().add(rep);
+			}else{
+				callEffect = rep.getDynamicEffects();
+			}
+
     		if(callEffect == null){
     			return new DepValue(Type.getReturnType(min.desc), deps);
     		}
@@ -557,14 +548,15 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    		DepValue otherObject = values.get(0);
 	    		for(ArgumentEffect ae : callEffect.getArgumentEffect()){
 	    			// ae.getArgPos  is method call is changing value of argument in position
-	    			log.info("ArgumentEffect {} values {} rep {}",ae.getArgPos(),values,rep);
+	    			log.info("ArgumentEffect {} values [{}] rep {}",
+	    					ae.getArgPos(),Joiner.on(",").join(values),rep);
 	    			
 	    			DepSet ds = values.get(ae.getArgPos()).getDeps();
 	    			for(int localPos:ds.getLocals()){
-	    				if(rep.isArg(localPos)){
+	    				if(method.isArg(localPos)){
 	    					DepSet newDs = new DepSet();
 	    					for(int local:ae.getDeps().getLocals()){
-	    						if(method.isArg(local)){
+	    						if(rep.isArg(local)){
 	    							newDs.merge(values.get(local).getDeps());
 	    						}
 	    					}

@@ -122,7 +122,7 @@ public class MethodRep extends MethodVisitor {
 	
 	public int argCount(){
 		MethodDesc p = new Types().method2full(insnNode.desc);
-		if (isStatic) {
+		if (!isStatic) {
 			return p.getArguments().size() + 1; // for this
 		} else {
 			return p.getArguments().size();
@@ -130,7 +130,7 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean isThis(int local){
-		return local == 0 && isStatic;
+		return local == 0 && !isStatic;
 	}
 	
 	public boolean isArg(int local){
@@ -223,11 +223,11 @@ public class MethodRep extends MethodVisitor {
 		for(MethodInsnNode insn: calls){
 			ClassRep crep = cf.loadClass(Types.binaryName2NormalName(insn.owner));
 			
-			MethodRep mrep ;
-			if(insn.getOpcode() == Opcodes.INVOKEINTERFACE || insn.getOpcode() == Opcodes.INVOKEVIRTUAL){
-				mrep=crep.getMethodVirtual(new MethodRep(insn,0).getId());
-			}else{
-				mrep=crep.getMethodStatic(new MethodRep(insn,0).getId());
+			MethodRep mrep = crep.getMethodVirtual(new MethodRep(insn,0).getId());
+			
+			if(mrep == null){
+				log.error("Cannot find method {} in class {} opcode {} ",new MethodRep(insn,0).getId(),crep.getName(), insn.getOpcode());
+				throw new RuntimeException("Cannot find method");
 			}
 			
 			if(mrep.getModifiedTimeStamp() == 0){

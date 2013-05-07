@@ -57,12 +57,8 @@ public class ClassRep extends ClassVisitor {
 		
 	}
 	
-	public MethodRep getMethodStatic(String methodId){
-		return methodMap.get(methodId);
-	}
-	
 	public MethodRep getMethodVirtual(String methodId){
-		MethodRep s = getMethodStatic(methodId);
+		MethodRep s = methodMap.get(methodId);
 		if(s == null){
 			for(ClassRep sup: supers){
 				s = sup.getMethodVirtual(methodId);
@@ -121,7 +117,7 @@ public class ClassRep extends ClassVisitor {
 	}
 	
 	public void override(String id, MethodRep overrider) {
-		MethodRep overridded = getMethodStatic(id);
+		MethodRep overridded = methodMap.get(id);
 		if(overridded != null){
 			overridded.getOverrides().add(overrider);
 		}

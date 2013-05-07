@@ -138,7 +138,12 @@ public class ClassFinder {
 //		String targetPackage="java.lang";
 		ClassFinder cf = new ClassFinder(targetPackage);
 		cf.resolveMethods();
-        //MethodRep rep=cf.getClassMap().get("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodMap().get("staticAdd(II)I");
+//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("staticAdd(II)I").resolve(0, cf);
+//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("setC(I)V").resolve(1, cf);
+//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("func(I)V").resolve(2, cf);
+//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("setC(I)V").resolve(3, cf);
+//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("func(I)V").resolve(4, cf);
+        
         //rep.resolve(1);
         //System.out.println(rep.getEffects().dump(rep.getMethodNode(), new TypeNameTable()));
 //		cf.loadClass("java.lang.AbstractStringBuilder");

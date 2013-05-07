@@ -1,10 +1,12 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
 import lombok.Getter;
+import lombok.ToString;
 
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Value;
 
+@ToString
 public class DepValue implements Value {
 	private final @Getter DepSet deps;
 	private final @Getter Type type;
