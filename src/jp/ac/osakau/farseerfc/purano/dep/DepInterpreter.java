@@ -529,7 +529,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		MethodRep rep = classFinder.loadClass(Types.binaryName2NormalName(min.owner))
     				.getMethodVirtual(new MethodRep(min, 0).getId());
     		
-    		log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
+    		//log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
     		
    			if(rep.getDynamicEffects() == null){
 				classFinder.getToResolve().add(rep);
@@ -548,8 +548,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    		DepValue otherObject = values.get(0);
 	    		for(ArgumentEffect ae : callEffect.getArgumentEffect()){
 	    			// ae.getArgPos  is method call is changing value of argument in position
-	    			log.info("ArgumentEffect {} values [{}] rep {}",
-	    					ae.getArgPos(),Joiner.on(",").join(values),rep);
+//	    			log.info("ArgumentEffect {} values [{}] rep {}",
+//	    					ae.getArgPos(),Joiner.on(",").join(values),rep);
 	    			
 	    			DepSet ds = values.get(ae.getArgPos()).getDeps();
 	    			for(int localPos:ds.getLocals()){

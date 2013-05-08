@@ -90,7 +90,7 @@ public class ClassRep extends ClassVisitor {
 		List<String> result = new ArrayList<>();
 		result.add(table.fullClassName(name));
 		for(MethodRep m:methodMap.values()){
-			result.addAll(m.dump(table));
+			result.addAll(m.dump(classFinder, table));
 		}
 		return result;
 	}

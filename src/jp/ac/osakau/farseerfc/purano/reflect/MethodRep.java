@@ -58,8 +58,12 @@ public class MethodRep extends MethodVisitor {
 		this.isAbstract = (access & Opcodes.ACC_ABSTRACT) > 0;
 		desc=new Types(false).method2full(methodInsnNode.desc);
 	}
-	
+
 	public String getId(){
+		return getId(insnNode);
+	}
+	
+	public static String getId(MethodInsnNode insnNode){
 		return insnNode.name+insnNode.desc;
 	}
 	
@@ -82,15 +86,11 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public String toString(Types table){
-		return toString(insnNode,table);
-	}
-	
-	public String toString(MethodInsnNode node, Types table){
 		return String.format("%3d %3d %s",resolveTimeStamp,modifiedTimeStamp,
-				table.dumpMethodDesc(node.desc, 
-						String.format("%s#%s", 
-								table.fullClassName(node.owner),
-								node.name)));
+		table.dumpMethodDesc(insnNode.desc, 
+				String.format("%s#%s", 
+						table.fullClassName(insnNode.owner),
+						insnNode.name)));
 	}
 	
 	public boolean equals(MethodRep other){
@@ -103,14 +103,24 @@ public class MethodRep extends MethodVisitor {
 		return true;
 	}
 	
-	public List<String> dump(Types table){
+	public List<String> dump(ClassFinder classFinder, Types table){
 		List<String> result = new ArrayList<>();
 		result.add("    "+toString(table));
 		for(MethodRep rep : overrides){
 			result.add(String.format("        @ %s", rep.toString(table)));
 		}
 		for(MethodInsnNode insn : calls){
-			result.add(String.format("        > %s", toString(insn,table)));
+			//log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));
+			if(classFinder.getClassMap().containsKey(Types.binaryName2NormalName(insn.owner))){
+				MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).getMethodVirtual(MethodRep.getId(insn));
+				result.add(String.format("        > %s", mr.toString(table)));
+			}else{
+				result.add(String.format("        >   /   / %s",
+						table.dumpMethodDesc(insn.desc, 
+								String.format("%s#%s", 
+										table.fullClassName(insn.owner),
+										insn.name))));
+			}
 		}
 		
 		if(staticEffects != null && getMethodNode() != null){
@@ -212,11 +222,14 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean needResolve(final ClassFinder cf){
+		if(modifiedTimeStamp == 0){
+			return true;
+		}
 		for(MethodRep rep:overrides){
 			if(rep.getModifiedTimeStamp() == 0){
 				return true;
 			}
-			if(resolveTimeStamp < rep.getModifiedTimeStamp()){
+			if(resolveTimeStamp <= rep.getModifiedTimeStamp()){
 				return true;
 			}
 		}
@@ -233,7 +246,7 @@ public class MethodRep extends MethodVisitor {
 			if(mrep.getModifiedTimeStamp() == 0){
 				return true;
 			}
-			if(resolveTimeStamp < mrep.getModifiedTimeStamp()){
+			if(resolveTimeStamp <= mrep.getResolveTimeStamp()){
 				return true;
 			}
 		}

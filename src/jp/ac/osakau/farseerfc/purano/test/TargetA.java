@@ -48,4 +48,25 @@ public class TargetA implements TargetInterface{
 		a[1]= c;
 	}
 	
+	public int selfRecursion(int n){
+		if(n>0){
+			return selfRecursion(n-1)+1;
+		}
+		return 1;
+	}
+	
+	public int crossRecursionA(int n){
+		if(n>0){
+			return crossRecursionB(n-1)+1;
+		}
+		return 1;
+	}
+	
+	public int crossRecursionB(int n){
+		if(n>0){
+			return crossRecursionA(n-1)*2;
+		}
+		return 1;
+	}
+	
 }

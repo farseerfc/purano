@@ -2,6 +2,7 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,7 @@ import com.google.common.base.Joiner;
 public class ClassFinder {
 	private static final Logger log= LoggerFactory.getLogger(ClassFinder.class);
 	
-	private final Map<String, ClassRep> classMap= new HashMap<>();
+	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
 	private final String prefix;
 	private @Getter List<MethodRep> toResolve = new ArrayList<>(); 
 	
@@ -47,17 +48,26 @@ public class ClassFinder {
 	
 	public void resolveMethods(){
 		int timestamp = 0;
+		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
 		boolean changed = false;
+		int pass =0;
 		do {
-			for (ClassRep crep : new ArrayList<>(classMap.values())) {
-				for (MethodRep mrep : crep.getAllMethods()) {
-					if (mrep.needResolve(this)) {
-						mrep.resolve(++timestamp, this);
+			changed = resolve(allCreps,++timestamp);
+			System.out.println("Pass: "+ ++pass);
+		} while (changed);
+	}
+	
+	public boolean resolve(Set<ClassRep> allCreps, int newTimeStamp){
+		for (ClassRep crep : allCreps) {
+			for (MethodRep mrep : crep.getAllMethods()) {
+				if (mrep.needResolve(this)) {
+					if( mrep.resolve(newTimeStamp, this)){
+						return true;
 					}
-					changed = true;
 				}
 			}
-		} while (changed);
+		}
+		return false;
 	}
 	
 	private void findClasses(String prefix){

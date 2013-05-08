@@ -54,7 +54,7 @@ public class DepEffect {
 
 		for(ArgumentEffect effect: argumentEffect){
 			deps.add(String.format("%sArgument %s:[%s]",prefix,
-					rep.getMethodNode().localVariables.get(effect.getArgPos()),
+					rep.getMethodNode().localVariables.get(effect.getArgPos()).name,
 					effect.getDeps().dumpDeps(rep, table)
 					));
 		}
