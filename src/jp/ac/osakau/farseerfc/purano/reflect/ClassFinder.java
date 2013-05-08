@@ -52,7 +52,7 @@ public class ClassFinder {
 		boolean changed = false;
 		int pass =0;
 		do {
-			changed = resolve(allCreps,++timestamp);
+			changed = resolve(allCreps, ++timestamp);
 			System.out.println("Pass: "+ ++pass);
 		} while (changed);
 	}
