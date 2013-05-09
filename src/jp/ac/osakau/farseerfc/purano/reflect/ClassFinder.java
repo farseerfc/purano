@@ -46,29 +46,38 @@ public class ClassFinder {
 
 	}
 	
-	public void resolveMethods(){
+	public void resolveMethods() {
 		int timestamp = 0;
-		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
+//		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
 		boolean changed = false;
-		int pass =0;
+		int pass = 0;
 		do {
-			changed = resolve(allCreps, ++timestamp);
-			System.out.println("Pass: "+ ++pass);
-		} while (changed);
-	}
-	
-	public boolean resolve(Set<ClassRep> allCreps, int newTimeStamp){
-		for (ClassRep crep : allCreps) {
-			for (MethodRep mrep : crep.getAllMethods()) {
-				if (mrep.needResolve(this)) {
-					if( mrep.resolve(newTimeStamp, this)){
-						return true;
+			changed = false;
+			for (ClassRep crep : new HashSet<>(classMap.values()) ) {
+				for (MethodRep mrep : crep.getAllMethods()) {
+					if (mrep.needResolve(this)) {
+						if (mrep.resolve(++timestamp, this)) {
+							changed = true;
+						}
 					}
 				}
 			}
-		}
-		return false;
+			System.out.println("Pass: " + ++pass);
+		} while (changed);
 	}
+	
+//	public boolean resolve(Set<ClassRep> allCreps, int newTimeStamp){
+//		for (ClassRep crep : allCreps) {
+//			for (MethodRep mrep : crep.getAllMethods()) {
+//				if (mrep.needResolve(this)) {
+//					if( mrep.resolve(newTimeStamp, this)){
+//						return true;
+//					}
+//				}
+//			}
+//		}
+//		return false;
+//	}
 	
 	private void findClasses(String prefix){
 		Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));

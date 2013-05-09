@@ -159,44 +159,52 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean resolve(int newTimeStamp,final ClassFinder cf){
-		try {
-			ClassReader cr=new ClassReader(insnNode.owner);
-			final MethodRep thisRep = this;
-			
+		try {			
 			final DepEffect analyzeResult = new DepEffect();
 			
-			log.info("Resolving {}",toString(new Types()));
+//			log.info("Resolving {}",toString(new Types()));
 			
 			if(isAbstract){
 				// do nothing
-				log.info("Meet Abstract {}",toString(new Types()));
+//				log.info("Meet Abstract {}",toString(new Types()));
 			}else if(isNative){
 				analyzeResult.getOtherEffects().add(new NativeEffect());
 			}else{
-				cr.accept(new ClassVisitor(Opcodes.ASM4){
-					@Override
-					public MethodVisitor visitMethod(int access, String name,
-							String desc, String signature, String[] exceptions) {
-						if(!insnNode.name.equals(name)||!insnNode.desc.equals(desc)){
-							return null;
-						}
-					
-						return new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
-							@Override
-							public void visitEnd() {
-								super.visitEnd();
-								methodNode = this;
-								Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(analyzeResult, thisRep,cf));
-								try {
-									/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
-								} catch (AnalyzerException e) {
-									throw new RuntimeException("Error when analyzing",e);
-								}
-								
+				if(methodNode == null){
+					final MethodRep thisRep = this;
+					ClassReader cr=new ClassReader(insnNode.owner);
+					cr.accept(new ClassVisitor(Opcodes.ASM4){
+						@Override
+						public MethodVisitor visitMethod(int access, String name,
+								String desc, String signature, String[] exceptions) {
+							if(!insnNode.name.equals(name)||!insnNode.desc.equals(desc)){
+								return null;
 							}
-						};
+						
+							return new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
+								@Override
+								public void visitEnd() {
+									super.visitEnd();
+									methodNode = this;
+									Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(analyzeResult, thisRep,cf));
+									try {
+										/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
+									} catch (AnalyzerException e) {
+										throw new RuntimeException("Error when analyzing",e);
+									}
+									
+								}
+							};
+						}
+					}, 0);
+				}else{
+					Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(analyzeResult, this,cf));
+					try {
+						/*Frame<DepValue> [] frames =*/ ana.analyze("dep", methodNode);
+					} catch (AnalyzerException e) {
+						throw new RuntimeException("Error when analyzing",e);
 					}
-				}, 0);
+				}
 			}
 			
 			staticEffects = new DepEffect();

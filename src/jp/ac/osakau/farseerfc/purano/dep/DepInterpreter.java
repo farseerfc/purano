@@ -452,7 +452,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				// arg[index] = value
 				for (int local : arrayref.getDeps().getLocals()) {
 					if (method.isArg(local)) {
-						log.info("Putting ArgumentEffect {} local {}", method, local);
+//						log.info("Putting ArgumentEffect {} local {}", method, local);
 						effect.getArgumentEffect().add(
 								new ArgumentEffect(local, value.getDeps()));
 					}
