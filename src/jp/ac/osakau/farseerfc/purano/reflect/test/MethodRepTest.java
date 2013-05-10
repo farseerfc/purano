@@ -3,6 +3,7 @@ package jp.ac.osakau.farseerfc.purano.reflect.test;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;

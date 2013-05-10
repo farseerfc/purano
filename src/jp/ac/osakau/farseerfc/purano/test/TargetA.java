@@ -5,6 +5,10 @@ public class TargetA extends TargetC implements TargetInterface{
 	private int c;
 	private int [] ma;
 	
+	public TargetA(int mc){
+		this.c = mc;
+	}
+	
 	public static int staticAdd(int a, int b){
 		return a+b;
 	}
@@ -72,5 +76,9 @@ public class TargetA extends TargetC implements TargetInterface{
 	public boolean equals(Object o){
 		c = 1;
 		return false;
+	}
+	
+	public static TargetA factory(int a){
+		return new TargetA(a);
 	}
 }

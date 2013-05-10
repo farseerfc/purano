@@ -608,17 +608,17 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    			
 	    			for(OtherFieldEffect ofe: callEffect.getOtherField().values()){
 	 					DepSet newDs = new DepSet();
-						for(int local:ofe.getDeps().getLocals()){
-							if(rep.isArg(local)){
-								newDs.merge(values.get(local).getDeps());
-							}
-						}
-						if(ofe.getDeps().getFields().size()>0){
-    						newDs.merge(otherObject.getDeps());
-    					}
-						for(FieldDep fd: ofe.getDeps().getStatics()){
-							newDs.getStatics().add(fd);
-						}
+//						for(int local:ofe.getDeps().getLocals()){
+//							if(rep.isArg(local)){
+//								newDs.merge(values.get(local).getDeps());
+//							}
+//						}
+//						if(ofe.getDeps().getFields().size()>0){
+//    						newDs.merge(otherObject.getDeps());
+//    					}
+//						for(FieldDep fd: ofe.getDeps().getStatics()){
+//							newDs.getStatics().add(fd);
+//						}
 	    				effect.addOtherField(new OtherFieldEffect(
 	    						ofe.getDesc(),ofe.getOwner() , ofe.getName(),
 	    						newDs, otherObject.getDeps()));

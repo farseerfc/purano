@@ -124,6 +124,11 @@
             <classpath refid="purano.classpath"/>
         </junit>
     </target>
+    <target name="TargetC">
+        <java classname="jp.ac.osakau.farseerfc.purano.test.TargetC" failonerror="true" fork="yes" output="/dev/tty">
+            <classpath refid="purano.classpath"/>
+        </java>
+    </target>
     <target name="junitreport">
         <junitreport todir="${junit.output.dir}">
             <fileset dir="${junit.output.dir}">

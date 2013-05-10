@@ -1,6 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,10 +24,10 @@ public class ClassFinder {
 	private static final Logger log= LoggerFactory.getLogger(ClassFinder.class);
 	
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
-	private final String prefix;
+	private final Collection<String> prefix;
 	private @Getter List<MethodRep> toResolve = new ArrayList<>(); 
 	
-	public ClassFinder(String prefix){
+	public ClassFinder(Collection<String> prefix){
 		this.prefix = prefix;
 		findClasses(prefix);
 		
@@ -46,6 +49,10 @@ public class ClassFinder {
 
 	}
 	
+	public ClassFinder(String string) {
+		this(Arrays.asList(string));
+	}
+
 	public void resolveMethods() {
 		int timestamp = 0;
 		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
@@ -53,7 +60,7 @@ public class ClassFinder {
 		int pass = 0;
 		do {
 			changed = false;
-			if(pass < 2){
+			if(pass < 1){
 				allCreps = new HashSet<>(classMap.values());
 			}
 			for (ClassRep crep : allCreps ) {
@@ -82,17 +89,19 @@ public class ClassFinder {
 //		return false;
 //	}
 	
-	private void findClasses(String prefix){
-		Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));
-        Set<String> allClasses = reflections.getStore().getSubTypesOf(Object.class.getName());
-        for(String cls : allClasses){
-			loadClass(cls);
-        }
+	private void findClasses(Collection<String> prefixes){
+		for(String prefix:prefixes){
+			Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));
+	        Set<String> allClasses = reflections.getStore().getSubTypesOf(Object.class.getName());
+	        for(String cls : allClasses){
+				loadClass(cls);
+	        }
+		}
 	}
 	
 	public ClassRep loadClass(String classname){
 		if(!classMap.containsKey(classname)){
-			log.info("Loading {}", classname);
+			log.info("\rLoading {}", classname);
 			if(classname.startsWith("[")){
 				classMap.put(classname, new ClassRep(ArrayStub.class.getName(),this));
 			}else{
@@ -156,12 +165,12 @@ public class ClassFinder {
 
 	public static void main(String [] argv){
 		long start=System.currentTimeMillis();
-		String targetPackage="jp.ac.osakau.farseerfc.purano";
+		String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
 		if(argv.length > 1){
-			targetPackage=argv[0];
+			targetPackage=argv;
 		}
 //		String targetPackage="java.lang";
-		ClassFinder cf = new ClassFinder(targetPackage);
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
 		cf.resolveMethods();
 //        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("staticAdd(II)I").resolve(0, cf);
 //        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("setC(I)V").resolve(1, cf);
@@ -176,7 +185,7 @@ public class ClassFinder {
 //		MethodRep mr = targetA.getMethodVirtual("getChars(II[CI)V");
 //		System.out.println(targetA.getSupers().get(1).getName());
 
-        Types table = new Types(false);
+        Types table = new Types(true, targetPackage[0]);
         
         System.out.println(Joiner.on("\n").join(cf.dump(table)));
         System.out.println(table.dumpImports());

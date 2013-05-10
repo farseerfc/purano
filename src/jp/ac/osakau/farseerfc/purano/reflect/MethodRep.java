@@ -2,7 +2,11 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
@@ -34,13 +38,14 @@ public class MethodRep extends MethodVisitor {
 	
 	private final @Getter MethodInsnNode insnNode;
 	//private final @Getter Method reflect;
-	private final @Getter List<MethodRep> overrides = new ArrayList<>();
-	private final @Getter List<MethodInsnNode> calls = new ArrayList<>();
+	private final @Getter Map<String, MethodRep> overrides = new HashMap<>();
+	private final @Getter Set<MethodInsnNode> calls = new HashSet<>();
 	
 	private final @Getter MethodDesc desc ;
 	private final @Getter boolean isStatic ;
 	private final @Getter boolean isNative;
 	private final @Getter boolean isAbstract;
+	private final @Getter boolean isInit;
 	
 	private @Getter int modifiedTimeStamp;
 	private @Getter int resolveTimeStamp;
@@ -49,6 +54,7 @@ public class MethodRep extends MethodVisitor {
 	private @Getter @Setter MethodNode methodNode;
 
 	private @Getter int access;
+
 	
 	public MethodRep(MethodInsnNode methodInsnNode, int access){
 		super(Opcodes.ASM4);
@@ -57,6 +63,7 @@ public class MethodRep extends MethodVisitor {
 		this.isStatic = (access & Opcodes.ACC_STATIC) > 0;
 		this.isNative = (access & Opcodes.ACC_NATIVE) > 0;
 		this.isAbstract = (access & Opcodes.ACC_ABSTRACT) > 0;
+		this.isInit = methodInsnNode.name.equals("<init>");
 		desc=new Types(false).method2full(methodInsnNode.desc);
 	}
 
@@ -109,7 +116,7 @@ public class MethodRep extends MethodVisitor {
 		if(dynamicEffects != null && getMethodNode() != null){
 			
 			result.add("    "+Escape.methodName(toString(table)));
-			for(MethodRep rep : overrides){
+			for(MethodRep rep : overrides.values()){
 				result.add(String.format("        @ %s", rep.toString(table)));
 			}
 			for(MethodInsnNode insn : calls){
@@ -212,7 +219,7 @@ public class MethodRep extends MethodVisitor {
 			
 			staticEffects = new DepEffect();
 			staticEffects.merge(analyzeResult);
-			for(MethodRep over:overrides){
+			for(MethodRep over:overrides.values()){
 				if(over.getDynamicEffects() != null){
 					analyzeResult.merge(over.getDynamicEffects());
 				}
@@ -236,7 +243,7 @@ public class MethodRep extends MethodVisitor {
 		if(modifiedTimeStamp == 0){
 			return true;
 		}
-		for(MethodRep rep:overrides){
+		for(MethodRep rep:overrides.values()){
 			if(rep.getModifiedTimeStamp() == 0){
 				return true;
 			}

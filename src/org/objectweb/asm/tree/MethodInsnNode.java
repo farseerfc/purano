@@ -31,6 +31,8 @@ package org.objectweb.asm.tree;
 
 import java.util.Map;
 
+import lombok.EqualsAndHashCode;
+
 import org.objectweb.asm.MethodVisitor;
 
 /**
@@ -39,6 +41,7 @@ import org.objectweb.asm.MethodVisitor;
  * 
  * @author Eric Bruneton
  */
+@EqualsAndHashCode(callSuper=false)
 public class MethodInsnNode extends AbstractInsnNode {
 
     /**

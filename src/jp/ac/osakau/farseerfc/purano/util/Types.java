@@ -45,6 +45,11 @@ public class Types {
 	public Types(boolean shorten){
 		this.shorten = shorten;
 	}
+	
+	public Types(boolean shorten, String pkg){
+		this.shorten = shorten;
+		this.packageName = pkg;
+	}
 
 	public String desc2full(String name) {
 		if (name.length() == 0) {

@@ -63,10 +63,10 @@ public class DepEffect {
 	
 	public void addOtherField(OtherFieldEffect ofe){
 		if(otherField.containsKey(ofe.getKey())){
-			DepSet ds = new DepSet();
-			ds.merge(otherField.get(ofe.getKey()).getDeps());
-			ds.merge(ofe.getDeps());
-			otherField.get(ofe.getKey()).setDeps(ds);
+//			DepSet ds = new DepSet();
+//			ds.merge(otherField.get(ofe.getKey()).getDeps());
+//			ds.merge(ofe.getDeps());
+//			otherField.get(ofe.getKey()).setDeps(ds);
 //			otherField.get(ofe.getKey()).getDeps().merge(ofe.getDeps());
 		}else{
 			otherField.put(ofe.getKey(), ofe);
@@ -114,12 +114,12 @@ public class DepEffect {
 		
 		
 		for(OtherFieldEffect effect: otherField.values()){
-			deps.add(String.format("%sOtherField %s %s#%s.%s: [%s]",prefix,
+			deps.add(String.format("%sOtherField %s %s#%s",prefix,
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
-					effect.getLeftValueDeps().dumpDeps(rep ,table),
-					effect.getName(), 
-					effect.getDeps().dumpDeps(rep ,table)));
+//					effect.getLeftValueDeps().dumpDeps(rep ,table),
+					effect.getName()));
+//					effect.getDeps().dumpDeps(rep ,table)));
 		}
 		
 		

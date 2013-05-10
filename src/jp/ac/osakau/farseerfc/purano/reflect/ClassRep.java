@@ -121,7 +121,7 @@ public class ClassRep extends ClassVisitor {
 	public void override(String id, MethodRep overrider) {
 		MethodRep overridded = methodMap.get(id);
 		if(overridded != null){
-			overridded.getOverrides().add(overrider);
+			overridded.getOverrides().put(overrider.getInsnNode().owner, overrider);
 		}
 		for(ClassRep s : supers){
 			s.override(overrider.getId(),overrider);
@@ -133,7 +133,7 @@ public class ClassRep extends ClassVisitor {
 			String superName, String[] interfaces) {
 		//super.visit(version, access, name, signature, superName, interfaces);
 		
-		log.info("Visiting class {} super {} interfaces {}",this.name,superName,Joiner.on(",").join(interfaces));
+//		log.info("Visiting class {} super {} interfaces {}",this.name,superName,Joiner.on(",").join(interfaces));
 		
 		if(!this.name.equals(Object.class.getName())){
 			this.supers.add(classFinder.loadClass(Types.binaryName2NormalName(superName)));
