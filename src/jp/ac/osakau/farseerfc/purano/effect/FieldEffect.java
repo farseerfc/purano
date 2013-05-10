@@ -16,4 +16,8 @@ public abstract class FieldEffect extends Effect {
 	private final @Getter String desc;
 	private final @Getter String owner;
 	private final @Getter String name;
+	
+	public String getKey(){
+		return desc+owner;//+name;
+	}
 }

@@ -4,7 +4,11 @@ import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import lombok.Data;
 
 public abstract @Data class Effect {
-	private final DepSet deps;
+	private DepSet deps;
+	
+	public Effect(DepSet deps){
+		this.deps = deps;
+	}
 	
 	@Override
 	public String toString(){

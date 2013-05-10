@@ -12,4 +12,11 @@ public class OtherFieldEffect extends FieldEffect {
 	}
 	
 	private final @Getter DepSet leftValueDeps;
+	
+	@Override
+	public String getKey(){
+		return getDesc()+getOwner();
+	}
+	
+	
 }
