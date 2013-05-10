@@ -530,6 +530,11 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     				.getMethodVirtual(new MethodRep(min, 0).getId());
     		
     		//log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
+    		if(rep == null){
+    			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
+    			effect.getCallEffects().add(ce);
+    			return new DepValue(Type.getReturnType(min.desc), deps);
+    		}
     		
    			if(rep.getDynamicEffects() == null){
 				classFinder.getToResolve().add(rep);

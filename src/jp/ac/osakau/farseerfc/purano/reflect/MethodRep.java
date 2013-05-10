@@ -8,6 +8,7 @@ import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.dep.DepValue;
 import jp.ac.osakau.farseerfc.purano.effect.NativeEffect;
+import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
@@ -105,26 +106,28 @@ public class MethodRep extends MethodVisitor {
 	
 	public List<String> dump(ClassFinder classFinder, Types table){
 		List<String> result = new ArrayList<>();
-		result.add("    "+toString(table));
-		for(MethodRep rep : overrides){
-			result.add(String.format("        @ %s", rep.toString(table)));
-		}
-		for(MethodInsnNode insn : calls){
-			//log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));
-			if(classFinder.getClassMap().containsKey(Types.binaryName2NormalName(insn.owner))){
-				MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).getMethodVirtual(MethodRep.getId(insn));
-				result.add(String.format("        > %s", mr.toString(table)));
-			}else{
-				result.add(String.format("        >   /   / %s",
-						table.dumpMethodDesc(insn.desc, 
-								String.format("%s#%s", 
-										table.fullClassName(insn.owner),
-										insn.name))));
+		if(dynamicEffects != null && getMethodNode() != null){
+			
+			result.add("    "+Escape.methodName(toString(table)));
+			for(MethodRep rep : overrides){
+				result.add(String.format("        @ %s", rep.toString(table)));
 			}
-		}
+			for(MethodInsnNode insn : calls){
+				//log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));
+				if(classFinder.getClassMap().containsKey(Types.binaryName2NormalName(insn.owner))){
+					MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).getMethodVirtual(MethodRep.getId(insn));
+					result.add(String.format("        > %s", mr.toString(table)));
+				}else{
+					result.add(String.format("        >   /   / %s",
+							table.dumpMethodDesc(insn.desc, 
+									String.format("%s#%s", 
+											table.fullClassName(insn.owner),
+											insn.name))));
+				}
+			}
 		
-		if(staticEffects != null && getMethodNode() != null){
-			result.add(staticEffects.dump(this, table,"            "));
+//		if(dynamicEffects != null && getMethodNode() != null){
+			result.add(Escape.effect(dynamicEffects.dump(this, table,"            ")));
 		}
 		return result;
 	}
@@ -248,7 +251,8 @@ public class MethodRep extends MethodVisitor {
 			
 			if(mrep == null){
 				log.error("Cannot find method {} in class {} opcode {} ",new MethodRep(insn,0).getId(),crep.getName(), insn.getOpcode());
-				throw new RuntimeException("Cannot find method");
+				Types.notFound("Cannot find method ", null);
+				return false;
 			}
 			
 			if(mrep.getModifiedTimeStamp() == 0){

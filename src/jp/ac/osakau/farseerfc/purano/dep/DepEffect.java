@@ -53,10 +53,18 @@ public class DepEffect {
 		List<String> deps= new ArrayList<>();
 
 		for(ArgumentEffect effect: argumentEffect){
-			deps.add(String.format("%sArgument %s:[%s]",prefix,
-					rep.getMethodNode().localVariables.get(effect.getArgPos()).name,
-					effect.getDeps().dumpDeps(rep, table)
-					));
+//			System.err.println("Dump "+rep.toString(table));
+			if(effect.getArgPos() < rep.getMethodNode().localVariables.size()){
+				deps.add(String.format("%sArgument %s:[%s]",prefix,
+						rep.getMethodNode().localVariables.get(effect.getArgPos()).name,
+						effect.getDeps().dumpDeps(rep, table)
+						));
+			}else{
+				deps.add(String.format("%sArgument #%d:[%s]",prefix,
+						effect.getArgPos(),
+						effect.getDeps().dumpDeps(rep, table)
+						));
+			}
 		}
 		
 		for(ThisFieldEffect effect: thisField){
@@ -69,9 +77,10 @@ public class DepEffect {
 		
 		
 		for(OtherFieldEffect effect: otherField){
-			deps.add(String.format("%sOtherField%s %s#%s: [%s]",prefix,
+			deps.add(String.format("%sOtherField %s %s#%s.%s: [%s]",prefix,
 					table.desc2full(effect.getDesc()),
 					table.fullClassName(effect.getOwner()),
+					effect.getLeftValueDeps().dumpDeps(rep ,table),
 					effect.getName(), 
 					effect.getDeps().dumpDeps(rep ,table)));
 		}
@@ -105,6 +114,41 @@ public class DepEffect {
 		return String.format("%sReturn: [%s]\n%s",prefix,
 				ret.dumpDeps(rep,table),
 				Joiner.on("\n").join(deps));
+	}
+
+	public boolean isSubset(DepEffect dec) {
+
+		for(ThisFieldEffect e:thisField){
+			if(! dec.getThisField().contains(e)){
+				return false;
+			}
+		}
+		
+		for(OtherFieldEffect e:otherField){
+			if(! dec.getOtherField().contains(e)){
+				return false;
+			}
+		}
+		
+		for(StaticFieldEffect e:staticField){
+			if(! dec.getStaticField().contains(e)){
+				return false;
+			}
+		}
+		
+		for(CallEffect e:callEffects){
+			if(! dec.getCallEffects().contains(e)){
+				return false;
+			}
+		}
+		
+		for(Effect e:otherEffects){
+			if(! dec.getOtherEffects().contains(e)){
+				return false;
+			}
+		}
+		
+		return true;
 	}
 
 

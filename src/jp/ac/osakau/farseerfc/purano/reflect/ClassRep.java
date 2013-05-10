@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 
@@ -52,7 +53,8 @@ public class ClassRep extends ClassVisitor {
 			new ClassReader(className).accept(this, 0);
 		} catch (IOException e) {
 //			e.printStackTrace();
-			throw new RuntimeException("Cannot load "+className ,e);
+//			throw new RuntimeException("Cannot load "+className ,e);
+			Types.notFound(className,e);
 		}
 		
 	}
@@ -88,7 +90,7 @@ public class ClassRep extends ClassVisitor {
 	
 	public List<String> dump(Types table){
 		List<String> result = new ArrayList<>();
-		result.add(table.fullClassName(name));
+		result.add(Escape.className( table.fullClassName(name)));
 		for(MethodRep m:methodMap.values()){
 			result.addAll(m.dump(classFinder, table));
 		}

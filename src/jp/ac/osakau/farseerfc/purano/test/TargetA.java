@@ -1,7 +1,7 @@
 package jp.ac.osakau.farseerfc.purano.test;
 
 
-public class TargetA implements TargetInterface{
+public class TargetA extends TargetC implements TargetInterface{
 	private int c;
 	private int [] ma;
 	
@@ -69,4 +69,8 @@ public class TargetA implements TargetInterface{
 		return 1;
 	}
 	
+	public boolean equals(Object o){
+		c = 1;
+		return false;
+	}
 }

@@ -48,12 +48,15 @@ public class ClassFinder {
 	
 	public void resolveMethods() {
 		int timestamp = 0;
-//		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
+		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
 		boolean changed = false;
 		int pass = 0;
 		do {
 			changed = false;
-			for (ClassRep crep : new HashSet<>(classMap.values()) ) {
+			if(pass < 1){
+				allCreps = new HashSet<>(classMap.values());
+			}
+			for (ClassRep crep : allCreps ) {
 				for (MethodRep mrep : crep.getAllMethods()) {
 					if (mrep.needResolve(this)) {
 						if (mrep.resolve(++timestamp, this)) {
@@ -62,7 +65,7 @@ public class ClassFinder {
 					}
 				}
 			}
-			System.out.println("Pass: " + ++pass);
+			System.out.println("Pass: " + ++pass + " classes: "+ allCreps.size());
 		} while (changed);
 	}
 	
@@ -153,7 +156,10 @@ public class ClassFinder {
 
 	public static void main(String [] argv){
 		long start=System.currentTimeMillis();
-		String targetPackage="jp.ac.osakau.farseerfc.purano.test";
+		String targetPackage="jp.ac.osakau.farseerfc.purano";
+		if(argv.length > 1){
+			targetPackage=argv[0];
+		}
 //		String targetPackage="java.lang";
 		ClassFinder cf = new ClassFinder(targetPackage);
 		cf.resolveMethods();

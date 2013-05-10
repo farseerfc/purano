@@ -112,6 +112,15 @@ public class ClassDepVisitor extends ClassVisitor{
 					"throws "+ Joiner.on(", ").join(exceptions));
 		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc), access);
 		return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
+			@Override public void visitLocalVariable(
+					String name, String desc, String signature, 
+					org.objectweb.asm.Label start, org.objectweb.asm.Label end, int index) {
+				super.visitLocalVariable(name, desc, signature, start, end, index);
+				printf("LocalVariable %s\n",name);
+				
+			};
+			
+			
 			@Override
 			public void visitEnd() {
 				super.visitEnd();
@@ -149,7 +158,7 @@ public class ClassDepVisitor extends ClassVisitor{
 	 */
 	public static void main(String[] args) throws IOException {
 		ClassDepVisitor tt = new ClassDepVisitor();
-		ClassReader cr = new ClassReader("java.lang.StringBuilder");//readAllBytes("target/TryTree.class"));
+		ClassReader cr = new ClassReader("java.lang.Class");//readAllBytes("target/TryTree.class"));
 		//TraceClassVisitor tcv = new TraceClassVisitor(tt,new Textifier(), new PrintWriter(System.err));
 		cr.accept(tt, 0);
 	}

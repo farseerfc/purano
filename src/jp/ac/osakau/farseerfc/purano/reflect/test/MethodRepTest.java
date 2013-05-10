@@ -4,13 +4,20 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
 
+import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
+import jp.ac.osakau.farseerfc.purano.dep.DepSet;
+import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassRep;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.test.TargetA;
+import jp.ac.osakau.farseerfc.purano.test.TargetC;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import org.junit.Test;
 import org.objectweb.asm.tree.MethodInsnNode;
+
+import com.google.common.base.Joiner;
 
 public class MethodRepTest {
 
@@ -87,5 +94,47 @@ public class MethodRepTest {
 		assertFalse(mr2.isArg(2));
 		
 	}
+	
+	@Test 
+	public void testMerge(){
+		ClassFinder cl = new ClassFinder("jp.ac.osakau.farseerfc.purano.reflect.test");
+		ClassRep ca = cl.loadClass(TargetA.class.getName());
+		ClassRep cc = cl.loadClass(TargetC.class.getName());
+		
+		MethodRep ma = ca.getMethodVirtual("equals(Ljava/lang/Object;)Z");
+		MethodRep mc = cc.getMethodVirtual("equals(Ljava/lang/Object;)Z");
+		ma.resolve(1, cl);
+		mc.resolve(2, cl);
+		ma.resolve(3, cl);
+		mc.resolve(4, cl);
+		
+		assertTrue(mc.getOverrides().get(0) == ma);
+		DepEffect dec = mc.getDynamicEffects();
+		DepEffect dea = ma.getDynamicEffects();
+		assertTrue(dea.isSubset(dec));
+		
+		System.out.println(dea.dump(ma, new Types(), ""));
+		System.out.println(dec.dump(mc, new Types(), ""));
+		
+		ThisFieldEffect tfe1 = new ThisFieldEffect("A", "B", "C", new DepSet());
+		ThisFieldEffect tfe2 = new ThisFieldEffect("A", "B", "C", new DepSet());
+		ThisFieldEffect tfe3 = new ThisFieldEffect("A", "B", "D", new DepSet());
+		assertEquals(tfe1, tfe2);
+		assertFalse(tfe1.equals(tfe3));
+			
+		System.out.println(Joiner.on("\n").join( ma.dump(cl, new Types())));
+		System.out.println(Joiner.on("\n").join( mc.dump(cl, new Types())));
+	}
+	
+	@Test
+	public void testLocalVariable(){
+		ClassFinder cl = new ClassFinder("jp.ac.osakau.farseerfc.purano.reflect.test");
+		ClassRep ca = cl.loadClass(Class.class.getName());
+		MethodRep ma = ca.getMethodVirtual("copyFields([Ljava/lang/reflect/Field;)[Ljava/lang/reflect/Field;");
+		ma.resolve(1, cl);
+		System.out.println(ma.getMethodNode().localVariables);
+	}
+
+	
 	
 }

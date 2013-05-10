@@ -239,4 +239,12 @@ public class Types {
 	    }
 	}
 	
+	
+	public static void notFound(String name,Exception e){
+		//throw new RuntimeException(name,e);
+		System.err.println(name);
+		if(e!=null){
+			e.printStackTrace(System.err);
+		}
+	}
 }
