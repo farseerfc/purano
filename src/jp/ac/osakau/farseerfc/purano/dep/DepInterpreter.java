@@ -6,6 +6,7 @@ import java.util.List;
 
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
 import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
+import jp.ac.osakau.farseerfc.purano.effect.Effect;
 import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
@@ -270,8 +271,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		case PUTSTATIC: {
 			FieldInsnNode fin = (FieldInsnNode) insn;
 			effect.addStaticField(
-					new StaticFieldEffect(fin.desc, fin.owner, fin.name, value
-							.getDeps()));
+					new StaticFieldEffect(fin.desc, fin.owner, fin.name, 
+							value.getDeps(),null));
 			return null;
 		}
         case GETFIELD:{
@@ -310,7 +311,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             return new DepValue(Type.INT_TYPE, value.getDeps());
         
         case ATHROW:{
-        	effect.getOtherEffects().add(new ThrowEffect(value.getDeps()));
+        	effect.getOtherEffects().add(new ThrowEffect(value.getDeps(), null));
             return null;
         }
         case CHECKCAST:{
@@ -402,11 +403,11 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			if (value1.isThis()) {
 				effect.addThisField(
 						new ThisFieldEffect(fin.desc, fin.owner, fin.name,
-								value2.getDeps()));
+								value2.getDeps(), null));
 			} else {
 				effect.addOtherField(
 						new OtherFieldEffect(fin.desc, fin.owner, fin.name,
-								value2.getDeps(), value1.getDeps()));
+								value2.getDeps(), value1.getDeps(), null));
 			}
         	return null;
         }
@@ -443,7 +444,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 							new ThisFieldEffect(
 									f.getDesc(),
 									f.getOwner(),
-									f.getName(), deps));
+									f.getName(), deps, null));
 				}
 
 			} else if (arrayref.getDeps().dependOnlyLocal(method)) {
@@ -453,8 +454,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				for (int local : arrayref.getDeps().getLocals()) {
 					if (method.isArg(local)) {
 //						log.info("Putting ArgumentEffect {} local {}", method, local);
-						effect.getArgumentEffect().add(
-								new ArgumentEffect(local, value.getDeps()));
+						effect.getArgumentEffects().add(
+								new ArgumentEffect(local, value.getDeps(), null));
 					}
 				}
 			} else {
@@ -465,7 +466,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				for (FieldDep f : arrayref.getDeps().getFields()) {
 					effect.addOtherField(
 							new OtherFieldEffect(f.getDesc(), f.getOwner(), f
-									.getName(), value.getDeps(), leftDeps));
+									.getName(), value.getDeps(), leftDeps, null));
 				}
 			}
 
@@ -521,7 +522,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	}
     	MethodInsnNode min = (MethodInsnNode) insn;
     	if(classFinder == null){
-			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
+			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
 			effect.getCallEffects().add(ce);
 			return new DepValue(Type.getReturnType(min.desc), deps);
     	}else{
@@ -531,7 +532,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		
     		//log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
     		if(rep == null){
-    			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps);
+    			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
     			effect.getCallEffects().add(ce);
     			return new DepValue(Type.getReturnType(min.desc), deps);
     		}
@@ -555,7 +556,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     			}
     		}else{
 	    		DepValue otherObject = values.get(0);
-	    		for(ArgumentEffect ae : callEffect.getArgumentEffect()){
+	    		for(ArgumentEffect ae : callEffect.getArgumentEffects()){
 	    			// ae.getArgPos  is method call is changing value of argument in position
 //	    			log.info("ArgumentEffect {} values [{}] rep {}",
 //	    					ae.getArgPos(),Joiner.on(",").join(values),rep);
@@ -575,7 +576,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    					for(FieldDep fd: ae.getDeps().getStatics()){
 	    						newDs.getStatics().add(fd);
 	    					}
-	    					effect.getArgumentEffect().add(new ArgumentEffect(localPos,newDs));
+	    					effect.getArgumentEffects().add(new ArgumentEffect(localPos,newDs, rep));
 	    				}
 	    			}
 	    		}
@@ -603,7 +604,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 						}
 	    				effect.addOtherField(new OtherFieldEffect(
 	    						tfe.getDesc(),tfe.getOwner() , tfe.getName(),
-	    						newDs, otherObject.getDeps()));
+	    						newDs, otherObject.getDeps(), rep));
 	    			}
 	    			
 	    			for(OtherFieldEffect ofe: callEffect.getOtherField().values()){
@@ -621,18 +622,22 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //						}
 	    				effect.addOtherField(new OtherFieldEffect(
 	    						ofe.getDesc(),ofe.getOwner() , ofe.getName(),
-	    						newDs, otherObject.getDeps()));
+	    						newDs, otherObject.getDeps(), rep));
 	    			}
 	    		}
     		}
     		
     		
 
-			for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
-				effect.addOtherField(ofe);
-			}
+//			for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
+//				effect.addOtherField(ofe);
+//			}
 			for(StaticFieldEffect sfe:callEffect.getStaticField().values()){
 				effect.addStaticField(sfe);
+			}
+			
+			for(Effect e :callEffect.getOtherEffects()){
+				effect.getOtherEffects().add(e.duplicate(rep));
 			}
 
     		return new DepValue(Type.getReturnType(min.desc), callEffect.getRet());

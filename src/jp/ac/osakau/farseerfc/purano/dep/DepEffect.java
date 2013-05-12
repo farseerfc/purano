@@ -14,12 +14,15 @@ import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 
 //@EqualsAndHashCode(callSuper=false)
 public class DepEffect {
@@ -27,26 +30,32 @@ public class DepEffect {
 	private final @Getter Map<String,ThisFieldEffect> thisField = new HashMap<>();
 	private final @Getter Map<String,OtherFieldEffect> otherField = new HashMap<>();
 	private final @Getter Map<String,StaticFieldEffect> staticField = new HashMap<>(); 
-	private final @Getter Set<ArgumentEffect> argumentEffect = new HashSet<>();
+	private final @Getter Set<ArgumentEffect> argumentEffects = new HashSet<>();
 	private final @Getter Set<CallEffect> callEffects = new HashSet<>();
 	private final @Getter Set<Effect> otherEffects = new HashSet<>();
 	
 
 
-	public void merge(DepEffect other){
+	public void merge(DepEffect other,MethodRep over){
 		ret.merge(other.ret);
 		for(ThisFieldEffect effect:other.getThisField().values()){
-			addThisField(effect);
+			addThisField((ThisFieldEffect)effect.duplicate(over));
 		}
 		for(OtherFieldEffect effect:other.getOtherField().values()){
-			addOtherField(effect);
+			addOtherField((OtherFieldEffect)effect.duplicate(over));
 		}
 		for(StaticFieldEffect effect:other.getStaticField().values()){
-			addStaticField(effect);
+			addStaticField((StaticFieldEffect)effect.duplicate(over));
 		}
-		argumentEffect.addAll(other.getArgumentEffect());
-		callEffects.addAll(other.getCallEffects());
-		otherEffects.addAll(other.getOtherEffects());
+		for(ArgumentEffect effect: other.getArgumentEffects()){
+			argumentEffects.add((ArgumentEffect)effect.duplicate(over));
+		}
+		for(CallEffect effect: other.getCallEffects()){
+			callEffects.add((CallEffect)effect.duplicate(over));
+		}
+		for(Effect effect: other.getOtherEffects()){
+			otherEffects.add((Effect)effect.duplicate(over));
+		}
 	}
 
 	public void addThisField(ThisFieldEffect tfe){
@@ -89,68 +98,38 @@ public class DepEffect {
 
 		List<String> deps= new ArrayList<>();
 
-		for(ArgumentEffect effect: argumentEffect){
-//			System.err.println("Dump "+rep.toString(table));
-			if(effect.getArgPos() < rep.getMethodNode().localVariables.size()){
-				deps.add(String.format("%sArgument %s:[%s]",prefix,
-						rep.getMethodNode().localVariables.get(effect.getArgPos()).name,
-						effect.getDeps().dumpDeps(rep, table)
-						));
-			}else{
-				deps.add(String.format("%sArgument #%d:[%s]",prefix,
-						effect.getArgPos(),
-						effect.getDeps().dumpDeps(rep, table)
-						));
-			}
+		deps.add(String.format("%s@%s[%s]",prefix,
+				Escape.annotation("Return"),
+				Escape.effect(ret.dumpDeps(rep,table))));
+		
+		for(ArgumentEffect effect: argumentEffects){
+			deps.add(effect.dump(rep, table, prefix));
 		}
 		
 		for(ThisFieldEffect effect: thisField.values()){
-			deps.add(String.format("%sThisField %s %s#this.%s: [%s]",prefix,
-					table.desc2full(effect.getDesc()),
-					table.fullClassName(effect.getOwner()),
-					effect.getName(), 
-					effect.getDeps().dumpDeps(rep,table)));
+			deps.add(effect.dump(rep, table, prefix));
 		}
 		
 		
 		for(OtherFieldEffect effect: otherField.values()){
-			deps.add(String.format("%sOtherField %s %s#%s",prefix,
-					table.desc2full(effect.getDesc()),
-					table.fullClassName(effect.getOwner()),
-//					effect.getLeftValueDeps().dumpDeps(rep ,table),
-					effect.getName()));
-//					effect.getDeps().dumpDeps(rep ,table)));
+			deps.add(effect.dump(rep, table, prefix));
 		}
 		
 		
 		for(StaticFieldEffect effect: staticField.values()){
-			deps.add(String.format("%sStatic %s %s#%s: [%s]",prefix,
-					table.desc2full(effect.getDesc()),
-					table.fullClassName(effect.getOwner()),
-					effect.getName(), 
-					effect.getDeps().dumpDeps(rep,table)));
+			deps.add(effect.dump(rep, table, prefix));
 		}
 		
 		for(CallEffect effect: callEffects){
-			deps.add(String.format("%s%sCALL %s: [%s]",prefix,
-					effect.getCallType(),
-					table.dumpMethodDesc(effect.getDesc(),
-							String.format("%s#%s",
-									table.fullClassName(effect.getOwner()), 
-									effect.getName())),
-									effect.getDeps().dumpDeps(rep ,table)));
+			deps.add(effect.dump(rep, table, prefix));
 		}
 		
 		
 		for(Effect effect: otherEffects){
-			deps.add(String.format("%s%s: [%s]",prefix,
-					table.fullClassName(effect.toString()) , 
-					effect.getDeps().dumpDeps(rep,table)));
+			deps.add(effect.dump(rep, table, prefix));
 		}
 		
-		return String.format("%sReturn: [%s]\n%s",prefix,
-				ret.dumpDeps(rep,table),
-				Joiner.on("\n").join(deps));
+		return Joiner.on("\n").join(deps);
 	}
 
 	public boolean isSubset(DepEffect dec) {
@@ -210,7 +189,7 @@ public class DepEffect {
 				&& other.staticField.keySet().containsAll(staticField.keySet())){
 			return false;
 		}
-		if(!argumentEffect.containsAll(other .argumentEffect)){
+		if(!argumentEffects.containsAll(other .argumentEffects)){
 			return false;
 		}
 		if(!otherEffects.containsAll(otherEffects)){
@@ -222,6 +201,6 @@ public class DepEffect {
 	
 	public int hashcode()
 	{
-		return Objects.hashCode(thisField.keySet(),otherField.keySet(),staticField.keySet(),argumentEffect,otherEffects);
+		return Objects.hashCode(thisField.keySet(),otherField.keySet(),staticField.keySet(),argumentEffects,otherEffects);
 	}
 }

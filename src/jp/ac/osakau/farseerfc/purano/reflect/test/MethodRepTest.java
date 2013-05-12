@@ -117,9 +117,9 @@ public class MethodRepTest {
 		System.out.println(dea.dump(ma, new Types(), ""));
 		System.out.println(dec.dump(mc, new Types(), ""));
 		
-		ThisFieldEffect tfe1 = new ThisFieldEffect("A", "B", "C", new DepSet());
-		ThisFieldEffect tfe2 = new ThisFieldEffect("A", "B", "C", new DepSet());
-		ThisFieldEffect tfe3 = new ThisFieldEffect("A", "B", "D", new DepSet());
+		ThisFieldEffect tfe1 = new ThisFieldEffect("A", "B", "C", new DepSet(), null);
+		ThisFieldEffect tfe2 = new ThisFieldEffect("A", "B", "C", new DepSet(), null);
+		ThisFieldEffect tfe3 = new ThisFieldEffect("A", "B", "D", new DepSet(), null);
 		assertEquals(tfe1, tfe2);
 		assertFalse(tfe1.equals(tfe3));
 			

@@ -82,6 +82,9 @@ public class MethodRep extends MethodVisitor {
 	
 	@Override
 	public boolean equals(Object other){
+		if(other == null){
+			return false;
+		}
 		if(other instanceof MethodRep){
 			return this.equals(other);
 		}
@@ -134,7 +137,7 @@ public class MethodRep extends MethodVisitor {
 			}
 		
 //		if(dynamicEffects != null && getMethodNode() != null){
-			result.add(Escape.effect(dynamicEffects.dump(this, table,"            ")));
+			result.add(dynamicEffects.dump(this, table,"            "));
 		}
 		return result;
 	}
@@ -178,7 +181,7 @@ public class MethodRep extends MethodVisitor {
 				// do nothing
 //				log.info("Meet Abstract {}",toString(new Types()));
 			}else if(isNative){
-				analyzeResult.getOtherEffects().add(new NativeEffect());
+				analyzeResult.getOtherEffects().add(new NativeEffect(null));
 			}else{
 				if(methodNode == null){
 					final MethodRep thisRep = this;
@@ -218,10 +221,10 @@ public class MethodRep extends MethodVisitor {
 			}
 			
 			staticEffects = new DepEffect();
-			staticEffects.merge(analyzeResult);
+			staticEffects.merge(analyzeResult, null);
 			for(MethodRep over:overrides.values()){
 				if(over.getDynamicEffects() != null){
-					analyzeResult.merge(over.getDynamicEffects());
+					analyzeResult.merge(over.getDynamicEffects(),over);
 				}
 			}
 			

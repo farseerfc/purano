@@ -23,4 +23,18 @@ public class Escape {
 		}
 		return "\033[1;33m" + str + "\033[m";
 	}
+	
+	public static String from(String str){
+		if (!use) {
+			return str;
+		}
+		return "\033[1;35m" + str + "\033[m";
+	}
+	
+	public static String annotation(String str){
+		if (!use) {
+			return str;
+		}
+		return "\033[1;36m" + str + "\033[m";
+	}
 }
