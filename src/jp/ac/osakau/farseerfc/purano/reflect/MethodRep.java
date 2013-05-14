@@ -126,7 +126,9 @@ public class MethodRep extends MethodVisitor {
 				//log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));
 				if(classFinder.getClassMap().containsKey(Types.binaryName2NormalName(insn.owner))){
 					MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).getMethodVirtual(MethodRep.getId(insn));
-					result.add(String.format("        > %s", mr.toString(table)));
+					if(mr != null){
+						result.add(String.format("        > %s", mr.toString(table)));
+					}
 				}else{
 					result.add(String.format("        >   /   / %s",
 							table.dumpMethodDesc(insn.desc, 

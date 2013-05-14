@@ -311,7 +311,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             return new DepValue(Type.INT_TYPE, value.getDeps());
         
         case ATHROW:{
-        	effect.getOtherEffects().add(new ThrowEffect(value.getDeps(), null));
+        	// effect.getOtherEffects().add(new ThrowEffect(value.getDeps(), null));
             return null;
         }
         case CHECKCAST:{
@@ -388,7 +388,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case DREM:
         	return new DepValue(Type.DOUBLE_TYPE, deps);
         case AALOAD:
-        	return new DepValue(Type.getObjectType("java/lang/Object"), deps);
+//        	if(value1.getType().getInternalName().startsWith("[")){
+//        		return new DepValue(Type.getObjectType(value1.getType().getInternalName().substring(1)), deps);
+//        	}else{
+//        		throw new RuntimeException("AALOAD encounter non-array value! "+value1.getType().getInternalName());
+//        	}
+        	return new DepValue(Type.getObjectType("java/lang/Object;"),deps);
         case IF_ICMPEQ:
         case IF_ICMPNE:
         case IF_ICMPLT:
@@ -527,32 +532,39 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			return new DepValue(Type.getReturnType(min.desc), deps);
     	}else{
     		DepEffect callEffect = null;
-    		MethodRep rep = classFinder.loadClass(Types.binaryName2NormalName(min.owner))
+    		
+    		MethodRep rep =  classFinder.loadClass(Types.binaryName2NormalName(min.owner))
     				.getMethodVirtual(new MethodRep(min, 0).getId());
     		
-    		//log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
+//    		log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
     		if(rep == null){
     			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
     			effect.getCallEffects().add(ce);
     			return new DepValue(Type.getReturnType(min.desc), deps);
     		}
     		
-   			if(rep.getDynamicEffects() == null){
-				classFinder.getToResolve().add(rep);
-			}else{
-				callEffect = rep.getDynamicEffects();
+   			if(rep.getDynamicEffects() != null){
+				if(insn.getOpcode() == INVOKESPECIAL ||insn.getOpcode() == INVOKEDYNAMIC){
+					callEffect = rep.getStaticEffects();
+				}else{
+					callEffect = rep.getDynamicEffects();
+				}
 			}
 
     		if(callEffect == null){
     			return new DepValue(Type.getReturnType(min.desc), deps);
     		}
     		
-    		if(rep.isStatic() || rep.isNative()){
+    		if(rep.isInit()){
+    			for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
+    				effect.addOtherField((OtherFieldEffect)ofe.duplicate(rep));
+    			}
+    		}else if(rep.isStatic() || rep.isNative() || values.size()==0 || values.get(0)== null){
     			for(ThisFieldEffect tfe:callEffect.getThisField().values()){
-    				effect.addThisField(tfe);
+    				effect.addThisField((ThisFieldEffect)tfe.duplicate(rep));
     			}
     			for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
-    				effect.addOtherField(ofe);
+    				effect.addOtherField((OtherFieldEffect)ofe.duplicate(rep));
     			}
     		}else{
 	    		DepValue otherObject = values.get(0);
@@ -583,10 +595,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    		
 	    		if(otherObject.isThis()){
 	    			for(ThisFieldEffect tfe:callEffect.getThisField().values()){
-	    				effect.addThisField(tfe);
+	    				effect.addThisField((ThisFieldEffect)tfe.duplicate(rep));
 	    			}
 	    			for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
-	    				effect.addOtherField(ofe);
+	    				effect.addOtherField((OtherFieldEffect)ofe.duplicate(rep));
 	    			}
 	    		}else{
 	    			for(ThisFieldEffect tfe : callEffect.getThisField().values()){
@@ -633,7 +645,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //				effect.addOtherField(ofe);
 //			}
 			for(StaticFieldEffect sfe:callEffect.getStaticField().values()){
-				effect.addStaticField(sfe);
+				effect.addStaticField((StaticFieldEffect)sfe.duplicate(rep));
 			}
 			
 			for(Effect e :callEffect.getOtherEffects()){
@@ -656,7 +668,13 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	deps.merge(v.getDeps());
     	deps.merge(w.getDeps());
         if (!v.equals(w)) {
-            return new DepValue(null, deps);
+        	if(v.getType() == null){
+        		return new DepValue(w.getType(),deps);
+        	}else if(w.getType() == null){
+        		return new DepValue(v.getType(),deps);
+        	}else{
+        		return new DepValue(Types.covariant(v.getType(),w.getType()), deps);
+        	}
         }
         return new DepValue(v.getType(),deps);
     }

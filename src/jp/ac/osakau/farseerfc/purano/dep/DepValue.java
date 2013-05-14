@@ -31,8 +31,10 @@ public class DepValue implements Value {
     }
     
     public boolean isThis(){
-    	return type.getSort() == Type.OBJECT && deps.getFields().size()==0
-    			&& deps.getStatics().size()==0 && deps.getLocals().size()==1 &&
+    	return type.getSort() == Type.OBJECT && 
+    			deps.getFields().size()==0 && 
+    			deps.getStatics().size()==0 && 
+    			deps.getLocals().size()==1 &&
     			deps.getLocals().contains(0);
     }
 

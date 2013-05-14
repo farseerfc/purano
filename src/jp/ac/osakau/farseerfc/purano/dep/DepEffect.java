@@ -98,7 +98,7 @@ public class DepEffect {
 
 		List<String> deps= new ArrayList<>();
 
-		deps.add(String.format("%s@%s[%s]",prefix,
+		deps.add(String.format("%s@%s(%s)",prefix,
 				Escape.annotation("Return"),
 				Escape.effect(ret.dumpDeps(rep,table))));
 		

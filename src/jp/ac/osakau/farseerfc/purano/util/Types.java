@@ -252,4 +252,46 @@ public class Types {
 			e.printStackTrace(System.err);
 		}
 	}
+
+	public static Type covariant(Type t1, Type t2) {
+		if(t1 == null){
+			return t2;
+		}
+		if(t2 == null){
+			return t1;
+		}
+		if(t1.equals(t2)){
+			return t1;
+		}
+		if(t1.getSort() == Type.OBJECT || t2.getSort() == Type.OBJECT){
+			return Type.getObjectType("java/lang/Object;");
+		}
+		if(t1.getSort() == Type.ARRAY || t2.getSort() == Type.ARRAY){
+			return Type.getObjectType("Ljava/lang/Object;");
+		}
+		
+		if(t1.equals(Type.DOUBLE_TYPE) || t2.equals(Type.DOUBLE_TYPE)){
+			return Type.DOUBLE_TYPE;
+		}
+		if(t1.equals(Type.FLOAT_TYPE) || t2.equals(Type.FLOAT_TYPE)){
+			return Type.FLOAT_TYPE;
+		}
+		if(t1.equals(Type.INT_TYPE) || t2.equals(Type.INT_TYPE)){
+			return Type.INT_TYPE;
+		}
+		if(t1.equals(Type.SHORT_TYPE) || t2.equals(Type.SHORT_TYPE)){
+			return Type.SHORT_TYPE;
+		}
+		if(t1.equals(Type.BYTE_TYPE) || t2.equals(Type.BYTE_TYPE)){
+			return Type.BYTE_TYPE;
+		}
+		if(t1.equals(Type.CHAR_TYPE) || t2.equals(Type.CHAR_TYPE)){
+			return Type.CHAR_TYPE;
+		}
+		if(t1.equals(Type.BOOLEAN_TYPE) || t2.equals(Type.BOOLEAN_TYPE)){
+			return Type.BOOLEAN_TYPE;
+		}
+		throw new RuntimeException(String.format("Unknown covariants %s %s",t1.toString(),t2.toString()));
+		//return null;
+	}
 }
