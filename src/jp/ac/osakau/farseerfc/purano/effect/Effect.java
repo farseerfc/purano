@@ -47,5 +47,9 @@ public abstract class Effect implements Cloneable{
 				fromStr);
 	}
 	
+	public String dumpDot(){
+		return "";
+	}
+	
 	protected abstract String dumpEffect(MethodRep rep, Types table);
 }

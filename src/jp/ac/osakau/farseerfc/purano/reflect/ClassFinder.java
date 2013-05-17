@@ -101,7 +101,7 @@ public class ClassFinder {
 	
 	public ClassRep loadClass(String classname){
 		if(!classMap.containsKey(classname)){
-			log.info("\rLoading {}", classname);
+			log.info("Loading {}", classname);
 			if(classname.startsWith("[")){
 				classMap.put(classname, new ClassRep(ArrayStub.class.getName(),this));
 			}else{
@@ -165,7 +165,7 @@ public class ClassFinder {
 
 	public static void main(String [] argv){
 		long start=System.currentTimeMillis();
-		String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
+		String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}

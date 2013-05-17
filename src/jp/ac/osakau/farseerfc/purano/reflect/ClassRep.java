@@ -121,6 +121,7 @@ public class ClassRep extends ClassVisitor {
 	public void override(String id, MethodRep overrider) {
 		MethodRep overridded = methodMap.get(id);
 		if(overridded != null){
+//			log.info("{} {} override {}",id ,overrider.getInsnNode().owner, name);
 			overridded.getOverrides().put(overrider.getInsnNode().owner, overrider);
 		}
 		for(ClassRep s : supers){

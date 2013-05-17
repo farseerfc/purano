@@ -4,6 +4,8 @@ import javassist.bytecode.AccessFlag;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.FieldInfo;
 import javassist.bytecode.MethodInfo;
+import jp.ac.osakau.farseerfc.purano.ano.CheckDependency;
+import jp.ac.osakau.farseerfc.purano.ano.Return;
 
 public class TargetC {
 	private int member;
@@ -31,6 +33,8 @@ public class TargetC {
 				AccessFlag.isPublic(accessFlags.intValue())));
 	}
 
+	@CheckDependency()
+	@Return(depends={})
 	public static void main(String [] args) throws InterruptedException{
 		Integer i = null;
 		System.out.println(i.intValue());
