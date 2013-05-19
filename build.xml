@@ -137,4 +137,13 @@
             <report format="frames" todir="${junit.output.dir}"/>
         </junitreport>
     </target>
+<target name="delombok">
+    <taskdef classname="lombok.delombok.ant.DelombokTask"  name="delombok">
+            <classpath refid="purano.classpath"/>
+    </taskdef>
+	<mkdir dir="build/src-delomboked" />
+    <delombok verbose="true" encoding="UTF-8" to="build/src-delomboked" from="src" >
+            <classpath refid="purano.classpath"/>
+    </delombok>
+</target>
 </project>
