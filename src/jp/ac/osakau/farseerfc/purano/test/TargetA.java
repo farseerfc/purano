@@ -1,6 +1,8 @@
 package jp.ac.osakau.farseerfc.purano.test;
 
 
+import org.jetbrains.annotations.NotNull;
+
 public class TargetA extends TargetC implements TargetInterface{
 	private int c;
 	private int [] ma;
@@ -78,7 +80,8 @@ public class TargetA extends TargetC implements TargetInterface{
 		return false;
 	}
 	
-	public static TargetA factory(int a){
+	@NotNull
+    public static TargetA factory(int a){
 		return new TargetA(a);
 	}
 }

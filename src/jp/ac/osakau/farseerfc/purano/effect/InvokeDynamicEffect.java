@@ -4,6 +4,7 @@ import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper=true)
 public class InvokeDynamicEffect extends Effect implements Cloneable{
@@ -15,12 +16,14 @@ public class InvokeDynamicEffect extends Effect implements Cloneable{
 		super(new DepSet(), from);
 	}
 	
-	@Override
+	@NotNull
+    @Override
 	public Effect clone() {
 		return new InvokeDynamicEffect(getDeps(),getFrom());
 	}
 
-	@Override
+	@NotNull
+    @Override
 	protected String dumpEffect(MethodRep rep, Types table) {
 		return "";
 	}

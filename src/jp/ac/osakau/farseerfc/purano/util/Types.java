@@ -1,28 +1,21 @@
 package jp.ac.osakau.farseerfc.purano.util;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import jp.ac.osakau.farseerfc.purano.reflect.ArrayStub;
-
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import jp.ac.osakau.farseerfc.purano.reflect.ArrayStub;
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.util.*;
 
 public class Types {
 	private final Map<String, String> fullClassNames = new HashMap<>();
-	private String packageName = null;
+	@org.jetbrains.annotations.Nullable
+    private String packageName = null;
 	private static final Map<Character, String> desc2type = new HashMap<>();
 	private final boolean shorten;
 
@@ -51,7 +44,8 @@ public class Types {
 		this.packageName = pkg;
 	}
 
-	public String desc2full(String name) {
+	@org.jetbrains.annotations.Nullable
+    public String desc2full(@NotNull String name) {
 		if (name.length() == 0) {
 			return null; // special mark to indicate that name is at end
 		}
@@ -69,7 +63,7 @@ public class Types {
 				"Bad type name: \"%s\"", name));
 	}
 
-	private LinkedList<String> nextDesc(String desc) {
+	private LinkedList<String> nextDesc(@NotNull String desc) {
 		if (desc.length() == 0) {
 			return new LinkedList<String>();
 		}
@@ -95,7 +89,8 @@ public class Types {
 				"Bad desc name: \"%s\"", desc));
 	}
 
-	public MethodDesc method2full(String desc) {
+	@org.jetbrains.annotations.Nullable
+    public MethodDesc method2full(@NotNull String desc) {
 		if (desc.length() < 2) {
 			throw new IllegalArgumentException(String.format(
 					"Bad method desc: \"%s\"", desc));
@@ -118,13 +113,13 @@ public class Types {
 		return new MethodDesc(desc2full(retDesc),args);
 	}
 	
-	public String dumpMethodDesc(String desc, String methodName){
+	public String dumpMethodDesc(@NotNull String desc, String methodName){
 		MethodDesc methodDesc = method2full(desc);
 		return String.format("%s %s (%s)", methodDesc.getReturnType(),methodName,
 				Joiner.on(", ").join(methodDesc.getArguments()));
 	}
 
-	public String fullClassName(String binaryName) {
+	public String fullClassName(@NotNull String binaryName) {
 		String name = Types.binaryName2NormalName(binaryName);
 		if(name.startsWith("[")){
 			name = ArrayStub.class.getName();
@@ -156,13 +151,15 @@ public class Types {
 		}
 	}
 
-	private Collection<String> getImports() {
+	@NotNull
+    private Collection<String> getImports() {
 		List<String> result = new ArrayList<>(fullClassNames.values());
 		Collections.sort(result);
 		return result;
 	}
 
-	public String dumpImports() {
+	@NotNull
+    public String dumpImports() {
 		if(!shorten){
 			return "";
 		}
@@ -178,11 +175,11 @@ public class Types {
 	}
 	
 	
-	public static String binaryName2NormalName(String binaryName){
+	public static String binaryName2NormalName(@NotNull String binaryName){
 		return binaryName.replace('/', '.');
 	}
 	
-	public static String normalName2BinaryName(String normalName){
+	public static String normalName2BinaryName(@NotNull String normalName){
 		return normalName.replace('.', '/');
 	}
 
@@ -193,7 +190,7 @@ public class Types {
 				int v = 0;
 				try {
 					v = f.getInt(f);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
+				} catch (@NotNull IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				}
 				if((access & v) !=0){
@@ -218,9 +215,10 @@ public class Types {
 	    primitiveClasses.put("boolean", boolean.class);
 	}
 
-	public static final Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
+	@org.jetbrains.annotations.Nullable
+    public static final Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
 		@Nullable @Override
-		public Class<? extends Object> apply(Type t){
+		public Class<? extends Object> apply(@NotNull Type t){
 			String name = t.getClassName();
 			if(name.endsWith("[]")){
 				name = Types.binaryName2NormalName(t.getInternalName());
@@ -245,7 +243,7 @@ public class Types {
 	}
 	
 	
-	public static void notFound(String name,Exception e){
+	public static void notFound(String name, @org.jetbrains.annotations.Nullable Exception e){
 		//throw new RuntimeException(name,e);
 		System.err.println(name);
 		if(e!=null){
@@ -253,7 +251,8 @@ public class Types {
 		}
 	}
 
-	public static Type covariant(Type t1, Type t2) {
+	@org.jetbrains.annotations.Nullable
+    public static Type covariant(@org.jetbrains.annotations.Nullable Type t1, @org.jetbrains.annotations.Nullable Type t2) {
 		if(t1 == null){
 			return t2;
 		}

@@ -4,6 +4,7 @@ import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper=true)
 public class StaticFieldEffect extends FieldEffect implements Cloneable{
@@ -11,13 +12,14 @@ public class StaticFieldEffect extends FieldEffect implements Cloneable{
 		super(desc,owner,name,deps, from);
 	}
 	
-	@Override
+	@NotNull
+    @Override
 	public Effect clone(){
 		return new StaticFieldEffect(getDesc(), getOwner(), getName(), getDeps(), getFrom());
 	}
 
 	@Override
-	protected String dumpEffect(MethodRep rep, Types table) {
+	protected String dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
 		return String.format("%s %s#%s: [%s]",
 				table.desc2full(getDesc()),
 				table.fullClassName(getOwner()),

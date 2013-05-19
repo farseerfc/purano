@@ -1,19 +1,11 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
-
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -22,9 +14,9 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.*;
 
 public class ClassRep extends ClassVisitor {
 	private static final Logger log = LoggerFactory.getLogger(ClassRep.class);
@@ -72,7 +64,8 @@ public class ClassRep extends ClassVisitor {
 		return s;
 	}
 	
-	public Collection<MethodRep> getAllMethods(){
+	@NotNull
+    public Collection<MethodRep> getAllMethods(){
 		return methodMap.values();
 	}
 	
@@ -88,7 +81,8 @@ public class ClassRep extends ClassVisitor {
 //		new ClassReader(this.name).accept(this, 0);
 //	}
 	
-	public List<String> dump(Types table){
+	@NotNull
+    public List<String> dump(@NotNull Types table){
 		List<String> result = new ArrayList<>();
 		result.add(Escape.className( table.fullClassName(name)));
 		for(MethodRep m:methodMap.values()){
@@ -97,7 +91,8 @@ public class ClassRep extends ClassVisitor {
 		return result;
 	}
 	
-	@Override
+	@org.jetbrains.annotations.Nullable
+    @Override
 	public MethodVisitor visitMethod(int access, String name, String desc,
 			String signature, String[] exceptions) {
 //		if(name.equals("<init>")){
@@ -118,7 +113,7 @@ public class ClassRep extends ClassVisitor {
 		return rep;
 	}
 	
-	public void override(String id, MethodRep overrider) {
+	public void override(String id, @NotNull MethodRep overrider) {
 		MethodRep overridded = methodMap.get(id);
 		if(overridded != null){
 //			log.info("{} {} override {}",id ,overrider.getInsnNode().owner, name);
@@ -136,7 +131,7 @@ public class ClassRep extends ClassVisitor {
 		
 //		log.info("Visiting class {} super {} interfaces {}",this.name,superName,Joiner.on(",").join(interfaces));
 		
-		if(!this.name.equals(Object.class.getName())){
+		if(!this.name.equals(Object.class.getName()) && superName != null){
 			this.supers.add(classFinder.loadClass(Types.binaryName2NormalName(superName)));
 		}
 		

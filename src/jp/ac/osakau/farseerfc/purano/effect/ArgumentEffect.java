@@ -5,6 +5,7 @@ import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper=true)
 public class ArgumentEffect extends Effect implements Cloneable {
@@ -16,13 +17,14 @@ public class ArgumentEffect extends Effect implements Cloneable {
 		this.argPos = argPos;
 	}
 	
-	@Override 
+	@NotNull
+    @Override
 	public Effect clone() {
 		return new ArgumentEffect(argPos, getDeps(), getFrom());
 	}
 
 	@Override
-	public String dumpEffect(MethodRep rep, Types table) {
+	public String dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
 		if(getArgPos() < rep.getMethodNode().localVariables.size()){
 			return String.format("%s:[%s]",
 					rep.getMethodNode().localVariables.get(getArgPos()).name,

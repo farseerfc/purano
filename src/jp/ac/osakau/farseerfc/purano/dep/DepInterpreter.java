@@ -1,39 +1,24 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
-import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
-import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
-import jp.ac.osakau.farseerfc.purano.effect.Effect;
-import jp.ac.osakau.farseerfc.purano.effect.InvokeDynamicEffect;
-import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
-import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
-import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
-import jp.ac.osakau.farseerfc.purano.effect.ThrowEffect;
+import com.google.common.base.Joiner;
+import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
-import org.objectweb.asm.tree.InvokeDynamicInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MultiANewArrayInsnNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Interpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	
@@ -42,7 +27,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	private final DepEffect effect;
 	private final MethodRep method;
 
-	private final ClassFinder classFinder;
+	@Nullable
+    private final ClassFinder classFinder;
 
 
 	public DepInterpreter(DepEffect effect, MethodRep method) {
@@ -67,7 +53,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				try {
 					
 					v = f.getInt(f);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
+				} catch (@NotNull IllegalArgumentException | IllegalAccessException e) {
 					//e.printStackTrace();
 				}
 				if(opcode == v){
@@ -78,8 +64,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		return Joiner.on(" ").join(result);
     }
 
+    @Nullable
     @Override
-    public DepValue newValue(final Type type) {
+    public DepValue newValue(@Nullable final Type type) {
         if (type == null) {
             return new DepValue(null);
         }
@@ -107,8 +94,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
-	@Override
-	public DepValue newOperation(final AbstractInsnNode insn)
+	@Nullable
+    @Override
+	public DepValue newOperation(@NotNull final AbstractInsnNode insn)
 			throws AnalyzerException {
 		switch (insn.getOpcode()) {
 		case ACONST_NULL:
@@ -184,9 +172,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		}
 	}
 
+    @NotNull
     @Override
-    public DepValue copyOperation(final AbstractInsnNode insn,
-            final DepValue value) throws AnalyzerException {
+    public DepValue copyOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final DepValue value) throws AnalyzerException {
     	DepSet deps = value.getDeps();
     	
         switch (insn.getOpcode()){
@@ -224,9 +213,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
+    @Nullable
     @Override
-    public DepValue unaryOperation(final AbstractInsnNode insn,
-            final DepValue value) throws AnalyzerException {
+    public DepValue unaryOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final DepValue value) throws AnalyzerException {
         switch (insn.getOpcode()) {
         case INEG:
         case IINC:
@@ -333,9 +323,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
+    @Nullable
     @Override
-    public DepValue binaryOperation(final AbstractInsnNode insn,
-            final DepValue value1, final DepValue value2)
+    public DepValue binaryOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final DepValue value1, @NotNull final DepValue value2)
             throws AnalyzerException {
     	DepSet deps = new DepSet(value1.getDeps());
     	deps.merge(value2.getDeps());
@@ -424,9 +415,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
-	@Override
-	public DepValue ternaryOperation(final AbstractInsnNode insn,
-			final DepValue arrayref, final DepValue index, final DepValue value)
+	@Nullable
+    @Override
+	public DepValue ternaryOperation(@NotNull final AbstractInsnNode insn,
+			@NotNull final DepValue arrayref, @NotNull final DepValue index, @NotNull final DepValue value)
 			throws AnalyzerException {
 		// DepSet deps = new DepSet(value1.getDeps());
 		// deps.merge(value2.getDeps());
@@ -496,16 +488,18 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	}
 
 
-	private DepValue addCallEffect(DepSet deps, String callType,
-			MethodInsnNode min) {
+	@NotNull
+    private DepValue addCallEffect(DepSet deps, String callType,
+			@NotNull MethodInsnNode min) {
 		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
 		effect.getCallEffects().add(ce);
 		return new DepValue(Type.getReturnType(min.desc), deps);
 	}
 	
+    @NotNull
     @Override
-    public DepValue naryOperation(final AbstractInsnNode insn,
-            final List<? extends DepValue> values) throws AnalyzerException {
+    public DepValue naryOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final List<? extends DepValue> values) throws AnalyzerException {
     	DepSet deps = new DepSet();
     	for(DepValue value :values){
     		deps.merge(value.getDeps());
@@ -669,8 +663,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             throws AnalyzerException {
     }
 
+    @NotNull
     @Override
-    public DepValue merge(final DepValue v, final DepValue w) {
+    public DepValue merge(@NotNull final DepValue v, @NotNull final DepValue w) {
     	DepSet deps = new DepSet();
     	deps.merge(v.getDeps());
     	deps.merge(w.getDeps());

@@ -1,7 +1,8 @@
 package jp.ac.osakau.farseerfc.purano.visitor;
 
 import jp.ac.osakau.farseerfc.purano.util.Types;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -30,8 +31,8 @@ public class MethodDump extends MethodVisitor {
 	}
 	
 	@Override
-	public void visitLocalVariable(String name, String desc,
-			String signature, Label start, Label end, int index){
+	public void visitLocalVariable(String name, @NotNull String desc,
+			@Nullable String signature, Label start, Label end, int index){
 		sb.append(String.format("        %s %s%s;\n",
 				typeNameTable.desc2full(desc),
 				name,

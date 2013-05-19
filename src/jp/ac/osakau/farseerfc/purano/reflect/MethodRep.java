@@ -1,13 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Objects;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.dep.DepValue;
@@ -17,8 +10,8 @@ import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.java.Log;
-
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -30,18 +23,21 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Objects;
+import java.io.IOException;
+import java.util.*;
 
 
 public class MethodRep extends MethodVisitor {
 	private static final Logger log = LoggerFactory.getLogger(MethodRep.class);
 	
-	private final @Getter MethodInsnNode insnNode;
+	@NotNull
+    private final @Getter MethodInsnNode insnNode;
 	//private final @Getter Method reflect;
 	private final @Getter Map<String, MethodRep> overrides = new HashMap<>();
 	private final @Getter Set<MethodInsnNode> calls = new HashSet<>();
 	
-	private final @Getter MethodDesc desc ;
+	@Nullable
+    private final @Getter MethodDesc desc ;
 	private final @Getter boolean isStatic ;
 	private final @Getter boolean isNative;
 	private final @Getter boolean isAbstract;
@@ -56,7 +52,7 @@ public class MethodRep extends MethodVisitor {
 	private @Getter int access;
 
 	
-	public MethodRep(MethodInsnNode methodInsnNode, int access){
+	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access){
 		super(Opcodes.ASM4);
 		this.insnNode = methodInsnNode;
 		this.access = access;
@@ -67,11 +63,13 @@ public class MethodRep extends MethodVisitor {
 		desc=new Types(false).method2full(methodInsnNode.desc);
 	}
 
-	public String getId(){
+	@NotNull
+    public String getId(){
 		return getId(insnNode);
 	}
 	
-	public static String getId(MethodInsnNode insnNode){
+	@NotNull
+    public static String getId(@NotNull MethodInsnNode insnNode){
 		return insnNode.name+insnNode.desc;
 	}
 	
@@ -81,7 +79,7 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	@Override
-	public boolean equals(Object other){
+	public boolean equals(@Nullable Object other){
 		if(other == null){
 			return false;
 		}
@@ -96,7 +94,7 @@ public class MethodRep extends MethodVisitor {
 		return toString(new Types(false));
 	}
 	
-	public String toString(Types table){
+	public String toString(@NotNull Types table){
 		return String.format("%3d %3d %s",resolveTimeStamp,modifiedTimeStamp,
 		table.dumpMethodDesc(insnNode.desc, 
 				String.format("%s#%s", 
@@ -104,7 +102,7 @@ public class MethodRep extends MethodVisitor {
 						insnNode.name)));
 	}
 	
-	public boolean equals(MethodRep other){
+	public boolean equals(@NotNull MethodRep other){
 		if (!Objects.equal(this.insnNode.desc, other.insnNode.desc))
 			return false;
 		if (!Objects.equal(this.insnNode.name, other.insnNode.name))
@@ -114,7 +112,8 @@ public class MethodRep extends MethodVisitor {
 		return true;
 	}
 	
-	public List<String> dump(ClassFinder classFinder, Types table){
+	@NotNull
+    public List<String> dump(@NotNull ClassFinder classFinder, @NotNull Types table){
 		List<String> result = new ArrayList<>();
 		if(dynamicEffects != null && getMethodNode() != null){
 			
@@ -189,7 +188,8 @@ public class MethodRep extends MethodVisitor {
 					final MethodRep thisRep = this;
 					ClassReader cr=new ClassReader(insnNode.owner);
 					cr.accept(new ClassVisitor(Opcodes.ASM4){
-						@Override
+						@Nullable
+                        @Override
 						public MethodVisitor visitMethod(int access, String name,
 								String desc, String signature, String[] exceptions) {
 							if(!insnNode.name.equals(name)||!insnNode.desc.equals(desc)){
@@ -244,7 +244,7 @@ public class MethodRep extends MethodVisitor {
 		}
 	}
 	
-	public boolean needResolve(final ClassFinder cf){
+	public boolean needResolve(@NotNull final ClassFinder cf){
 		if(modifiedTimeStamp == 0){
 			return true;
 		}

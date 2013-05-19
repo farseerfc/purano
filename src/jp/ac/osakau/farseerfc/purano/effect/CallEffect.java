@@ -5,6 +5,7 @@ import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper=true)
 public class CallEffect extends FieldEffect implements Cloneable{
@@ -15,13 +16,14 @@ public class CallEffect extends FieldEffect implements Cloneable{
 	
 	private final @Getter String callType;
 
-	@Override 
+	@NotNull
+    @Override
 	public Effect clone(){
 		return new CallEffect(callType, getDesc(),getOwner(),getName(), getDeps(), getFrom());
 	}
 
 	@Override
-	protected String dumpEffect(MethodRep rep, Types table) {
+	protected String dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
 		return String.format("%s %s: [%s]",
 				getCallType(),
 				table.dumpMethodDesc(getDesc(),

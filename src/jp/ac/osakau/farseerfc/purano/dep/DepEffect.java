@@ -1,28 +1,15 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
-import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
-import jp.ac.osakau.farseerfc.purano.effect.Effect;
-import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
-import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
-import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
+import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
-import com.google.common.collect.Lists;
+import java.util.*;
 
 //@EqualsAndHashCode(callSuper=false)
 public class DepEffect {
@@ -36,7 +23,7 @@ public class DepEffect {
 	
 
 
-	public void merge(DepEffect other,MethodRep over){
+	public void merge(@NotNull DepEffect other,MethodRep over){
 		ret.merge(other.ret);
 		for(ThisFieldEffect effect:other.getThisField().values()){
 			addThisField((ThisFieldEffect)effect.duplicate(over));
@@ -58,7 +45,7 @@ public class DepEffect {
 		}
 	}
 
-	public void addThisField(ThisFieldEffect tfe){
+	public void addThisField(@NotNull ThisFieldEffect tfe){
 		if(thisField.containsKey(tfe.getKey())){
 			DepSet ds = new DepSet();
 			ds.merge(thisField.get(tfe.getKey()).getDeps());
@@ -70,7 +57,7 @@ public class DepEffect {
 		}
 	}
 	
-	public void addOtherField(OtherFieldEffect ofe){
+	public void addOtherField(@NotNull OtherFieldEffect ofe){
 		if(otherField.containsKey(ofe.getKey())){
 //			DepSet ds = new DepSet();
 //			ds.merge(otherField.get(ofe.getKey()).getDeps());
@@ -82,7 +69,7 @@ public class DepEffect {
 		}
 	}
 	
-	public void addStaticField(StaticFieldEffect sfe){
+	public void addStaticField(@NotNull StaticFieldEffect sfe){
 		if(staticField.containsKey(sfe.getKey())){
 			DepSet ds = new DepSet();
 			ds.merge(staticField.get(sfe.getKey()).getDeps());
@@ -94,7 +81,7 @@ public class DepEffect {
 		}
 	}
 	
-	public String dump(MethodRep rep, Types table, String prefix){
+	public String dump(@NotNull MethodRep rep, @NotNull Types table, String prefix){
 
 		List<String> deps= new ArrayList<>();
 
@@ -132,7 +119,7 @@ public class DepEffect {
 		return Joiner.on("\n").join(deps);
 	}
 
-	public boolean isSubset(DepEffect dec) {
+	public boolean isSubset(@NotNull DepEffect dec) {
 
 		for(ThisFieldEffect e:thisField.values()){
 			if(! dec.getThisField().containsValue(e)){
@@ -176,7 +163,7 @@ public class DepEffect {
 		return false;
 	}
 	
-	public boolean equals(DepEffect other){
+	public boolean equals(@NotNull DepEffect other){
 		if(!thisField.keySet().containsAll(other.thisField.keySet())
 				&& other.thisField.keySet().containsAll(thisField.keySet())){
 			return false;

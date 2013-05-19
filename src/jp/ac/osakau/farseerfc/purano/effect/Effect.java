@@ -4,10 +4,10 @@ import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(exclude="from")
 public abstract class Effect implements Cloneable{
@@ -47,7 +47,8 @@ public abstract class Effect implements Cloneable{
 				fromStr);
 	}
 	
-	public String dumpDot(){
+	@NotNull
+    public String dumpDot(){
 		return "";
 	}
 	

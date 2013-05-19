@@ -1,24 +1,19 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Collections2;
+import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import jp.ac.osakau.farseerfc.purano.util.Types;
+import lombok.Data;
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.MethodNode;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
-import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
-import jp.ac.osakau.farseerfc.purano.util.Types;
-
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.MethodNode;
-
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Collections2;
-
-import lombok.Data;
 
 public @Data class DepSet {
 	private final Set<FieldDep> statics = new HashSet<>();
@@ -29,25 +24,25 @@ public @Data class DepSet {
 	
 	public DepSet(){}
 	
-	public DepSet(DepSet ... others){
+	public DepSet(@NotNull DepSet ... others){
 		for(DepSet o : others){
 			this.merge(o);
 		}
 	}
 
-	public void merge(DepSet other){
+	public void merge(@NotNull final DepSet other){
 		this.statics.addAll(other.statics);
 		this.locals.addAll(other.locals);
 		this.fields.addAll(other.fields);
 	}
 	
 
-	public String dumpDeps(final MethodRep rep, final Types table){
+	public String dumpDeps(@NotNull final MethodRep rep, @NotNull final Types table){
 		int argCount = rep.argCount();
 		MethodNode methodNode = rep.getMethodNode();
 		
-		List<String> argsb = new ArrayList<>();
-		List<String> localsb = new ArrayList<>();
+		List<String> arguments = new ArrayList<>();
+		List<String> locals = new ArrayList<>();
 		boolean thisDep=false;
 		//System.err.printf("method %s ArgCount %s localV %s\n",methodNode.name,argCount,methodNode.localVariables.size());
 		if(getLocals().contains(0) &&
@@ -57,25 +52,25 @@ public @Data class DepSet {
 		}
 		for(int i=thisDep?1:0;i<argCount;++i){
 			if(getLocals().contains(i) && methodNode.localVariables.size()>i){
-				argsb.add(String.format("%s %s",
-						table.desc2full(methodNode.localVariables.get(i).desc) ,
-						methodNode.localVariables.get(i).name));
+				arguments.add(String.format("%s %s",
+                        table.desc2full(methodNode.localVariables.get(i).desc),
+                        methodNode.localVariables.get(i).name));
 			}
 		}
 		
 		if(methodNode.localVariables != null){
 			for(int i=argCount;i<methodNode.localVariables.size();++i){
 				if(getLocals().contains(i) && methodNode.localVariables.size()>i){
-					localsb.add(String.format("%s %s",
-							table.desc2full(methodNode.localVariables.get(i).desc) ,
-							methodNode.localVariables.get(i).name));
+					locals.add(String.format("%s %s",
+                            table.desc2full(methodNode.localVariables.get(i).desc),
+                            methodNode.localVariables.get(i).name));
 				}
 			}
 		}
 
 		final Function<FieldDep,String> dumper = new Function<FieldDep,String>(){
-			@Override @Nullable
-			public String apply(@Nullable FieldDep fd) {
+			@Override
+			public String apply(@NotNull FieldDep fd) {
 				return fd.dump(table);
 			}
 		};
@@ -84,13 +79,13 @@ public @Data class DepSet {
 		if(thisDep){
 			result.add("this");
 		}
-		if(argsb.size() > 0){
+		if(arguments.size() > 0){
 			result.add(String.format("Args: [%s]", 
-					Joiner.on(", ").join(argsb)));
+					Joiner.on(", ").join(arguments)));
 		}
-		if(localsb.size()>0){
+		if(locals.size()>0){
 			result.add(String.format("Locals: [%s]", 
-					Joiner.on(", ").join(localsb)));
+					Joiner.on(", ").join(locals)));
 		}
 		if(getFields().size() > 0){
 			result.add(String.format("Fields: [%s]",
@@ -106,7 +101,7 @@ public @Data class DepSet {
 		return Joiner.on(", ").join(result);
 	}
 	
-	public boolean dependOnThis(MethodRep rep) {
+	public boolean dependOnThis(@NotNull MethodRep rep) {
 		boolean thisDep=false;
 		if(getLocals().contains(0) &&
 				((rep.getMethodNode().access & Opcodes.ACC_STATIC) == 0) &&
@@ -116,7 +111,7 @@ public @Data class DepSet {
 		return thisDep;
 	}
 
-	public boolean dependOnlyLocal(MethodRep rep) {
+	public boolean dependOnlyLocal(@NotNull MethodRep rep) {
 		int argCount = rep.argCount();
 		
 		if(getStatics().size() > 0){
@@ -143,7 +138,7 @@ public @Data class DepSet {
 		return true;
 	}
 	
-	public boolean dependOnlyArgs(MethodRep rep){
+	public boolean dependOnlyArgs(@NotNull MethodRep rep){
 		if(!dependOnlyLocalArgs()){
 			return false;
 		}

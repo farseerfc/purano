@@ -1,10 +1,11 @@
 package jp.ac.osakau.farseerfc.purano.dep.test;
 
-import static org.junit.Assert.*;
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.dep.FieldDep;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class DepSetTest {
 

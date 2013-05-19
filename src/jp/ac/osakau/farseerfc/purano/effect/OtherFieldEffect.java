@@ -4,6 +4,7 @@ import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper=true)
 public class OtherFieldEffect extends FieldEffect implements Cloneable {
@@ -14,18 +15,20 @@ public class OtherFieldEffect extends FieldEffect implements Cloneable {
 //	
 //	private final @Getter DepSet leftValueDeps;
 	
-	@Override
+	@NotNull
+    @Override
 	public String getKey(){
 		return getDesc()+getOwner()+getName();
 	}
 	
-	@Override
+	@NotNull
+    @Override
 	public Effect clone() {
 		return new OtherFieldEffect(getDesc(), getOwner(), getName(), getDeps(), null, getFrom());
 	}
 
 	@Override
-	protected String dumpEffect(MethodRep rep, Types table) {
+	protected String dumpEffect(MethodRep rep, @NotNull Types table) {
 		return String.format("%s %s#%s",
 				table.desc2full(getDesc()),
 				table.fullClassName(getOwner()),

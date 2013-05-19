@@ -1,34 +1,27 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Joiner;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
-
+import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
+import java.util.*;
 
 public class ClassFinder {
 	private static final Logger log= LoggerFactory.getLogger(ClassFinder.class);
 	
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
-	private final Collection<String> prefix;
-	private @Getter List<MethodRep> toResolve = new ArrayList<>(); 
+	@NotNull
+    private final Collection<String> prefix;
+	@NotNull
+    private @Getter List<MethodRep> toResolve = new ArrayList<>();
 	private final Set<String> classTargets = new HashSet<>() ;
 	
-	public ClassFinder(Collection<String> prefix){
+	public ClassFinder(@NotNull Collection<String> prefix){
 		this.prefix = prefix;
 		findClasses(prefix);
 		
@@ -57,7 +50,7 @@ public class ClassFinder {
 	public void resolveMethods() {
 		int timestamp = 0;
 		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
-		boolean changed = false;
+		boolean changed;
 		int pass = 0;
 		do {
 			changed = false;
@@ -90,7 +83,7 @@ public class ClassFinder {
 //		return false;
 //	}
 	
-	private void findClasses(Collection<String> prefixes){
+	private void findClasses(@NotNull Collection<String> prefixes){
 		
 		for(String prefix:prefixes){
 			Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));
@@ -101,7 +94,7 @@ public class ClassFinder {
 		}
 	}
 	
-	public ClassRep loadClass(String classname){
+	public ClassRep loadClass(@NotNull String classname){
 		if(!classMap.containsKey(classname)){
 			log.info("Loading {}", classname);
 			if(classname.startsWith("[")){
@@ -156,7 +149,8 @@ public class ClassFinder {
 //		}
 //	}
 	
-	public List<String> dump(Types table){
+	@NotNull
+    public List<String> dump(@NotNull Types table){
 		List<String> result = new ArrayList<>();
 		for(String clsName : classMap.keySet()){
 			if(classTargets.contains(clsName)){
@@ -168,7 +162,7 @@ public class ClassFinder {
 		return result;
 	}
 
-	public static void main(String [] argv){
+	public static void main(@NotNull String [] argv){
 		long start=System.currentTimeMillis();
 		String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
 		if(argv.length > 1){

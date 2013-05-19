@@ -1,10 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.reflect.test;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
-
+import com.google.common.base.Joiner;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
@@ -14,11 +10,12 @@ import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.test.TargetA;
 import jp.ac.osakau.farseerfc.purano.test.TargetC;
 import jp.ac.osakau.farseerfc.purano.util.Types;
-
 import org.junit.Test;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import com.google.common.base.Joiner;
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.*;
 
 public class MethodRepTest {
 

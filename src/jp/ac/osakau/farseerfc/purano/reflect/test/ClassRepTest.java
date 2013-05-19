@@ -1,15 +1,14 @@
 package jp.ac.osakau.farseerfc.purano.reflect.test;
 
-import static org.junit.Assert.*;
+import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
+import jp.ac.osakau.farseerfc.purano.reflect.ClassRep;
+import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
-import jp.ac.osakau.farseerfc.purano.reflect.ClassRep;
-import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
-
-import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
 
 public class ClassRepTest {
 
