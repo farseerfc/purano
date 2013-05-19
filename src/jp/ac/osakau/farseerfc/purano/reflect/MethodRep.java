@@ -120,7 +120,7 @@ public class MethodRep extends MethodVisitor {
 			
 			result.add("    "+Escape.methodName(toString(table)));
 			for(MethodRep rep : overrides.values()){
-				result.add(String.format("        % %s", rep.toString(table)));
+				result.add(String.format("        # %s", rep.toString(table)));
 			}
 			for(MethodInsnNode insn : calls){
 				//log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));

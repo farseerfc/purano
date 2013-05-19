@@ -26,6 +26,7 @@ public class ClassFinder {
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
 	private final Collection<String> prefix;
 	private @Getter List<MethodRep> toResolve = new ArrayList<>(); 
+	private final Set<String> classTargets = new HashSet<>() ;
 	
 	public ClassFinder(Collection<String> prefix){
 		this.prefix = prefix;
@@ -90,12 +91,13 @@ public class ClassFinder {
 //	}
 	
 	private void findClasses(Collection<String> prefixes){
+		
 		for(String prefix:prefixes){
 			Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));
-	        Set<String> allClasses = reflections.getStore().getSubTypesOf(Object.class.getName());
-	        for(String cls : allClasses){
-				loadClass(cls);
-	        }
+	        classTargets.addAll( reflections.getStore().getSubTypesOf(Object.class.getName()));
+		}
+		for(String cls : classTargets){
+			loadClass(cls);
 		}
 	}
 	
@@ -156,8 +158,11 @@ public class ClassFinder {
 	
 	public List<String> dump(Types table){
 		List<String> result = new ArrayList<>();
-		for(ClassRep cls : classMap.values()){
-			result.addAll(cls.dump(table));
+		for(String clsName : classMap.keySet()){
+			if(classTargets.contains(clsName)){
+				ClassRep cls = classMap.get(clsName);
+				result.addAll(cls.dump(table));
+			}
 			//result.add(cls.getName());
 		}
 		return result;
@@ -165,7 +170,7 @@ public class ClassFinder {
 
 	public static void main(String [] argv){
 		long start=System.currentTimeMillis();
-		String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
+		String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}

@@ -7,6 +7,7 @@ import java.util.List;
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
 import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
 import jp.ac.osakau.farseerfc.purano.effect.Effect;
+import jp.ac.osakau.farseerfc.purano.effect.InvokeDynamicEffect;
 import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
@@ -494,6 +495,14 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		}
 	}
 
+
+	private DepValue addCallEffect(DepSet deps, String callType,
+			MethodInsnNode min) {
+		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
+		effect.getCallEffects().add(ce);
+		return new DepValue(Type.getReturnType(min.desc), deps);
+	}
+	
     @Override
     public DepValue naryOperation(final AbstractInsnNode insn,
             final List<? extends DepValue> values) throws AnalyzerException {
@@ -506,6 +515,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	case MULTIANEWARRAY:
     		return new DepValue(Type.getType(((MultiANewArrayInsnNode) insn).desc), deps);
     	case INVOKEDYNAMIC:
+    		effect.getOtherEffects().add(new InvokeDynamicEffect(null));
     		return new DepValue(Type.getReturnType(((InvokeDynamicInsnNode) insn).desc), deps);
     	case INVOKEVIRTUAL:
     		callType="VIRTUAL";
@@ -526,25 +536,21 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         	//return null;
     	}
     	MethodInsnNode min = (MethodInsnNode) insn;
-    	if(classFinder == null){
-			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
-			effect.getCallEffects().add(ce);
-			return new DepValue(Type.getReturnType(min.desc), deps);
+    	if(classFinder == null ){
+			return addCallEffect(deps, callType, min);
     	}else{
-    		DepEffect callEffect = null;
     		
     		MethodRep rep =  classFinder.loadClass(Types.binaryName2NormalName(min.owner))
     				.getMethodVirtual(new MethodRep(min, 0).getId());
     		
 //    		log.info("Analyzing Calling {} in {}",new MethodRep(min, 0),method);
     		if(rep == null){
-    			CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
-    			effect.getCallEffects().add(ce);
-    			return new DepValue(Type.getReturnType(min.desc), deps);
+    			return addCallEffect(deps, callType, min);
     		}
     		
+    		DepEffect callEffect = null;
    			if(rep.getDynamicEffects() != null){
-				if(insn.getOpcode() == INVOKESPECIAL ||insn.getOpcode() == INVOKEDYNAMIC){
+				if(insn.getOpcode() == INVOKESPECIAL ||insn.getOpcode() == INVOKESTATIC){
 					callEffect = rep.getStaticEffects();
 				}else{
 					callEffect = rep.getDynamicEffects();
@@ -552,14 +558,14 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			}
 
     		if(callEffect == null){
-    			return new DepValue(Type.getReturnType(min.desc), deps);
+    			return addCallEffect(deps, callType, min);
     		}
     		
     		if(rep.isInit()){
     			for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
     				effect.addOtherField((OtherFieldEffect)ofe.duplicate(rep));
     			}
-    		}else if(rep.isStatic() || rep.isNative() || values.size()==0 || values.get(0)== null){
+    		}else if(rep.isStatic() || rep.isNative() || values.size()==0 || values.get(0) == null){
     			for(ThisFieldEffect tfe:callEffect.getThisField().values()){
     				effect.addThisField((ThisFieldEffect)tfe.duplicate(rep));
     			}
@@ -655,6 +661,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		return new DepValue(Type.getReturnType(min.desc), callEffect.getRet());
     	}
     }
+
 
     @Override
     public void returnOperation(final AbstractInsnNode insn,
