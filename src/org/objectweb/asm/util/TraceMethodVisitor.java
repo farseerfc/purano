@@ -30,12 +30,7 @@
 package org.objectweb.asm.util;
 
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 
 /**
  * A {@link MethodVisitor} that prints the methods it visits with a

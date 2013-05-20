@@ -29,19 +29,14 @@
  */
 package org.objectweb.asm.xml;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.util.Printer;
 import org.xml.sax.helpers.AttributesImpl;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@link MethodVisitor} that generates SAX 2.0 events from the visited

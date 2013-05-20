@@ -29,12 +29,12 @@
  */
 package org.objectweb.asm.tree;
 
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
+
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 /**
  * A doubly linked list of {@link AbstractInsnNode} objects. <i>This

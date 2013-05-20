@@ -32,11 +32,7 @@ package org.objectweb.asm.tree.analysis;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.AbstractSet;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A set of at most two elements.

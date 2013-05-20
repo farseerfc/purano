@@ -29,12 +29,12 @@
  */
 package org.objectweb.asm.tree;
 
-import java.util.Map;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+
+import java.util.Map;
 
 /**
  * An {@link AbstractInsnNode} that encapsulates a {@link Label}.

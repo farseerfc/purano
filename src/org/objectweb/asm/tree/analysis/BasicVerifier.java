@@ -29,8 +29,6 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import java.util.List;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
@@ -38,6 +36,8 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+
+import java.util.List;
 
 /**
  * An extended {@link BasicInterpreter} that checks that bytecode instructions

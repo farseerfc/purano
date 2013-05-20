@@ -29,15 +29,11 @@
  */
 package org.objectweb.asm.tree;
 
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Opcodes;
 
 /**
  * A node that represents a field.

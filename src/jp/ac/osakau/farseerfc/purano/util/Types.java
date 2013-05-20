@@ -5,16 +5,16 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import jp.ac.osakau.farseerfc.purano.reflect.ArrayStub;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 
 public class Types {
 	private final Map<String, String> fullClassNames = new HashMap<>();
-	@org.jetbrains.annotations.Nullable
+	@Nullable
     private String packageName = null;
 	private static final Map<Character, String> desc2type = new HashMap<>();
 	private final boolean shorten;
@@ -39,14 +39,14 @@ public class Types {
 		this.shorten = shorten;
 	}
 	
-	public Types(boolean shorten, String pkg){
+	public Types(boolean shorten, @Nullable String pkg){
 		this.shorten = shorten;
 		this.packageName = pkg;
 	}
 
-	@org.jetbrains.annotations.Nullable
-    public String desc2full(@NotNull String name) {
-		if (name.length() == 0) {
+	@Nullable
+    public String desc2full(@Nullable String name) {
+		if (name == null || name.length() == 0) {
 			return null; // special mark to indicate that name is at end
 		}
 		if (desc2type.containsKey(name.charAt(0))) {
@@ -65,7 +65,7 @@ public class Types {
 
 	private LinkedList<String> nextDesc(@NotNull String desc) {
 		if (desc.length() == 0) {
-			return new LinkedList<String>();
+			return new LinkedList<>();
 		}
 		if (desc2type.containsKey(desc.charAt(0))) {
 			LinkedList<String> result = nextDesc(desc.substring(1));
@@ -106,8 +106,8 @@ public class Types {
 		List<String> args = Lists.transform(nextDesc(argDesc),
 				new Function<String, String>() {
 					@Override
-					@NotNull
-					public String apply(@NotNull String desc) {
+					@Nullable
+					public String apply(@Nullable String desc) {
 						return desc2full(desc);
 					}
 				});
@@ -203,7 +203,7 @@ public class Types {
 	}
 	
 
-	private static final Map<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>();
+	private static final Map<String, Class<?>> primitiveClasses = new HashMap<>();
 
 	static {
 	    primitiveClasses.put("byte", byte.class);
@@ -216,26 +216,26 @@ public class Types {
 	    primitiveClasses.put("boolean", boolean.class);
 	}
 
-	@org.jetbrains.annotations.Nullable
-    public static final Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
-		@Nullable @Override
-		public Class<? extends Object> apply(@NotNull Type t){
-			String name = t.getClassName();
-			if(name.endsWith("[]")){
-				name = Types.binaryName2NormalName(t.getInternalName());
-			}
-			try {
-				return forName(name);
-			} catch (ClassNotFoundException e) {
-				System.err.printf("Cannot load \"%s\"\n",name);
-				e.printStackTrace(System.err);
-				return null;
-				//throw new RuntimeException("Cannot load "+name,e);
-			}
-		}
-	};
+//	@org.jetbrains.annotations.Nullable
+//    public static final Function<Type, Class<? extends Object>> loadClass = new Function<Type, Class<? extends Object>> (){
+//		@Nullable @Override
+//		public Class<? extends Object> apply(@NotNull Type t){
+//			String name = t.getClassName();
+//			if(name.endsWith("[]")){
+//				name = Types.binaryName2NormalName(t.getInternalName());
+//			}
+//			try {
+//				return forName(name);
+//			} catch (ClassNotFoundException e) {
+//				System.err.printf("Cannot load \"%s\"\n",name);
+//				e.printStackTrace(System.err);
+//				return null;
+//				//throw new RuntimeException("Cannot load "+name,e);
+//			}
+//		}
+//	};
 	
-	public static Class<? extends Object> forName(String name) throws ClassNotFoundException{
+	public static Class<?> forName(String name) throws ClassNotFoundException{
 	    if (primitiveClasses.containsKey(name)) {
 	        return primitiveClasses.get(name);
 	    } else {
@@ -244,7 +244,7 @@ public class Types {
 	}
 	
 	
-	public static void notFound(String name, @org.jetbrains.annotations.Nullable Exception e){
+	public static void notFound(String name, @Nullable Exception e){
 		//throw new RuntimeException(name,e);
 		System.err.println(name);
 		if(e!=null){
@@ -252,8 +252,8 @@ public class Types {
 		}
 	}
 
-	@org.jetbrains.annotations.Nullable
-    public static Type covariant(@org.jetbrains.annotations.Nullable Type t1, @org.jetbrains.annotations.Nullable Type t2) {
+	@Nullable
+    public static Type covariant(@Nullable Type t1, @Nullable Type t2) {
 		if(t1 == null){
 			return t2;
 		}

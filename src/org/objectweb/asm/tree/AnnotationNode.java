@@ -29,13 +29,13 @@
  */
 package org.objectweb.asm.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A node that represents an annotationn.

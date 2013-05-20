@@ -29,12 +29,11 @@
  */
 package org.objectweb.asm.tree;
 
-import java.util.Map;
-
 import lombok.EqualsAndHashCode;
-
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
+
+import java.util.Map;
 
 /**
  * A node that represents a method instruction. A method instruction is an

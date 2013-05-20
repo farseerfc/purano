@@ -29,11 +29,11 @@
  */
 package org.objectweb.asm.commons;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A named method descriptor.

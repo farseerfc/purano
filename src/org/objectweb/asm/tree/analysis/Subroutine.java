@@ -29,12 +29,12 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A method subroutine (corresponds to a JSR instruction).

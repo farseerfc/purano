@@ -29,12 +29,12 @@
  */
 package org.objectweb.asm.tree;
 
-import java.util.Map;
-
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+
+import java.util.Map;
 
 /**
  * A node that represents an invokedynamic instruction.

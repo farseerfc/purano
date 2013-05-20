@@ -31,11 +31,7 @@ package org.objectweb.asm.optimizer;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 
 /**
  * An {@link MethodVisitor} that collects the {@link Constant}s of the methods

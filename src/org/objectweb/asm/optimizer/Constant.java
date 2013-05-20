@@ -29,11 +29,11 @@
  */
 package org.objectweb.asm.optimizer;
 
-import java.util.Arrays;
-
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
+
+import java.util.Arrays;
 
 /**
  * A constant pool item.

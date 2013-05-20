@@ -29,10 +29,10 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import java.util.Set;
-
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.AbstractInsnNode;
+
+import java.util.Set;
 
 /**
  * A {@link Value} that is represented by its type in a two types type system.

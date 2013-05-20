@@ -14,8 +14,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.Interpreter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

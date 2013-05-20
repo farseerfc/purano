@@ -29,12 +29,12 @@
  */
 package org.objectweb.asm.optimizer;
 
-import java.util.HashMap;
-
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+
+import java.util.HashMap;
 
 /**
  * A constant pool.

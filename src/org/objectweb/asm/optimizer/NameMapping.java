@@ -29,6 +29,9 @@
  */
 package org.objectweb.asm.optimizer;
 
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Type;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,9 +39,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.Type;
 
 /**
  * A MAPPING from names to names, used to rename classes, fields and methods.

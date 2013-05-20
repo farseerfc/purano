@@ -29,15 +29,10 @@
  */
 package org.objectweb.asm.util;
 
-import java.io.PrintWriter;
-
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
+
+import java.io.PrintWriter;
 
 /**
  * A {@link ClassVisitor} that prints the classes it visits with a

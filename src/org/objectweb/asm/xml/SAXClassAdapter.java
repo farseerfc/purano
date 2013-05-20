@@ -31,11 +31,7 @@ package org.objectweb.asm.xml;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
 

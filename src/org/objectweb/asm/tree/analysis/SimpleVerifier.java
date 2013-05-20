@@ -29,11 +29,11 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import java.util.List;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
+
+import java.util.List;
 
 /**
  * An extended {@link BasicVerifier} that performs more precise verifications.

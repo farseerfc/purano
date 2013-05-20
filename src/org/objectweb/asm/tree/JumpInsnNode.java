@@ -29,10 +29,10 @@
  */
 package org.objectweb.asm.tree;
 
-import java.util.Map;
-
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
+
+import java.util.Map;
 
 /**
  * A node that represents a jump instruction. A jump instruction is an
