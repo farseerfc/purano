@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.tree;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
 /**
@@ -105,7 +106,7 @@ public class LocalVariableNode {
      * @param mv
      *            a method visitor.
      */
-    public void accept(final MethodVisitor mv) {
+    public void accept(@NotNull final MethodVisitor mv) {
         mv.visitLocalVariable(name, desc, signature, start.getLabel(),
                 end.getLabel(), index);
     }

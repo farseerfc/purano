@@ -31,6 +31,7 @@ package org.objectweb.asm.tree.analysis;
 
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
 /**
@@ -61,6 +62,7 @@ public class SourceValue implements Value {
      * 
      * This field is a set of {@link AbstractInsnNode} objects.
      */
+    @Nullable
     public final Set<AbstractInsnNode> insns;
 
     public SourceValue(final int size) {

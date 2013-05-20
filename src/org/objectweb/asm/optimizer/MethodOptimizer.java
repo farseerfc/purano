@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.optimizer;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.FieldVisitor;
@@ -59,18 +60,21 @@ public class MethodOptimizer extends RemappingMethodAdapter implements Opcodes {
     // Overridden methods
     // ------------------------------------------------------------------------
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         // remove annotations
         return null;
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         // remove annotations
         return null;
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible) {

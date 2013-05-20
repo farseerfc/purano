@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.optimizer;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.FieldVisitor;
@@ -49,8 +50,9 @@ public class FieldConstantsCollector extends FieldVisitor {
         this.cp = cp;
     }
 
+    @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
+    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         cp.newUTF8(desc);
         if (visible) {

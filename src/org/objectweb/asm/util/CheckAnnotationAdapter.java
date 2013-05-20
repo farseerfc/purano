@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -80,8 +82,8 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
     }
 
     @Override
-    public void visitEnum(final String name, final String desc,
-            final String value) {
+    public void visitEnum(final String name, @NotNull final String desc,
+            @Nullable final String value) {
         checkEnd();
         checkName(name);
         CheckMethodAdapter.checkDesc(desc, false);
@@ -93,9 +95,10 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
         }
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String name,
-            final String desc) {
+            @NotNull final String desc) {
         checkEnd();
         checkName(name);
         CheckMethodAdapter.checkDesc(desc, false);
@@ -103,6 +106,7 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
                 : av.visitAnnotation(name, desc));
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitArray(final String name) {
         checkEnd();
@@ -127,7 +131,7 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
         }
     }
 
-    private void checkName(final String name) {
+    private void checkName(@Nullable final String name) {
         if (named && name == null) {
             throw new IllegalArgumentException(
                     "Annotation value name must not be null");

@@ -30,6 +30,8 @@
 
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -666,7 +668,7 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInsn(Opcodes.NOP);
     }
 
-    public void aconst(final Object cst) {
+    public void aconst(@Nullable final Object cst) {
         if (cst == null) {
             mv.visitInsn(Opcodes.ACONST_NULL);
         } else {
@@ -720,19 +722,19 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitLdcInsn(handle);
     }
 
-    public void load(final int var, final Type type) {
+    public void load(final int var, @NotNull final Type type) {
         mv.visitVarInsn(type.getOpcode(Opcodes.ILOAD), var);
     }
 
-    public void aload(final Type type) {
+    public void aload(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IALOAD));
     }
 
-    public void store(final int var, final Type type) {
+    public void store(final int var, @NotNull final Type type) {
         mv.visitVarInsn(type.getOpcode(Opcodes.ISTORE), var);
     }
 
-    public void astore(final Type type) {
+    public void astore(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IASTORE));
     }
 
@@ -772,51 +774,51 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInsn(Opcodes.SWAP);
     }
 
-    public void add(final Type type) {
+    public void add(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IADD));
     }
 
-    public void sub(final Type type) {
+    public void sub(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.ISUB));
     }
 
-    public void mul(final Type type) {
+    public void mul(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IMUL));
     }
 
-    public void div(final Type type) {
+    public void div(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IDIV));
     }
 
-    public void rem(final Type type) {
+    public void rem(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IREM));
     }
 
-    public void neg(final Type type) {
+    public void neg(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.INEG));
     }
 
-    public void shl(final Type type) {
+    public void shl(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.ISHL));
     }
 
-    public void shr(final Type type) {
+    public void shr(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.ISHR));
     }
 
-    public void ushr(final Type type) {
+    public void ushr(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IUSHR));
     }
 
-    public void and(final Type type) {
+    public void and(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IAND));
     }
 
-    public void or(final Type type) {
+    public void or(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IOR));
     }
 
-    public void xor(final Type type) {
+    public void xor(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IXOR));
     }
 
@@ -961,7 +963,7 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitLookupSwitchInsn(dflt, keys, labels);
     }
 
-    public void areturn(final Type t) {
+    public void areturn(@NotNull final Type t) {
         mv.visitInsn(t.getOpcode(Opcodes.IRETURN));
     }
 
@@ -1010,11 +1012,11 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
     }
 
-    public void anew(final Type type) {
+    public void anew(@NotNull final Type type) {
         mv.visitTypeInsn(Opcodes.NEW, type.getInternalName());
     }
 
-    public void newarray(final Type type) {
+    public void newarray(@NotNull final Type type) {
         int typ;
         switch (type.getSort()) {
         case Type.BOOLEAN:
@@ -1056,11 +1058,11 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInsn(Opcodes.ATHROW);
     }
 
-    public void checkcast(final Type type) {
+    public void checkcast(@NotNull final Type type) {
         mv.visitTypeInsn(Opcodes.CHECKCAST, type.getInternalName());
     }
 
-    public void instanceOf(final Type type) {
+    public void instanceOf(@NotNull final Type type) {
         mv.visitTypeInsn(Opcodes.INSTANCEOF, type.getInternalName());
     }
 

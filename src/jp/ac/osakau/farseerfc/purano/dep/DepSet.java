@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public @Data class DepSet {
+public final @Data class DepSet {
 	private final Set<FieldDep> statics = new HashSet<>();
 	// this pointer, Args, and true locals, all in the locals list, by the order
 	private final Set<Integer> locals = new HashSet<>();

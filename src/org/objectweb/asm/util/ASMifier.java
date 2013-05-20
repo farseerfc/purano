@@ -34,6 +34,8 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Handle;
@@ -118,7 +120,7 @@ public class ASMifier extends Printer {
      * @throws Exception
      *             if the class cannot be found, or if an IO exception occurs.
      */
-    public static void main(final String[] args) throws Exception {
+    public static void main(@NotNull final String[] args) throws Exception {
         int i = 0;
         int flags = ClassReader.SKIP_DEBUG;
 
@@ -156,9 +158,9 @@ public class ASMifier extends Printer {
     // ------------------------------------------------------------------------
 
     @Override
-    public void visit(final int version, final int access, final String name,
+    public void visit(final int version, final int access, @NotNull final String name,
             final String signature, final String superName,
-            final String[] interfaces) {
+            @Nullable final String[] interfaces) {
         String simpleName;
         int n = name.lastIndexOf('/');
         if (n == -1) {
@@ -254,6 +256,7 @@ public class ASMifier extends Printer {
         text.add(buf.toString());
     }
 
+    @NotNull
     @Override
     public ASMifier visitClassAnnotation(final String desc,
             final boolean visible) {
@@ -261,7 +264,7 @@ public class ASMifier extends Printer {
     }
 
     @Override
-    public void visitClassAttribute(final Attribute attr) {
+    public void visitClassAttribute(@NotNull final Attribute attr) {
         visitAttribute(attr);
     }
 
@@ -281,6 +284,7 @@ public class ASMifier extends Printer {
         text.add(buf.toString());
     }
 
+    @NotNull
     @Override
     public ASMifier visitField(final int access, final String name,
             final String desc, final String signature, final Object value) {
@@ -304,9 +308,10 @@ public class ASMifier extends Printer {
         return a;
     }
 
+    @NotNull
     @Override
     public ASMifier visitMethod(final int access, final String name,
-            final String desc, final String signature, final String[] exceptions) {
+            final String desc, final String signature, @Nullable final String[] exceptions) {
         buf.setLength(0);
         buf.append("{\n");
         buf.append("mv = cw.visitMethod(");
@@ -373,6 +378,7 @@ public class ASMifier extends Printer {
         text.add(buf.toString());
     }
 
+    @NotNull
     @Override
     public ASMifier visitAnnotation(final String name, final String desc) {
         buf.setLength(0);
@@ -390,6 +396,7 @@ public class ASMifier extends Printer {
         return a;
     }
 
+    @NotNull
     @Override
     public ASMifier visitArray(final String name) {
         buf.setLength(0);
@@ -416,6 +423,7 @@ public class ASMifier extends Printer {
     // Fields
     // ------------------------------------------------------------------------
 
+    @NotNull
     @Override
     public ASMifier visitFieldAnnotation(final String desc,
             final boolean visible) {
@@ -423,7 +431,7 @@ public class ASMifier extends Printer {
     }
 
     @Override
-    public void visitFieldAttribute(final Attribute attr) {
+    public void visitFieldAttribute(@NotNull final Attribute attr) {
         visitAttribute(attr);
     }
 
@@ -438,6 +446,7 @@ public class ASMifier extends Printer {
     // Methods
     // ------------------------------------------------------------------------
 
+    @NotNull
     @Override
     public ASMifier visitAnnotationDefault() {
         buf.setLength(0);
@@ -450,12 +459,14 @@ public class ASMifier extends Printer {
         return a;
     }
 
+    @NotNull
     @Override
     public ASMifier visitMethodAnnotation(final String desc,
             final boolean visible) {
         return visitAnnotation(desc, visible);
     }
 
+    @NotNull
     @Override
     public ASMifier visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible) {
@@ -473,7 +484,7 @@ public class ASMifier extends Printer {
     }
 
     @Override
-    public void visitMethodAttribute(final Attribute attr) {
+    public void visitMethodAttribute(@NotNull final Attribute attr) {
         visitAttribute(attr);
     }
 
@@ -599,7 +610,7 @@ public class ASMifier extends Printer {
 
     @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
-            Object... bsmArgs) {
+            @NotNull Object... bsmArgs) {
         buf.setLength(0);
         buf.append(this.name).append(".visitInvokeDynamicInsn(");
         appendConstant(name);
@@ -658,7 +669,7 @@ public class ASMifier extends Printer {
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, final Label... labels) {
+            final Label dflt, @NotNull final Label... labels) {
         buf.setLength(0);
         for (int i = 0; i < labels.length; ++i) {
             declareLabel(labels[i]);
@@ -678,8 +689,8 @@ public class ASMifier extends Printer {
     }
 
     @Override
-    public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            final Label[] labels) {
+    public void visitLookupSwitchInsn(final Label dflt, @NotNull final int[] keys,
+            @NotNull final Label[] labels) {
         buf.setLength(0);
         for (int i = 0; i < labels.length; ++i) {
             declareLabel(labels[i]);
@@ -776,6 +787,7 @@ public class ASMifier extends Printer {
     // Common methods
     // ------------------------------------------------------------------------
 
+    @NotNull
     public ASMifier visitAnnotation(final String desc, final boolean visible) {
         buf.setLength(0);
         buf.append("{\n").append("av0 = ").append(name)
@@ -789,7 +801,7 @@ public class ASMifier extends Printer {
         return a;
     }
 
-    public void visitAttribute(final Attribute attr) {
+    public void visitAttribute(@NotNull final Attribute attr) {
         buf.setLength(0);
         buf.append("// ATTRIBUTE ").append(attr.type).append('\n');
         if (attr instanceof ASMifiable) {
@@ -808,6 +820,7 @@ public class ASMifier extends Printer {
     // Utility methods
     // ------------------------------------------------------------------------
 
+    @NotNull
     protected ASMifier createASMifier(final String name, final int id) {
         return new ASMifier(Opcodes.ASM4, name, id);
     }
@@ -977,7 +990,7 @@ public class ASMifier extends Printer {
      *            an {@link Integer}, {@link Float}, {@link Long},
      *            {@link Double} or {@link String} object. May be <tt>null</tt>.
      */
-    static void appendConstant(final StringBuffer buf, final Object cst) {
+    static void appendConstant(@NotNull final StringBuffer buf, @Nullable final Object cst) {
         if (cst == null) {
             buf.append("null");
         } else if (cst instanceof String) {

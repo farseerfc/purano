@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.signature;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 
 /**
@@ -83,28 +84,33 @@ public class SignatureWriter extends SignatureVisitor {
         buf.append(':');
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitClassBound() {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitInterfaceBound() {
         buf.append(':');
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitSuperclass() {
         endFormals();
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitInterface() {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitParameterType() {
         endFormals();
@@ -115,6 +121,7 @@ public class SignatureWriter extends SignatureVisitor {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitReturnType() {
         endFormals();
@@ -125,6 +132,7 @@ public class SignatureWriter extends SignatureVisitor {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitExceptionType() {
         buf.append('^');
@@ -143,6 +151,7 @@ public class SignatureWriter extends SignatureVisitor {
         buf.append(';');
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitArrayType() {
         buf.append('[');
@@ -173,6 +182,7 @@ public class SignatureWriter extends SignatureVisitor {
         buf.append('*');
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitTypeArgument(final char wildcard) {
         if (argumentStack % 2 == 0) {
@@ -196,6 +206,7 @@ public class SignatureWriter extends SignatureVisitor {
      * 
      * @return the signature that was built by this signature writer.
      */
+    @NotNull
     @Override
     public String toString() {
         return buf.toString();

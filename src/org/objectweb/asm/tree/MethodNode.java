@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -239,7 +241,7 @@ public class MethodNode extends MethodVisitor {
      *            <tt>null</tt>.
      */
     public MethodNode(final int api, final int access, final String name,
-            final String desc, final String signature, final String[] exceptions) {
+            final String desc, final String signature, @Nullable final String[] exceptions) {
         super(api);
         this.access = access;
         this.name = name;
@@ -262,6 +264,7 @@ public class MethodNode extends MethodVisitor {
     // Implementation of the MethodVisitor abstract class
     // ------------------------------------------------------------------------
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         return new AnnotationNode(new ArrayList<Object>(0) {
@@ -273,6 +276,7 @@ public class MethodNode extends MethodVisitor {
         });
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -291,6 +295,7 @@ public class MethodNode extends MethodVisitor {
         return an;
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible) {
@@ -333,7 +338,7 @@ public class MethodNode extends MethodVisitor {
 
     @Override
     public void visitFrame(final int type, final int nLocal,
-            final Object[] local, final int nStack, final Object[] stack) {
+            @Nullable final Object[] local, final int nStack, @Nullable final Object[] stack) {
         instructions.add(new FrameNode(type, nLocal, local == null ? null
                 : getLabelNodes(local), nStack, stack == null ? null
                 : getLabelNodes(stack)));
@@ -378,12 +383,12 @@ public class MethodNode extends MethodVisitor {
     }
 
     @Override
-    public void visitJumpInsn(final int opcode, final Label label) {
+    public void visitJumpInsn(final int opcode, @NotNull final Label label) {
         instructions.add(new JumpInsnNode(opcode, getLabelNode(label)));
     }
 
     @Override
-    public void visitLabel(final Label label) {
+    public void visitLabel(@NotNull final Label label) {
         instructions.add(getLabelNode(label));
     }
 
@@ -399,14 +404,14 @@ public class MethodNode extends MethodVisitor {
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, final Label... labels) {
+            @NotNull final Label dflt, @NotNull final Label... labels) {
         instructions.add(new TableSwitchInsnNode(min, max, getLabelNode(dflt),
                 getLabelNodes(labels)));
     }
 
     @Override
-    public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            final Label[] labels) {
+    public void visitLookupSwitchInsn(@NotNull final Label dflt, final int[] keys,
+            @NotNull final Label[] labels) {
         instructions.add(new LookupSwitchInsnNode(getLabelNode(dflt), keys,
                 getLabelNodes(labels)));
     }
@@ -417,22 +422,22 @@ public class MethodNode extends MethodVisitor {
     }
 
     @Override
-    public void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, final String type) {
+    public void visitTryCatchBlock(@NotNull final Label start, @NotNull final Label end,
+            @NotNull final Label handler, final String type) {
         tryCatchBlocks.add(new TryCatchBlockNode(getLabelNode(start),
                 getLabelNode(end), getLabelNode(handler), type));
     }
 
     @Override
     public void visitLocalVariable(final String name, final String desc,
-            final String signature, final Label start, final Label end,
+            final String signature, @NotNull final Label start, @NotNull final Label end,
             final int index) {
         localVariables.add(new LocalVariableNode(name, desc, signature,
                 getLabelNode(start), getLabelNode(end), index));
     }
 
     @Override
-    public void visitLineNumber(final int line, final Label start) {
+    public void visitLineNumber(final int line, @NotNull final Label start) {
         instructions.add(new LineNumberNode(line, getLabelNode(start)));
     }
 
@@ -456,14 +461,16 @@ public class MethodNode extends MethodVisitor {
      *            a Label.
      * @return the LabelNode corresponding to l.
      */
-    protected LabelNode getLabelNode(final Label l) {
+    @NotNull
+    protected LabelNode getLabelNode(@NotNull final Label l) {
         if (!(l.info instanceof LabelNode)) {
             l.info = new LabelNode();
         }
         return (LabelNode) l.info;
     }
 
-    private LabelNode[] getLabelNodes(final Label[] l) {
+    @NotNull
+    private LabelNode[] getLabelNodes(@NotNull final Label[] l) {
         LabelNode[] nodes = new LabelNode[l.length];
         for (int i = 0; i < l.length; ++i) {
             nodes[i] = getLabelNode(l[i]);
@@ -471,7 +478,8 @@ public class MethodNode extends MethodVisitor {
         return nodes;
     }
 
-    private Object[] getLabelNodes(final Object[] objs) {
+    @NotNull
+    private Object[] getLabelNodes(@NotNull final Object[] objs) {
         Object[] nodes = new Object[objs.length];
         for (int i = 0; i < objs.length; ++i) {
             Object o = objs[i];
@@ -506,7 +514,7 @@ public class MethodNode extends MethodVisitor {
      * @param cv
      *            a class visitor.
      */
-    public void accept(final ClassVisitor cv) {
+    public void accept(@NotNull final ClassVisitor cv) {
         String[] exceptions = new String[this.exceptions.size()];
         this.exceptions.toArray(exceptions);
         MethodVisitor mv = cv.visitMethod(access, name, desc, signature,
@@ -522,7 +530,7 @@ public class MethodNode extends MethodVisitor {
      * @param mv
      *            a method visitor.
      */
-    public void accept(final MethodVisitor mv) {
+    public void accept(@NotNull final MethodVisitor mv) {
         // visits the method attributes
         int i, j, n;
         if (annotationDefault != null) {

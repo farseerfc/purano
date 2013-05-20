@@ -31,6 +31,8 @@ package org.objectweb.asm.tree.analysis;
 
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -54,9 +56,10 @@ public class BasicVerifier extends BasicInterpreter {
         super(api);
     }
 
+    @NotNull
     @Override
-    public BasicValue copyOperation(final AbstractInsnNode insn,
-            final BasicValue value) throws AnalyzerException {
+    public BasicValue copyOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final BasicValue value) throws AnalyzerException {
         Value expected;
         switch (insn.getOpcode()) {
         case ILOAD:
@@ -98,8 +101,8 @@ public class BasicVerifier extends BasicInterpreter {
     }
 
     @Override
-    public BasicValue unaryOperation(final AbstractInsnNode insn,
-            final BasicValue value) throws AnalyzerException {
+    public BasicValue unaryOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final BasicValue value) throws AnalyzerException {
         BasicValue expected;
         switch (insn.getOpcode()) {
         case INEG:
@@ -185,8 +188,8 @@ public class BasicVerifier extends BasicInterpreter {
     }
 
     @Override
-    public BasicValue binaryOperation(final AbstractInsnNode insn,
-            final BasicValue value1, final BasicValue value2)
+    public BasicValue binaryOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final BasicValue value1, @NotNull final BasicValue value2)
             throws AnalyzerException {
         BasicValue expected1;
         BasicValue expected2;
@@ -312,10 +315,11 @@ public class BasicVerifier extends BasicInterpreter {
         }
     }
 
+    @Nullable
     @Override
-    public BasicValue ternaryOperation(final AbstractInsnNode insn,
-            final BasicValue value1, final BasicValue value2,
-            final BasicValue value3) throws AnalyzerException {
+    public BasicValue ternaryOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final BasicValue value1, final BasicValue value2,
+            @NotNull final BasicValue value3) throws AnalyzerException {
         BasicValue expected1;
         BasicValue expected3;
         switch (insn.getOpcode()) {
@@ -372,8 +376,8 @@ public class BasicVerifier extends BasicInterpreter {
     }
 
     @Override
-    public BasicValue naryOperation(final AbstractInsnNode insn,
-            final List<? extends BasicValue> values) throws AnalyzerException {
+    public BasicValue naryOperation(@NotNull final AbstractInsnNode insn,
+            @NotNull final List<? extends BasicValue> values) throws AnalyzerException {
         int opcode = insn.getOpcode();
         if (opcode == MULTIANEWARRAY) {
             for (int i = 0; i < values.size(); ++i) {
@@ -409,7 +413,7 @@ public class BasicVerifier extends BasicInterpreter {
 
     @Override
     public void returnOperation(final AbstractInsnNode insn,
-            final BasicValue value, final BasicValue expected)
+            @NotNull final BasicValue value, final BasicValue expected)
             throws AnalyzerException {
         if (!isSubTypeOf(value, expected)) {
             throw new AnalyzerException(insn, "Incompatible return type",
@@ -417,7 +421,7 @@ public class BasicVerifier extends BasicInterpreter {
         }
     }
 
-    protected boolean isArrayValue(final BasicValue value) {
+    protected boolean isArrayValue(@NotNull final BasicValue value) {
         return value.isReference();
     }
 
@@ -426,7 +430,7 @@ public class BasicVerifier extends BasicInterpreter {
         return BasicValue.REFERENCE_VALUE;
     }
 
-    protected boolean isSubTypeOf(final BasicValue value,
+    protected boolean isSubTypeOf(@NotNull final BasicValue value,
             final BasicValue expected) {
         return value.equals(expected);
     }

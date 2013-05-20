@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -72,8 +74,8 @@ public class LookupSwitchInsnNode extends AbstractInsnNode {
      *            beginnings of the handler blocks. <tt>labels[i]</tt> is the
      *            beginning of the handler block for the <tt>keys[i]</tt> key.
      */
-    public LookupSwitchInsnNode(final LabelNode dflt, final int[] keys,
-            final LabelNode[] labels) {
+    public LookupSwitchInsnNode(final LabelNode dflt, @Nullable final int[] keys,
+            @Nullable final LabelNode[] labels) {
         super(Opcodes.LOOKUPSWITCH);
         this.dflt = dflt;
         this.keys = new ArrayList<Integer>(keys == null ? 0 : keys.length);
@@ -95,7 +97,7 @@ public class LookupSwitchInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(final MethodVisitor mv) {
+    public void accept(@NotNull final MethodVisitor mv) {
         int[] keys = new int[this.keys.size()];
         for (int i = 0; i < keys.length; ++i) {
             keys[i] = this.keys.get(i).intValue();
@@ -107,8 +109,9 @@ public class LookupSwitchInsnNode extends AbstractInsnNode {
         mv.visitLookupSwitchInsn(dflt.getLabel(), keys, labels);
     }
 
+    @NotNull
     @Override
-    public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
+    public AbstractInsnNode clone(@NotNull final Map<LabelNode, LabelNode> labels) {
         LookupSwitchInsnNode clone = new LookupSwitchInsnNode(clone(dflt,
                 labels), null, clone(this.labels, labels));
         clone.keys.addAll(keys);

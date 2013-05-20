@@ -29,6 +29,9 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -115,6 +118,7 @@ public class ClassReader {
      * The start index of each constant pool item in {@link #b b}, plus one. The
      * one byte offset skips the constant pool item tag that indicates its type.
      */
+    @NotNull
     private final int[] items;
 
     /**
@@ -125,6 +129,7 @@ public class ClassReader {
      * would not be so great for these items (because they are much less
      * expensive to parse than CONSTANT_Utf8 items).
      */
+    @NotNull
     private final String[] strings;
 
     /**
@@ -149,7 +154,7 @@ public class ClassReader {
      * @param b
      *            the bytecode of the class to be read.
      */
-    public ClassReader(final byte[] b) {
+    public ClassReader(@NotNull final byte[] b) {
         this(b, 0, b.length);
     }
 
@@ -237,6 +242,7 @@ public class ClassReader {
      * 
      * @see ClassVisitor#visit(int, int, String, String, String, String[])
      */
+    @Nullable
     public String getClassName() {
         return readClass(header + 2, new char[maxStringLength]);
     }
@@ -251,6 +257,7 @@ public class ClassReader {
      * 
      * @see ClassVisitor#visit(int, int, String, String, String, String[])
      */
+    @Nullable
     public String getSuperName() {
         return readClass(header + 4, new char[maxStringLength]);
     }
@@ -264,6 +271,7 @@ public class ClassReader {
      * 
      * @see ClassVisitor#visit(int, int, String, String, String, String[])
      */
+    @NotNull
     public String[] getInterfaces() {
         int index = header + 6;
         int n = readUnsignedShort(index);
@@ -285,7 +293,7 @@ public class ClassReader {
      * @param classWriter
      *            the {@link ClassWriter} to copy constant pool into.
      */
-    void copyPool(final ClassWriter classWriter) {
+    void copyPool(@NotNull final ClassWriter classWriter) {
         char[] buf = new char[maxStringLength];
         int ll = items.length;
         Item[] items2 = new Item[ll];
@@ -373,8 +381,8 @@ public class ClassReader {
      * @param classWriter
      *            the {@link ClassWriter} to copy bootstrap methods into.
      */
-    private void copyBootstrapMethods(final ClassWriter classWriter,
-            final Item[] items, final char[] c) {
+    private void copyBootstrapMethods(@NotNull final ClassWriter classWriter,
+            @NotNull final Item[] items, final char[] c) {
         // finds the "BootstrapMethods" attribute
         int u = getAttributes();
         boolean found = false;
@@ -432,7 +440,7 @@ public class ClassReader {
      * @throws IOException
      *             if an exception occurs during reading.
      */
-    public ClassReader(final String name) throws IOException {
+    public ClassReader(@NotNull final String name) throws IOException {
         this(readClass(
                 ClassLoader.getSystemResourceAsStream(name.replace('.', '/')
                         + ".class"), true));
@@ -449,7 +457,8 @@ public class ClassReader {
      * @throws IOException
      *             if a problem occurs during reading.
      */
-    private static byte[] readClass(final InputStream is, boolean close)
+    @NotNull
+    private static byte[] readClass(@Nullable final InputStream is, boolean close)
             throws IOException {
         if (is == null) {
             throw new IOException("Class not found");
@@ -502,7 +511,7 @@ public class ClassReader {
      *            of this class. See {@link #SKIP_DEBUG}, {@link #EXPAND_FRAMES}
      *            , {@link #SKIP_FRAMES}, {@link #SKIP_CODE}.
      */
-    public void accept(final ClassVisitor classVisitor, final int flags) {
+    public void accept(@NotNull final ClassVisitor classVisitor, final int flags) {
         accept(classVisitor, new Attribute[0], flags);
     }
 
@@ -527,8 +536,8 @@ public class ClassReader {
      *            of this class. See {@link #SKIP_DEBUG}, {@link #EXPAND_FRAMES}
      *            , {@link #SKIP_FRAMES}, {@link #SKIP_CODE}.
      */
-    public void accept(final ClassVisitor classVisitor,
-            final Attribute[] attrs, final int flags) {
+    public void accept(@NotNull final ClassVisitor classVisitor,
+            @NotNull final Attribute[] attrs, final int flags) {
         int u = header; // current offset in the class file
         char[] c = new char[maxStringLength]; // buffer used to read strings
 
@@ -684,8 +693,8 @@ public class ClassReader {
      *            the start offset of the field in the class file.
      * @return the offset of the first byte following the field in the class.
      */
-    private int readField(final ClassVisitor classVisitor,
-            final Context context, int u) {
+    private int readField(@NotNull final ClassVisitor classVisitor,
+            @NotNull final Context context, int u) {
         // reads the field declaration
         char[] c = context.buffer;
         int access = readUnsignedShort(u);
@@ -778,8 +787,8 @@ public class ClassReader {
      *            the start offset of the method in the class file.
      * @return the offset of the first byte following the method in the class.
      */
-    private int readMethod(final ClassVisitor classVisitor,
-            final Context context, int u) {
+    private int readMethod(@NotNull final ClassVisitor classVisitor,
+            @NotNull final Context context, int u) {
         // reads the method declaration
         char[] c = context.buffer;
         int access = readUnsignedShort(u);
@@ -954,7 +963,7 @@ public class ClassReader {
      * @param u
      *            the start offset of the code attribute in the class file.
      */
-    private void readCode(final MethodVisitor mv, final Context context, int u) {
+    private void readCode(@NotNull final MethodVisitor mv, @NotNull final Context context, int u) {
         // reads the header
         byte[] b = this.b;
         char[] c = context.buffer;
@@ -1426,8 +1435,8 @@ public class ClassReader {
      * @param mv
      *            the visitor that must visit the annotations.
      */
-    private void readParameterAnnotations(int v, final String desc,
-            final char[] buf, final boolean visible, final MethodVisitor mv) {
+    private void readParameterAnnotations(int v, @NotNull final String desc,
+            final char[] buf, final boolean visible, @NotNull final MethodVisitor mv) {
         int i;
         int n = b[v++] & 0xFF;
         // workaround for a bug in javac (javac compiler generates a parameter
@@ -1473,7 +1482,7 @@ public class ClassReader {
      * @return the end offset of the annotation values.
      */
     private int readAnnotationValues(int v, final char[] buf,
-            final boolean named, final AnnotationVisitor av) {
+            final boolean named, @Nullable final AnnotationVisitor av) {
         int i = readUnsignedShort(v);
         v += 2;
         if (named) {
@@ -1508,7 +1517,7 @@ public class ClassReader {
      * @return the end offset of the annotation value.
      */
     private int readAnnotationValue(int v, final char[] buf, final String name,
-            final AnnotationVisitor av) {
+            @Nullable final AnnotationVisitor av) {
         int i;
         if (av == null) {
             switch (b[v] & 0xFF) {
@@ -1663,7 +1672,7 @@ public class ClassReader {
      * @param frame
      *            information about the class being parsed.
      */
-    private void getImplicitFrame(final Context frame) {
+    private void getImplicitFrame(@NotNull final Context frame) {
         String desc = frame.desc;
         Object[] locals = frame.local;
         int local = 0;
@@ -1738,7 +1747,7 @@ public class ClassReader {
      * @return the offset of the first byte following the parsed frame.
      */
     private int readFrame(int stackMap, boolean zip, boolean unzip,
-            Label[] labels, Context frame) {
+            Label[] labels, @NotNull Context frame) {
         char[] c = frame.buffer;
         int tag;
         int delta;
@@ -1942,7 +1951,8 @@ public class ClassReader {
      * @return the attribute that has been read, or <tt>null</tt> to skip this
      *         attribute.
      */
-    private Attribute readAttribute(final Attribute[] attrs, final String type,
+    @NotNull
+    private Attribute readAttribute(@NotNull final Attribute[] attrs, final String type,
             final int off, final int len, final char[] buf, final int codeOff,
             final Label[] labels) {
         for (int i = 0; i < attrs.length; ++i) {
@@ -2075,6 +2085,7 @@ public class ClassReader {
      *            sufficiently large. It is not automatically resized.
      * @return the String corresponding to the specified UTF8 item.
      */
+    @Nullable
     public String readUTF8(int index, final char[] buf) {
         int item = readUnsignedShort(index);
         if (index == 0 || item == 0) {
@@ -2100,6 +2111,7 @@ public class ClassReader {
      *            sufficiently large. It is not automatically resized.
      * @return the String corresponding to the specified UTF8 string.
      */
+    @NotNull
     private String readUTF(int index, final int utfLen, final char[] buf) {
         int endIndex = index + utfLen;
         byte[] b = this.b;
@@ -2150,6 +2162,7 @@ public class ClassReader {
      *            sufficiently large. It is not automatically resized.
      * @return the String corresponding to the specified class item.
      */
+    @Nullable
     public String readClass(final int index, final char[] buf) {
         // computes the start index of the CONSTANT_Class item in b
         // and reads the CONSTANT_Utf8 item designated by
@@ -2171,6 +2184,7 @@ public class ClassReader {
      *         {@link String}, {@link Type} or {@link Handle} corresponding to
      *         the given constant pool item.
      */
+    @Nullable
     public Object readConst(final int item, final char[] buf) {
         int index = items[item];
         switch (b[index - 1]) {

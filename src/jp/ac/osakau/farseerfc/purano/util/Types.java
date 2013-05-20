@@ -89,7 +89,8 @@ public class Types {
 				"Bad desc name: \"%s\"", desc));
 	}
 
-	@org.jetbrains.annotations.Nullable
+
+    @NotNull
     public MethodDesc method2full(@NotNull String desc) {
 		if (desc.length() < 2) {
 			throw new IllegalArgumentException(String.format(
@@ -105,8 +106,8 @@ public class Types {
 		List<String> args = Lists.transform(nextDesc(argDesc),
 				new Function<String, String>() {
 					@Override
-					@Nullable
-					public String apply(@Nullable String desc) {
+					@NotNull
+					public String apply(@NotNull String desc) {
 						return desc2full(desc);
 					}
 				});

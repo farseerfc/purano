@@ -29,6 +29,9 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * A dynamically extensible vector of bytes. This class is roughly equivalent to
  * a DataOutputStream on top of a ByteArrayOutputStream, but is more efficient.
@@ -74,6 +77,7 @@ public class ByteVector {
      *            a byte.
      * @return this byte vector.
      */
+    @NotNull
     public ByteVector putByte(final int b) {
         int length = this.length;
         if (length + 1 > data.length) {
@@ -94,6 +98,7 @@ public class ByteVector {
      *            another byte.
      * @return this byte vector.
      */
+    @NotNull
     ByteVector put11(final int b1, final int b2) {
         int length = this.length;
         if (length + 2 > data.length) {
@@ -114,6 +119,7 @@ public class ByteVector {
      *            a short.
      * @return this byte vector.
      */
+    @NotNull
     public ByteVector putShort(final int s) {
         int length = this.length;
         if (length + 2 > data.length) {
@@ -136,6 +142,7 @@ public class ByteVector {
      *            a short.
      * @return this byte vector.
      */
+    @NotNull
     ByteVector put12(final int b, final int s) {
         int length = this.length;
         if (length + 3 > data.length) {
@@ -157,6 +164,7 @@ public class ByteVector {
      *            an int.
      * @return this byte vector.
      */
+    @NotNull
     public ByteVector putInt(final int i) {
         int length = this.length;
         if (length + 4 > data.length) {
@@ -179,6 +187,7 @@ public class ByteVector {
      *            a long.
      * @return this byte vector.
      */
+    @NotNull
     public ByteVector putLong(final long l) {
         int length = this.length;
         if (length + 8 > data.length) {
@@ -207,7 +216,8 @@ public class ByteVector {
      *            a String.
      * @return this byte vector.
      */
-    public ByteVector putUTF8(final String s) {
+    @NotNull
+    public ByteVector putUTF8(@NotNull final String s) {
         int charLength = s.length();
         int len = length;
         if (len + 2 + charLength > data.length) {
@@ -278,7 +288,8 @@ public class ByteVector {
      *            number of bytes of b that must be copied.
      * @return this byte vector.
      */
-    public ByteVector putByteArray(final byte[] b, final int off, final int len) {
+    @NotNull
+    public ByteVector putByteArray(@Nullable final byte[] b, final int off, final int len) {
         if (length + len > data.length) {
             enlarge(len);
         }

@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.tree;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
 /**
@@ -87,7 +88,7 @@ public class TryCatchBlockNode {
      * @param mv
      *            a method visitor.
      */
-    public void accept(final MethodVisitor mv) {
+    public void accept(@NotNull final MethodVisitor mv) {
         mv.visitTryCatchBlock(start.getLabel(), end.getLabel(),
                 handler == null ? null : handler.getLabel(), type);
     }

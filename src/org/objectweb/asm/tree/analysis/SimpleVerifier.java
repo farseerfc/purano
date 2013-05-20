@@ -31,6 +31,8 @@ package org.objectweb.asm.tree.analysis;
 
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 /**
@@ -133,8 +135,9 @@ public class SimpleVerifier extends BasicVerifier {
         this.loader = loader;
     }
 
+    @Nullable
     @Override
-    public BasicValue newValue(final Type type) {
+    public BasicValue newValue(@Nullable final Type type) {
         if (type == null) {
             return BasicValue.UNINITIALIZED_VALUE;
         }
@@ -167,14 +170,15 @@ public class SimpleVerifier extends BasicVerifier {
     }
 
     @Override
-    protected boolean isArrayValue(final BasicValue value) {
+    protected boolean isArrayValue(@NotNull final BasicValue value) {
         Type t = value.getType();
         return t != null
                 && ("Lnull;".equals(t.getDescriptor()) || t.getSort() == Type.ARRAY);
     }
 
+    @Nullable
     @Override
-    protected BasicValue getElementValue(final BasicValue objectArrayValue)
+    protected BasicValue getElementValue(@NotNull final BasicValue objectArrayValue)
             throws AnalyzerException {
         Type arrayType = objectArrayValue.getType();
         if (arrayType != null) {
@@ -189,8 +193,8 @@ public class SimpleVerifier extends BasicVerifier {
     }
 
     @Override
-    protected boolean isSubTypeOf(final BasicValue value,
-            final BasicValue expected) {
+    protected boolean isSubTypeOf(@NotNull final BasicValue value,
+            @NotNull final BasicValue expected) {
         Type expectedType = expected.getType();
         Type type = value.getType();
         switch (expectedType.getSort()) {
@@ -214,8 +218,9 @@ public class SimpleVerifier extends BasicVerifier {
         }
     }
 
+    @Nullable
     @Override
-    public BasicValue merge(final BasicValue v, final BasicValue w) {
+    public BasicValue merge(@NotNull final BasicValue v, @NotNull final BasicValue w) {
         if (!v.equals(w)) {
             Type t = v.getType();
             Type u = w.getType();
@@ -255,14 +260,15 @@ public class SimpleVerifier extends BasicVerifier {
         return v;
     }
 
-    protected boolean isInterface(final Type t) {
+    protected boolean isInterface(@NotNull final Type t) {
         if (currentClass != null && t.equals(currentClass)) {
             return isInterface;
         }
         return getClass(t).isInterface();
     }
 
-    protected Type getSuperClass(final Type t) {
+    @Nullable
+    protected Type getSuperClass(@NotNull final Type t) {
         if (currentClass != null && t.equals(currentClass)) {
             return currentSuperClass;
         }
@@ -270,7 +276,7 @@ public class SimpleVerifier extends BasicVerifier {
         return c == null ? null : Type.getType(c);
     }
 
-    protected boolean isAssignableFrom(final Type t, final Type u) {
+    protected boolean isAssignableFrom(@NotNull final Type t, @NotNull final Type u) {
         if (t.equals(u)) {
             return true;
         }
@@ -306,7 +312,7 @@ public class SimpleVerifier extends BasicVerifier {
         return tc.isAssignableFrom(getClass(u));
     }
 
-    protected Class<?> getClass(final Type t) {
+    protected Class<?> getClass(@NotNull final Type t) {
         try {
             if (t.getSort() == Type.ARRAY) {
                 return Class.forName(t.getDescriptor().replace('/', '.'),

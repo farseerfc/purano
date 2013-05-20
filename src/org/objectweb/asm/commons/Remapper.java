@@ -30,6 +30,8 @@
 
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
@@ -68,7 +70,7 @@ public abstract class Remapper {
         return desc;
     }
 
-    private Type mapType(Type t) {
+    private Type mapType(@NotNull Type t) {
         switch (t.getSort()) {
         case Type.ARRAY:
             String s = mapDesc(t.getElementType().getDescriptor());
@@ -85,14 +87,16 @@ public abstract class Remapper {
         return t;
     }
 
-    public String mapType(String type) {
+    @Nullable
+    public String mapType(@Nullable String type) {
         if (type == null) {
             return null;
         }
         return mapType(Type.getObjectType(type)).getInternalName();
     }
 
-    public String[] mapTypes(String[] types) {
+    @Nullable
+    public String[] mapTypes(@NotNull String[] types) {
         String[] newTypes = null;
         boolean needMapping = false;
         for (int i = 0; i < types.length; i++) {
@@ -151,7 +155,8 @@ public abstract class Remapper {
      *            signature parameter of the ClassVisitor.visitField or
      *            MethodVisitor.visitLocalVariable methods
      */
-    public String mapSignature(String signature, boolean typeSignature) {
+    @Nullable
+    public String mapSignature(@Nullable String signature, boolean typeSignature) {
         if (signature == null) {
             return null;
         }
@@ -166,6 +171,7 @@ public abstract class Remapper {
         return w.toString();
     }
 
+    @NotNull
     protected SignatureVisitor createRemappingSignatureAdapter(
             SignatureVisitor v) {
         return new RemappingSignatureAdapter(v, this);

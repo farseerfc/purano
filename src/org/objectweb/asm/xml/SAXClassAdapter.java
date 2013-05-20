@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.xml;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -89,7 +91,7 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visitSource(final String source, final String debug) {
+    public void visitSource(@Nullable final String source, @Nullable final String debug) {
         AttributesImpl att = new AttributesImpl();
         if (source != null) {
             att.addAttribute("", "file", "file", "", encode(source));
@@ -102,8 +104,8 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visitOuterClass(final String owner, final String name,
-            final String desc) {
+    public void visitOuterClass(final String owner, @Nullable final String name,
+            @Nullable final String desc) {
         AttributesImpl att = new AttributesImpl();
         att.addAttribute("", "owner", "owner", "", owner);
         if (name != null) {
@@ -116,6 +118,7 @@ public final class SAXClassAdapter extends ClassVisitor {
         sa.addElement("outerclass", att);
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -124,9 +127,9 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visit(final int version, final int access, final String name,
-            final String signature, final String superName,
-            final String[] interfaces) {
+    public void visit(final int version, final int access, @Nullable final String name,
+            @Nullable final String signature, @Nullable final String superName,
+            @Nullable final String[] interfaces) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access | ACCESS_CLASS, sb);
 
@@ -159,9 +162,10 @@ public final class SAXClassAdapter extends ClassVisitor {
         sa.addEnd("interfaces");
     }
 
+    @NotNull
     @Override
     public FieldVisitor visitField(final int access, final String name,
-            final String desc, final String signature, final Object value) {
+            final String desc, @Nullable final String signature, @Nullable final Object value) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access | ACCESS_FIELD, sb);
 
@@ -180,9 +184,10 @@ public final class SAXClassAdapter extends ClassVisitor {
         return new SAXFieldAdapter(sa, att);
     }
 
+    @NotNull
     @Override
     public MethodVisitor visitMethod(final int access, final String name,
-            final String desc, final String signature, final String[] exceptions) {
+            final String desc, @Nullable final String signature, @Nullable final String[] exceptions) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access, sb);
 
@@ -209,8 +214,8 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public final void visitInnerClass(final String name,
-            final String outerName, final String innerName, final int access) {
+    public final void visitInnerClass(@Nullable final String name,
+            @Nullable final String outerName, @Nullable final String innerName, final int access) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access | ACCESS_INNER, sb);
 
@@ -236,7 +241,8 @@ public final class SAXClassAdapter extends ClassVisitor {
         }
     }
 
-    static final String encode(final String s) {
+    @NotNull
+    static final String encode(@NotNull final String s) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -259,7 +265,7 @@ public final class SAXClassAdapter extends ClassVisitor {
         return sb.toString();
     }
 
-    static void appendAccess(final int access, final StringBuffer sb) {
+    static void appendAccess(final int access, @NotNull final StringBuffer sb) {
         if ((access & Opcodes.ACC_PUBLIC) != 0) {
             sb.append("public ");
         }

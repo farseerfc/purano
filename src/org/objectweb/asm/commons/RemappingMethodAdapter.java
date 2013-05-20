@@ -30,6 +30,8 @@
 
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -120,7 +122,7 @@ public class RemappingMethodAdapter extends LocalVariablesSorter {
 
     @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
-            Object... bsmArgs) {
+            @NotNull Object... bsmArgs) {
         for (int i = 0; i < bsmArgs.length; i++) {
             bsmArgs[i] = remapper.mapValue(bsmArgs[i]);
         }
@@ -147,7 +149,7 @@ public class RemappingMethodAdapter extends LocalVariablesSorter {
 
     @Override
     public void visitTryCatchBlock(Label start, Label end, Label handler,
-            String type) {
+            @Nullable String type) {
         super.visitTryCatchBlock(start, end, handler, type == null ? null
                 : remapper.mapType(type));
     }

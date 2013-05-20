@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.tree;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassVisitor;
 
 /**
@@ -95,7 +96,7 @@ public class InnerClassNode {
      * @param cv
      *            a class visitor.
      */
-    public void accept(final ClassVisitor cv) {
+    public void accept(@NotNull final ClassVisitor cv) {
         cv.visitInnerClass(name, outerName, innerName, access);
     }
 }

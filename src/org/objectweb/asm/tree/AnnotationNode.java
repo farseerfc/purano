@@ -32,6 +32,8 @@ package org.objectweb.asm.tree;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -124,6 +126,7 @@ public class AnnotationNode extends AnnotationVisitor {
         values.add(new String[] { desc, value });
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String name,
             final String desc) {
@@ -138,6 +141,7 @@ public class AnnotationNode extends AnnotationVisitor {
         return annotation;
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitArray(final String name) {
         if (values == null) {
@@ -178,7 +182,7 @@ public class AnnotationNode extends AnnotationVisitor {
      * @param av
      *            an annotation visitor. Maybe <tt>null</tt>.
      */
-    public void accept(final AnnotationVisitor av) {
+    public void accept(@Nullable final AnnotationVisitor av) {
         if (av != null) {
             if (values != null) {
                 for (int i = 0; i < values.size(); i += 2) {
@@ -201,7 +205,7 @@ public class AnnotationNode extends AnnotationVisitor {
      * @param value
      *            the actual value.
      */
-    static void accept(final AnnotationVisitor av, final String name,
+    static void accept(@Nullable final AnnotationVisitor av, final String name,
             final Object value) {
         if (av != null) {
             if (value instanceof String[]) {

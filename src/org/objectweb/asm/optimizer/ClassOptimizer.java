@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.optimizer;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -55,6 +57,7 @@ public class ClassOptimizer extends RemappingClassAdapter {
         super(cv, remapper);
     }
 
+    @Nullable
     FieldVisitor syntheticFieldVisitor(final int access, final String name,
             final String desc) {
         return super.visitField(access, name, desc, null, null);
@@ -65,7 +68,7 @@ public class ClassOptimizer extends RemappingClassAdapter {
     // ------------------------------------------------------------------------
 
     @Override
-    public void visit(final int version, final int access, final String name,
+    public void visit(final int version, final int access, @NotNull final String name,
             final String signature, final String superName,
             final String[] interfaces) {
         super.visit(Opcodes.V1_2, access, name, null, superName, interfaces);
@@ -89,6 +92,7 @@ public class ClassOptimizer extends RemappingClassAdapter {
         // remove debug info
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -107,9 +111,10 @@ public class ClassOptimizer extends RemappingClassAdapter {
         // remove debug info
     }
 
+    @Nullable
     @Override
     public FieldVisitor visitField(final int access, final String name,
-            final String desc, final String signature, final Object value) {
+            @NotNull final String desc, final String signature, final Object value) {
         String s = remapper.mapFieldName(className, name, desc);
         if ("-".equals(s)) {
             return null;
@@ -134,8 +139,9 @@ public class ClassOptimizer extends RemappingClassAdapter {
         return null; // remove debug info
     }
 
+    @Nullable
     @Override
-    public MethodVisitor visitMethod(final int access, final String name,
+    public MethodVisitor visitMethod(final int access, @NotNull final String name,
             final String desc, final String signature, final String[] exceptions) {
         String s = remapper.mapMethodName(className, name, desc);
         if ("-".equals(s)) {
@@ -159,6 +165,7 @@ public class ClassOptimizer extends RemappingClassAdapter {
         }
     }
 
+    @NotNull
     @Override
     protected MethodVisitor createRemappingMethodAdapter(int access,
             String newDesc, MethodVisitor mv) {

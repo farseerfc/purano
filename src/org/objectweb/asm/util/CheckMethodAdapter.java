@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -135,11 +137,13 @@ public class CheckMethodAdapter extends MethodVisitor {
     /**
      * Code of the visit method to be used for each opcode.
      */
+    @NotNull
     private static final int[] TYPE;
 
     /**
      * The Label.status field.
      */
+    @Nullable
     private static Field labelStatusField;
 
     static {
@@ -432,7 +436,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      *            a map of already visited labels (in other methods).
      */
     public CheckMethodAdapter(final int access, final String name,
-            final String desc, final MethodVisitor cmv,
+            final String desc, @NotNull final MethodVisitor cmv,
             final Map<Label, Integer> labels) {
         this(new MethodNode(access, name, desc, null, null) {
             @Override
@@ -461,23 +465,26 @@ public class CheckMethodAdapter extends MethodVisitor {
         this.access = access;
     }
 
+    @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
+    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         checkEndMethod();
         checkDesc(desc, false);
         return new CheckAnnotationAdapter(super.visitAnnotation(desc, visible));
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         checkEndMethod();
         return new CheckAnnotationAdapter(super.visitAnnotationDefault(), false);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
-            final String desc, final boolean visible) {
+            @NotNull final String desc, final boolean visible) {
         checkEndMethod();
         checkDesc(desc, false);
         return new CheckAnnotationAdapter(super.visitParameterAnnotation(
@@ -485,7 +492,7 @@ public class CheckMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitAttribute(final Attribute attr) {
+    public void visitAttribute(@Nullable final Attribute attr) {
         checkEndMethod();
         if (attr == null) {
             throw new IllegalArgumentException(
@@ -505,7 +512,7 @@ public class CheckMethodAdapter extends MethodVisitor {
 
     @Override
     public void visitFrame(final int type, final int nLocal,
-            final Object[] local, final int nStack, final Object[] stack) {
+            @Nullable final Object[] local, final int nStack, @Nullable final Object[] stack) {
         if (insnCount == lastFrame) {
             throw new IllegalStateException(
                     "At most one frame can be visited at a given code location.");
@@ -621,7 +628,7 @@ public class CheckMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, final String type) {
+    public void visitTypeInsn(final int opcode, @NotNull final String type) {
         checkStartCode();
         checkEndCode();
         checkOpcode(opcode, 3);
@@ -636,7 +643,7 @@ public class CheckMethodAdapter extends MethodVisitor {
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+            @NotNull final String name, @NotNull final String desc) {
         checkStartCode();
         checkEndCode();
         checkOpcode(opcode, 4);
@@ -663,8 +670,8 @@ public class CheckMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
-            Object... bsmArgs) {
+    public void visitInvokeDynamicInsn(String name, String desc, @NotNull Handle bsm,
+            @NotNull Object... bsmArgs) {
         checkStartCode();
         checkEndCode();
         checkMethodIdentifier(version, name, "name");
@@ -726,7 +733,7 @@ public class CheckMethodAdapter extends MethodVisitor {
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, final Label... labels) {
+            final Label dflt, @Nullable final Label... labels) {
         checkStartCode();
         checkEndCode();
         if (max < min) {
@@ -751,8 +758,8 @@ public class CheckMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            final Label[] labels) {
+    public void visitLookupSwitchInsn(final Label dflt, @Nullable final int[] keys,
+            @Nullable final Label[] labels) {
         checkEndCode();
         checkStartCode();
         checkLabel(dflt, false, "default label");
@@ -774,7 +781,7 @@ public class CheckMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(final String desc, final int dims) {
+    public void visitMultiANewArrayInsn(@NotNull final String desc, final int dims) {
         checkStartCode();
         checkEndCode();
         checkDesc(desc, false);
@@ -798,7 +805,7 @@ public class CheckMethodAdapter extends MethodVisitor {
 
     @Override
     public void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, final String type) {
+            final Label handler, @Nullable final String type) {
         checkStartCode();
         checkEndCode();
         checkLabel(start, false, "start label");
@@ -821,7 +828,7 @@ public class CheckMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitLocalVariable(final String name, final String desc,
+    public void visitLocalVariable(@NotNull final String name, @NotNull final String desc,
             final String signature, final Label start, final Label end,
             final int index) {
         checkStartCode();
@@ -1052,7 +1059,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param msg
      *            a message to be used in case of error.
      */
-    static void checkUnqualifiedName(int version, final String name,
+    static void checkUnqualifiedName(int version, @NotNull final String name,
             final String msg) {
         if ((version & 0xFFFF) < Opcodes.V1_5) {
             checkIdentifier(name, msg);
@@ -1092,7 +1099,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param msg
      *            a message to be used in case of error.
      */
-    static void checkIdentifier(final String name, final int start,
+    static void checkIdentifier(@Nullable final String name, final int start,
             final int end, final String msg) {
         if (name == null || (end == -1 ? name.length() <= start : end <= start)) {
             throw new IllegalArgumentException("Invalid " + msg
@@ -1121,7 +1128,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param msg
      *            a message to be used in case of error.
      */
-    static void checkMethodIdentifier(int version, final String name,
+    static void checkMethodIdentifier(int version, @Nullable final String name,
             final String msg) {
         if (name == null || name.length() == 0) {
             throw new IllegalArgumentException("Invalid " + msg
@@ -1162,7 +1169,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param msg
      *            a message to be used in case of error.
      */
-    static void checkInternalName(final String name, final String msg) {
+    static void checkInternalName(@Nullable final String name, final String msg) {
         if (name == null || name.length() == 0) {
             throw new IllegalArgumentException("Invalid " + msg
                     + " (must not be null or empty)");
@@ -1188,7 +1195,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param msg
      *            a message to be used in case of error.
      */
-    static void checkInternalName(final String name, final int start,
+    static void checkInternalName(@NotNull final String name, final int start,
             final int end, final String msg) {
         int max = end == -1 ? name.length() : end;
         try {
@@ -1219,7 +1226,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param canBeVoid
      *            <tt>true</tt> if <tt>V</tt> can be considered valid.
      */
-    static void checkDesc(final String desc, final boolean canBeVoid) {
+    static void checkDesc(@NotNull final String desc, final boolean canBeVoid) {
         int end = checkDesc(desc, 0, canBeVoid);
         if (end != desc.length()) {
             throw new IllegalArgumentException("Invalid descriptor: " + desc);
@@ -1237,7 +1244,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      *            <tt>true</tt> if <tt>V</tt> can be considered valid.
      * @return the index of the last character of the type decriptor, plus one.
      */
-    static int checkDesc(final String desc, final int start,
+    static int checkDesc(@Nullable final String desc, final int start,
             final boolean canBeVoid) {
         if (desc == null || start >= desc.length()) {
             throw new IllegalArgumentException(
@@ -1296,7 +1303,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param desc
      *            the string to be checked.
      */
-    static void checkMethodDesc(final String desc) {
+    static void checkMethodDesc(@Nullable final String desc) {
         if (desc == null || desc.length() == 0) {
             throw new IllegalArgumentException(
                     "Invalid method descriptor (must not be null or empty)");
@@ -1331,7 +1338,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * @param msg
      *            a message to be used in case of error.
      */
-    void checkLabel(final Label label, final boolean checkVisited,
+    void checkLabel(@Nullable final Label label, final boolean checkVisited,
             final String msg) {
         if (label == null) {
             throw new IllegalArgumentException("Invalid " + msg
@@ -1368,6 +1375,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      * 
      * @return the Field object corresponding to the Label.status field.
      */
+    @Nullable
     private static Field getLabelStatusField() {
         if (labelStatusField == null) {
             labelStatusField = getLabelField("a");
@@ -1385,6 +1393,7 @@ public class CheckMethodAdapter extends MethodVisitor {
      *            a field name.
      * @return the field of the Label class whose name is given, or null.
      */
+    @Nullable
     private static Field getLabelField(final String name) {
         try {
             Field f = Label.class.getDeclaredField(name);

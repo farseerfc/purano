@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.FieldVisitor;
@@ -66,6 +68,7 @@ public class CheckFieldAdapter extends FieldVisitor {
         super(api, fv);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -75,7 +78,7 @@ public class CheckFieldAdapter extends FieldVisitor {
     }
 
     @Override
-    public void visitAttribute(final Attribute attr) {
+    public void visitAttribute(@Nullable final Attribute attr) {
         checkEnd();
         if (attr == null) {
             throw new IllegalArgumentException(

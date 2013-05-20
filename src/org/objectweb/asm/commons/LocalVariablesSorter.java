@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -56,11 +57,13 @@ public class LocalVariablesSorter extends MethodVisitor {
      * i of size 1 is remapped to 'mapping[2*i]', while a local variable at
      * index i of size 2 is remapped to 'mapping[2*i+1]'.
      */
+    @NotNull
     private int[] mapping = new int[40];
 
     /**
      * Array used to store stack map local variable types after remapping.
      */
+    @NotNull
     private Object[] newLocals = new Object[20];
 
     /**
@@ -249,7 +252,7 @@ public class LocalVariablesSorter extends MethodVisitor {
      *            the type of the local variable to be created.
      * @return the identifier of the newly created local variable.
      */
-    public int newLocal(final Type type) {
+    public int newLocal(@NotNull final Type type) {
         Object t;
         switch (type.getSort()) {
         case Type.BOOLEAN:
@@ -327,7 +330,7 @@ public class LocalVariablesSorter extends MethodVisitor {
         newLocals[local] = type;
     }
 
-    private int remap(final int var, final Type type) {
+    private int remap(final int var, @NotNull final Type type) {
         if (var + type.getSize() <= firstLocal) {
             return var;
         }
@@ -352,7 +355,7 @@ public class LocalVariablesSorter extends MethodVisitor {
         return value;
     }
 
-    protected int newLocalMapping(final Type type) {
+    protected int newLocalMapping(@NotNull final Type type) {
         int local = nextLocal;
         nextLocal += type.getSize();
         return local;

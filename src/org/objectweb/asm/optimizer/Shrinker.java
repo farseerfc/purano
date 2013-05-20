@@ -43,6 +43,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
@@ -60,7 +61,7 @@ public class Shrinker {
 
     static final HashMap<String, String> MAPPING = new HashMap<String, String>();
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(@NotNull final String[] args) throws IOException {
         Properties properties = new Properties();
         int n = args.length - 1;
         for (int i = 0; i < n - 1; ++i) {
@@ -96,7 +97,7 @@ public class Shrinker {
         }
     }
 
-    static void optimize(final File f, final File d, final Remapper remapper)
+    static void optimize(@NotNull final File f, final File d, @NotNull final Remapper remapper)
             throws IOException {
         if (f.isDirectory()) {
             File[] files = f.listFiles();
@@ -146,7 +147,7 @@ public class Shrinker {
 
     static class ConstantComparator implements Comparator<Constant> {
 
-        public int compare(final Constant c1, final Constant c2) {
+        public int compare(@NotNull final Constant c1, @NotNull final Constant c2) {
             int d = getSort(c1) - getSort(c2);
             if (d == 0) {
                 switch (c1.type) {
@@ -201,7 +202,7 @@ public class Shrinker {
             return d;
         }
 
-        private static int compareHandle(Handle h1, Handle h2) {
+        private static int compareHandle(@NotNull Handle h1, @NotNull Handle h2) {
             int d = h1.getTag() - h2.getTag();
             if (d == 0) {
                 d = h1.getOwner().compareTo(h2.getOwner());
@@ -215,11 +216,11 @@ public class Shrinker {
             return d;
         }
 
-        private static int compareType(Type mtype1, Type mtype2) {
+        private static int compareType(@NotNull Type mtype1, @NotNull Type mtype2) {
             return mtype1.getDescriptor().compareTo(mtype2.getDescriptor());
         }
 
-        private static int compareObjects(Object[] objVals1, Object[] objVals2) {
+        private static int compareObjects(@NotNull Object[] objVals1, @NotNull Object[] objVals2) {
             int length = objVals1.length;
             int d = length - objVals2.length;
             if (d == 0) {
@@ -247,7 +248,7 @@ public class Shrinker {
             return 0;
         }
 
-        private static int getSort(final Constant c) {
+        private static int getSort(@NotNull final Constant c) {
             switch (c.type) {
             case 'I':
                 return 0;

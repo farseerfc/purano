@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.util;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -72,6 +74,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
      */
     private int arrayStack;
 
+    @NotNull
     private String separator = "";
 
     public TraceSignatureVisitor(final int access) {
@@ -92,6 +95,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         seenInterfaceBound = false;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitClassBound() {
         separator = " extends ";
@@ -99,6 +103,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitInterfaceBound() {
         separator = seenInterfaceBound ? ", " : " extends ";
@@ -107,6 +112,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitSuperclass() {
         endFormals();
@@ -115,6 +121,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitInterface() {
         separator = seenInterface ? ", " : isInterface ? " extends "
@@ -124,6 +131,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitParameterType() {
         endFormals();
@@ -137,6 +145,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitReturnType() {
         endFormals();
@@ -150,6 +159,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         return new TraceSignatureVisitor(returnType);
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitExceptionType() {
         if (exceptions == null) {
@@ -202,6 +212,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         endType();
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitArrayType() {
         startType();
@@ -210,7 +221,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
     }
 
     @Override
-    public void visitClassType(final String name) {
+    public void visitClassType(@NotNull final String name) {
         if ("java/lang/Object".equals(name)) {
             // Map<java.lang.Object,java.util.List>
             // or
@@ -229,7 +240,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
     }
 
     @Override
-    public void visitInnerClassType(final String name) {
+    public void visitInnerClassType(@NotNull final String name) {
         if (argumentStack % 2 != 0) {
             declaration.append('>');
         }
@@ -251,6 +262,7 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         declaration.append('?');
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitTypeArgument(final char tag) {
         if (argumentStack % 2 == 0) {
@@ -279,14 +291,17 @@ public final class TraceSignatureVisitor extends SignatureVisitor {
         endType();
     }
 
+    @NotNull
     public String getDeclaration() {
         return declaration.toString();
     }
 
+    @Nullable
     public String getReturnType() {
         return returnType == null ? null : returnType.toString();
     }
 
+    @Nullable
     public String getExceptions() {
         return exceptions == null ? null : exceptions.toString();
     }

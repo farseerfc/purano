@@ -32,6 +32,8 @@ package org.objectweb.asm.tree;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.MethodVisitor;
 
 /**
@@ -130,11 +132,13 @@ public abstract class AbstractInsnNode {
     /**
      * Previous instruction in the list to which this instruction belongs.
      */
+    @Nullable
     AbstractInsnNode prev;
 
     /**
      * Next instruction in the list to which this instruction belongs.
      */
+    @Nullable
     AbstractInsnNode next;
 
     /**
@@ -180,6 +184,7 @@ public abstract class AbstractInsnNode {
      * @return the previous instruction in the list to which this instruction
      *         belongs, if any. May be <tt>null</tt>.
      */
+    @Nullable
     public AbstractInsnNode getPrevious() {
         return prev;
     }
@@ -191,6 +196,7 @@ public abstract class AbstractInsnNode {
      * @return the next instruction in the list to which this instruction
      *         belongs, if any. May be <tt>null</tt>.
      */
+    @Nullable
     public AbstractInsnNode getNext() {
         return next;
     }
@@ -224,7 +230,7 @@ public abstract class AbstractInsnNode {
      * @return the clone of the given label.
      */
     static LabelNode clone(final LabelNode label,
-            final Map<LabelNode, LabelNode> map) {
+            @NotNull final Map<LabelNode, LabelNode> map) {
         return map.get(label);
     }
 
@@ -237,8 +243,9 @@ public abstract class AbstractInsnNode {
      *            a map from LabelNodes to cloned LabelNodes.
      * @return the clones of the given labels.
      */
-    static LabelNode[] clone(final List<LabelNode> labels,
-            final Map<LabelNode, LabelNode> map) {
+    @NotNull
+    static LabelNode[] clone(@NotNull final List<LabelNode> labels,
+            @NotNull final Map<LabelNode, LabelNode> map) {
         LabelNode[] clones = new LabelNode[labels.size()];
         for (int i = 0; i < clones.length; ++i) {
             clones[i] = map.get(labels.get(i));

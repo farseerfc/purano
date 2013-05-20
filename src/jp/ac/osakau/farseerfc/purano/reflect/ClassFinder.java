@@ -3,6 +3,7 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 import com.google.common.base.Joiner;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -11,19 +12,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+@Slf4j
 public class ClassFinder {
-	private static final Logger log= LoggerFactory.getLogger(ClassFinder.class);
-	
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
-	@NotNull
-    private final Collection<String> prefix;
-	@NotNull
+    @NotNull
     private @Getter List<MethodRep> toResolve = new ArrayList<>();
 	private final Set<String> classTargets = new HashSet<>() ;
 	
 	public ClassFinder(@NotNull Collection<String> prefix){
-		this.prefix = prefix;
-		findClasses(prefix);
+        findClasses(prefix);
 		
 //		Set<String> toLoadClass;
 //		Set<String> loadedClass = new HashSet<>();

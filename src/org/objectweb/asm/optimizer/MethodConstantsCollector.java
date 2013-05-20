@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.optimizer;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -51,14 +53,16 @@ public class MethodConstantsCollector extends MethodVisitor {
         this.cp = cp;
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         cp.newUTF8("AnnotationDefault");
         return new AnnotationConstantsCollector(mv.visitAnnotationDefault(), cp);
     }
 
+    @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
+    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         cp.newUTF8(desc);
         if (visible) {
@@ -70,9 +74,10 @@ public class MethodConstantsCollector extends MethodVisitor {
                 visible), cp);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
-            final String desc, final boolean visible) {
+            @NotNull final String desc, final boolean visible) {
         cp.newUTF8(desc);
         if (visible) {
             cp.newUTF8("RuntimeVisibleParameterAnnotations");
@@ -84,28 +89,28 @@ public class MethodConstantsCollector extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, final String type) {
+    public void visitTypeInsn(final int opcode, @NotNull final String type) {
         cp.newClass(type);
         mv.visitTypeInsn(opcode, type);
     }
 
     @Override
-    public void visitFieldInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+    public void visitFieldInsn(final int opcode, @NotNull final String owner,
+            @NotNull final String name, @NotNull final String desc) {
         cp.newField(owner, name, desc);
         mv.visitFieldInsn(opcode, owner, name, desc);
     }
 
     @Override
-    public void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+    public void visitMethodInsn(final int opcode, @NotNull final String owner,
+            @NotNull final String name, @NotNull final String desc) {
         boolean itf = opcode == Opcodes.INVOKEINTERFACE;
         cp.newMethod(owner, name, desc, itf);
         mv.visitMethodInsn(opcode, owner, name, desc);
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
+    public void visitInvokeDynamicInsn(@NotNull String name, @NotNull String desc, @NotNull Handle bsm,
             Object... bsmArgs) {
         cp.newInvokeDynamic(name, desc, bsm, bsmArgs);
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -118,14 +123,14 @@ public class MethodConstantsCollector extends MethodVisitor {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(final String desc, final int dims) {
+    public void visitMultiANewArrayInsn(@NotNull final String desc, final int dims) {
         cp.newClass(desc);
         mv.visitMultiANewArrayInsn(desc, dims);
     }
 
     @Override
     public void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, final String type) {
+            final Label handler, @Nullable final String type) {
         if (type != null) {
             cp.newClass(type);
         }
@@ -133,8 +138,8 @@ public class MethodConstantsCollector extends MethodVisitor {
     }
 
     @Override
-    public void visitLocalVariable(final String name, final String desc,
-            final String signature, final Label start, final Label end,
+    public void visitLocalVariable(@NotNull final String name, @NotNull final String desc,
+            @Nullable final String signature, final Label start, final Label end,
             final int index) {
         if (signature != null) {
             cp.newUTF8("LocalVariableTypeTable");

@@ -31,6 +31,8 @@ package org.objectweb.asm.tree.analysis;
 
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -60,8 +62,9 @@ public class BasicInterpreter extends Interpreter<BasicValue> implements
         super(api);
     }
 
+    @Nullable
     @Override
-    public BasicValue newValue(final Type type) {
+    public BasicValue newValue(@Nullable final Type type) {
         if (type == null) {
             return BasicValue.UNINITIALIZED_VALUE;
         }
@@ -88,8 +91,9 @@ public class BasicInterpreter extends Interpreter<BasicValue> implements
         }
     }
 
+    @Nullable
     @Override
-    public BasicValue newOperation(final AbstractInsnNode insn)
+    public BasicValue newOperation(@NotNull final AbstractInsnNode insn)
             throws AnalyzerException {
         switch (insn.getOpcode()) {
         case ACONST_NULL:
@@ -162,8 +166,9 @@ public class BasicInterpreter extends Interpreter<BasicValue> implements
         return value;
     }
 
+    @Nullable
     @Override
-    public BasicValue unaryOperation(final AbstractInsnNode insn,
+    public BasicValue unaryOperation(@NotNull final AbstractInsnNode insn,
             final BasicValue value) throws AnalyzerException {
         switch (insn.getOpcode()) {
         case INEG:
@@ -250,8 +255,9 @@ public class BasicInterpreter extends Interpreter<BasicValue> implements
         }
     }
 
+    @Nullable
     @Override
-    public BasicValue binaryOperation(final AbstractInsnNode insn,
+    public BasicValue binaryOperation(@NotNull final AbstractInsnNode insn,
             final BasicValue value1, final BasicValue value2)
             throws AnalyzerException {
         switch (insn.getOpcode()) {
@@ -321,6 +327,7 @@ public class BasicInterpreter extends Interpreter<BasicValue> implements
         }
     }
 
+    @Nullable
     @Override
     public BasicValue ternaryOperation(final AbstractInsnNode insn,
             final BasicValue value1, final BasicValue value2,
@@ -328,8 +335,9 @@ public class BasicInterpreter extends Interpreter<BasicValue> implements
         return null;
     }
 
+    @Nullable
     @Override
-    public BasicValue naryOperation(final AbstractInsnNode insn,
+    public BasicValue naryOperation(@NotNull final AbstractInsnNode insn,
             final List<? extends BasicValue> values) throws AnalyzerException {
         int opcode = insn.getOpcode();
         if (opcode == MULTIANEWARRAY) {
@@ -348,8 +356,9 @@ public class BasicInterpreter extends Interpreter<BasicValue> implements
             throws AnalyzerException {
     }
 
+    @Nullable
     @Override
-    public BasicValue merge(final BasicValue v, final BasicValue w) {
+    public BasicValue merge(@NotNull final BasicValue v, final BasicValue w) {
         if (!v.equals(w)) {
             return BasicValue.UNINITIALIZED_VALUE;
         }

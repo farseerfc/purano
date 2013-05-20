@@ -29,6 +29,9 @@
  */
 package org.objectweb.asm.tree.analysis;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.AbstractSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,8 +47,10 @@ class SmallSet<E> extends AbstractSet<E> implements Iterator<E> {
 
     // if e1 is null, e2 must be null; otherwise e2 must be different from e1
 
+    @Nullable
     E e1, e2;
 
+    @Nullable
     static final <T> Set<T> emptySet() {
         return new SmallSet<T>(null, null);
     }
@@ -59,6 +64,7 @@ class SmallSet<E> extends AbstractSet<E> implements Iterator<E> {
     // Implementation of inherited abstract methods
     // -------------------------------------------------------------------------
 
+    @NotNull
     @Override
     public Iterator<E> iterator() {
         return new SmallSet<E>(e1, e2);
@@ -77,6 +83,7 @@ class SmallSet<E> extends AbstractSet<E> implements Iterator<E> {
         return e1 != null;
     }
 
+    @Nullable
     public E next() {
         if (e1 == null) {
             throw new NoSuchElementException();
@@ -94,7 +101,8 @@ class SmallSet<E> extends AbstractSet<E> implements Iterator<E> {
     // Utility methods
     // -------------------------------------------------------------------------
 
-    Set<E> union(final SmallSet<E> s) {
+    @Nullable
+    Set<E> union(@NotNull final SmallSet<E> s) {
         if ((s.e1 == e1 && s.e2 == e2) || (s.e1 == e2 && s.e2 == e1)) {
             return this; // if the two sets are equal, return this
         }

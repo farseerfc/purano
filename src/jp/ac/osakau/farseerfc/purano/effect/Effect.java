@@ -24,16 +24,18 @@ public abstract class Effect implements Cloneable{
 		return this.getClass().getName();
 	}
 	
-	@Override
+	@NotNull
+    @Override
 	public abstract Effect clone();
 	
-	public Effect duplicate(MethodRep from){
+	@NotNull
+    public Effect duplicate(MethodRep from){
 		Effect cl = clone();
 		cl.setFrom(from);
 		return cl;
 	}
 	
-	public String dump(MethodRep rep, Types table, String prefix){
+	public String dump(MethodRep rep, @NotNull Types table, String prefix){
 		String className = getClass().getSimpleName();
 		className = className.substring(0,className.length() - 6 );
 		String fromStr="";

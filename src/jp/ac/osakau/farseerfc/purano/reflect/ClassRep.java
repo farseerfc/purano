@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -18,8 +19,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 
+@Slf4j
 public class ClassRep extends ClassVisitor {
-	private static final Logger log = LoggerFactory.getLogger(ClassRep.class);
 	
 	private final Map<String, MethodRep> methodMap = new HashMap<>();
 	
@@ -126,7 +127,7 @@ public class ClassRep extends ClassVisitor {
 
 	@Override
 	public void visit(int version, int access, String name, String signature,
-			String superName, String[] interfaces) {
+			@org.jetbrains.annotations.Nullable String superName, String[] interfaces) {
 		//super.visit(version, access, name, signature, superName, interfaces);
 		
 //		log.info("Visiting class {} super {} interfaces {}",this.name,superName,Joiner.on(",").join(interfaces));

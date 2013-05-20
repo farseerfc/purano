@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.xml;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -45,19 +47,19 @@ public final class SAXAnnotationAdapter extends AnnotationVisitor {
 
     private final String elementName;
 
-    public SAXAnnotationAdapter(final SAXAdapter sa, final String elementName,
+    public SAXAnnotationAdapter(@NotNull final SAXAdapter sa, final String elementName,
             final int visible, final String name, final String desc) {
         this(Opcodes.ASM4, sa, elementName, visible, desc, name, -1);
     }
 
-    public SAXAnnotationAdapter(final SAXAdapter sa, final String elementName,
+    public SAXAnnotationAdapter(@NotNull final SAXAdapter sa, final String elementName,
             final int visible, final int parameter, final String desc) {
         this(Opcodes.ASM4, sa, elementName, visible, desc, null, parameter);
     }
 
-    protected SAXAnnotationAdapter(final int api, final SAXAdapter sa,
-            final String elementName, final int visible, final String desc,
-            final String name, final int parameter) {
+    protected SAXAnnotationAdapter(final int api, @NotNull final SAXAdapter sa,
+            final String elementName, final int visible, @Nullable final String desc,
+            @Nullable final String name, final int parameter) {
         super(api);
         this.sa = sa;
         this.elementName = elementName;
@@ -82,7 +84,7 @@ public final class SAXAnnotationAdapter extends AnnotationVisitor {
     }
 
     @Override
-    public void visit(final String name, final Object value) {
+    public void visit(final String name, @NotNull final Object value) {
         Class<?> c = value.getClass();
         if (c.isArray()) {
             AnnotationVisitor av = visitArray(name);
@@ -148,6 +150,7 @@ public final class SAXAnnotationAdapter extends AnnotationVisitor {
         addValueElement("annotationValueEnum", name, desc, value);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String name,
             final String desc) {
@@ -155,6 +158,7 @@ public final class SAXAnnotationAdapter extends AnnotationVisitor {
                 name, desc);
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitArray(final String name) {
         return new SAXAnnotationAdapter(sa, "annotationValueArray", 0, name,
@@ -166,8 +170,8 @@ public final class SAXAnnotationAdapter extends AnnotationVisitor {
         sa.addEnd(elementName);
     }
 
-    private void addValueElement(final String element, final String name,
-            final String desc, final String value) {
+    private void addValueElement(final String element, @Nullable final String name,
+            @Nullable final String desc, @Nullable final String value) {
         AttributesImpl att = new AttributesImpl();
         if (name != null) {
             att.addAttribute("", "name", "name", "", name);

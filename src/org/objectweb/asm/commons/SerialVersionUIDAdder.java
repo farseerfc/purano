@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -478,8 +479,8 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * @exception IOException
      *                if an error occurs
      */
-    private static void writeItems(final Collection<Item> itemCollection,
-            final DataOutput dos, final boolean dotted) throws IOException {
+    private static void writeItems(@NotNull final Collection<Item> itemCollection,
+            @NotNull final DataOutput dos, final boolean dotted) throws IOException {
         int size = itemCollection.size();
         Item[] items = itemCollection.toArray(new Item[size]);
         Arrays.sort(items);
@@ -509,7 +510,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
             this.desc = desc;
         }
 
-        public int compareTo(final Item other) {
+        public int compareTo(@NotNull final Item other) {
             int retVal = name.compareTo(other.name);
             if (retVal == 0) {
                 retVal = desc.compareTo(other.desc);

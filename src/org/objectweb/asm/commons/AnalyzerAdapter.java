@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -73,6 +75,7 @@ public class AnalyzerAdapter extends MethodVisitor {
      * this uninitialized value). This field is <tt>null</tt> for unreachable
      * instructions.
      */
+    @Nullable
     public List<Object> locals;
 
     /**
@@ -87,12 +90,14 @@ public class AnalyzerAdapter extends MethodVisitor {
      * this uninitialized value). This field is <tt>null</tt> for unreachable
      * instructions.
      */
+    @Nullable
     public List<Object> stack;
 
     /**
      * The labels that designate the next instruction to be visited. May be
      * <tt>null</tt>.
      */
+    @Nullable
     private List<Label> labels;
 
     /**
@@ -233,7 +238,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     private static void visitFrameTypes(final int n, final Object[] types,
-            final List<Object> result) {
+            @NotNull final List<Object> result) {
         for (int i = 0; i < n; ++i) {
             Object type = types[i];
             result.add(type);
@@ -273,7 +278,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, final String type) {
+    public void visitTypeInsn(final int opcode, @NotNull final String type) {
         if (opcode == Opcodes.NEW) {
             if (labels == null) {
                 Label l = new Label();
@@ -295,7 +300,7 @@ public class AnalyzerAdapter extends MethodVisitor {
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+            final String name, @NotNull final String desc) {
         if (mv != null) {
             mv.visitFieldInsn(opcode, owner, name, desc);
         }
@@ -304,7 +309,7 @@ public class AnalyzerAdapter extends MethodVisitor {
 
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+            @NotNull final String name, @NotNull final String desc) {
         if (mv != null) {
             mv.visitMethodInsn(opcode, owner, name, desc);
         }
@@ -339,7 +344,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
+    public void visitInvokeDynamicInsn(String name, @NotNull String desc, Handle bsm,
             Object... bsmArgs) {
         if (mv != null) {
             mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -445,7 +450,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(final String desc, final int dims) {
+    public void visitMultiANewArrayInsn(@NotNull final String desc, final int dims) {
         if (mv != null) {
             mv.visitMultiANewArrayInsn(desc, dims);
         }
@@ -481,7 +486,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         maxStack = Math.max(maxStack, stack.size());
     }
 
-    private void pushDesc(final String desc) {
+    private void pushDesc(@NotNull final String desc) {
         int index = desc.charAt(0) == '(' ? desc.indexOf(')') + 1 : 0;
         switch (desc.charAt(index)) {
         case 'V':
@@ -533,7 +538,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         }
     }
 
-    private void pop(final String desc) {
+    private void pop(@NotNull final String desc) {
         char c = desc.charAt(0);
         if (c == '(') {
             int n = 0;
@@ -549,7 +554,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         }
     }
 
-    private void execute(final int opcode, final int iarg, final String sarg) {
+    private void execute(final int opcode, final int iarg, @NotNull final String sarg) {
         if (this.locals == null) {
             labels = null;
             return;

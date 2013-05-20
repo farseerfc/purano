@@ -32,6 +32,7 @@ package org.objectweb.asm.tree.analysis;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -94,7 +95,7 @@ public class Frame<V extends Value> {
      * @param src
      *            a frame.
      */
-    public Frame(final Frame<? extends V> src) {
+    public Frame(@NotNull final Frame<? extends V> src) {
         this(src.locals, src.values.length - src.locals);
         init(src);
     }
@@ -106,7 +107,8 @@ public class Frame<V extends Value> {
      *            a frame.
      * @return this frame.
      */
-    public Frame<V> init(final Frame<? extends V> src) {
+    @NotNull
+    public Frame<V> init(@NotNull final Frame<? extends V> src) {
         returnValue = src.returnValue;
         System.arraycopy(src.values, 0, values, 0, values.length);
         top = src.top;
@@ -230,8 +232,8 @@ public class Frame<V extends Value> {
         values[top++ + locals] = value;
     }
 
-    public void execute(final AbstractInsnNode insn,
-            final Interpreter<V> interpreter) throws AnalyzerException {
+    public void execute(@NotNull final AbstractInsnNode insn,
+            @NotNull final Interpreter<V> interpreter) throws AnalyzerException {
         V value1, value2, value3, value4;
         List<V> values;
         int var;
@@ -671,8 +673,8 @@ public class Frame<V extends Value> {
      * @throws AnalyzerException
      *             if the frames have incompatible sizes.
      */
-    public boolean merge(final Frame<? extends V> frame,
-            final Interpreter<V> interpreter) throws AnalyzerException {
+    public boolean merge(@NotNull final Frame<? extends V> frame,
+            @NotNull final Interpreter<V> interpreter) throws AnalyzerException {
         if (top != frame.top) {
             throw new AnalyzerException(null, "Incompatible stack heights");
         }
@@ -698,7 +700,7 @@ public class Frame<V extends Value> {
      * @return <tt>true</tt> if this frame has been changed as a result of the
      *         merge operation, or <tt>false</tt> otherwise.
      */
-    public boolean merge(final Frame<? extends V> frame, final boolean[] access) {
+    public boolean merge(@NotNull final Frame<? extends V> frame, final boolean[] access) {
         boolean changes = false;
         for (int i = 0; i < locals; ++i) {
             if (!access[i] && !values[i].equals(frame.values[i])) {
@@ -714,6 +716,7 @@ public class Frame<V extends Value> {
      * 
      * @return a string representation of this frame.
      */
+    @NotNull
     @Override
     public String toString() {
         StringBuffer b = new StringBuffer();

@@ -5,6 +5,7 @@ import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
@@ -20,9 +21,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
-	
-	private static final Logger log = LoggerFactory.getLogger(DepInterpreter.class);
 	
 	private final DepEffect effect;
 	private final MethodRep method;

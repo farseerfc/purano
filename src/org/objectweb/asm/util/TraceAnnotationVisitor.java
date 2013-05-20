@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -64,6 +65,7 @@ public final class TraceAnnotationVisitor extends AnnotationVisitor {
         super.visitEnum(name, desc, value);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String name,
             final String desc) {
@@ -73,6 +75,7 @@ public final class TraceAnnotationVisitor extends AnnotationVisitor {
         return new TraceAnnotationVisitor(av, p);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitArray(final String name) {
         Printer p = this.p.visitArray(name);

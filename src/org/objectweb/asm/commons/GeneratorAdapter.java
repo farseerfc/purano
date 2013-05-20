@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -297,7 +299,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param mv
      *            the method visitor to which this adapter delegates calls.
      */
-    public GeneratorAdapter(final int access, final Method method,
+    public GeneratorAdapter(final int access, @NotNull final Method method,
             final MethodVisitor mv) {
         this(mv, access, null, method.getDescriptor());
     }
@@ -320,9 +322,9 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param cv
      *            the class visitor to which this adapter delegates calls.
      */
-    public GeneratorAdapter(final int access, final Method method,
+    public GeneratorAdapter(final int access, @NotNull final Method method,
             final String signature, final Type[] exceptions,
-            final ClassVisitor cv) {
+            @NotNull final ClassVisitor cv) {
         this(access, method, cv
                 .visitMethod(access, method.getName(), method.getDescriptor(),
                         signature, getInternalNames(exceptions)));
@@ -335,7 +337,8 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      *            a set of types.
      * @return the internal names of the given types.
      */
-    private static String[] getInternalNames(final Type[] types) {
+    @Nullable
+    private static String[] getInternalNames(@Nullable final Type[] types) {
         if (types == null) {
             return null;
         }
@@ -428,7 +431,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param value
      *            the value to be pushed on the stack. May be <tt>null</tt>.
      */
-    public void push(final String value) {
+    public void push(@Nullable final String value) {
         if (value == null) {
             mv.visitInsn(Opcodes.ACONST_NULL);
         } else {
@@ -442,7 +445,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param value
      *            the value to be pushed on the stack.
      */
-    public void push(final Type value) {
+    public void push(@Nullable final Type value) {
         if (value == null) {
             mv.visitInsn(Opcodes.ACONST_NULL);
         } else {
@@ -524,7 +527,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param index
      *            an index in the frame's local variables array.
      */
-    private void loadInsn(final Type type, final int index) {
+    private void loadInsn(@NotNull final Type type, final int index) {
         mv.visitVarInsn(type.getOpcode(Opcodes.ILOAD), index);
     }
 
@@ -537,7 +540,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param index
      *            an index in the frame's local variables array.
      */
-    private void storeInsn(final Type type, final int index) {
+    private void storeInsn(@NotNull final Type type, final int index) {
         mv.visitVarInsn(type.getOpcode(Opcodes.ISTORE), index);
     }
 
@@ -659,7 +662,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of this local variable.
      */
-    public void loadLocal(final int local, final Type type) {
+    public void loadLocal(final int local, @NotNull final Type type) {
         setLocalType(local, type);
         loadInsn(type, local);
     }
@@ -686,7 +689,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of this local variable.
      */
-    public void storeLocal(final int local, final Type type) {
+    public void storeLocal(final int local, @NotNull final Type type) {
         setLocalType(local, type);
         storeInsn(type, local);
     }
@@ -697,7 +700,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the array element to be loaded.
      */
-    public void arrayLoad(final Type type) {
+    public void arrayLoad(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IALOAD));
     }
 
@@ -707,7 +710,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the array element to be stored.
      */
-    public void arrayStore(final Type type) {
+    public void arrayStore(@NotNull final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IASTORE));
     }
 
@@ -786,7 +789,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            type of the top stack value.
      */
-    public void swap(final Type prev, final Type type) {
+    public void swap(@NotNull final Type prev, @NotNull final Type type) {
         if (type.getSize() == 1) {
             if (prev.getSize() == 1) {
                 swap(); // same as dupX1(), pop();
@@ -819,7 +822,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the operand(s) for this operation.
      */
-    public void math(final int op, final Type type) {
+    public void math(final int op, @NotNull final Type type) {
         mv.visitInsn(type.getOpcode(op));
     }
 
@@ -904,7 +907,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
     // Instructions to do boxing and unboxing operations
     // ------------------------------------------------------------------------
 
-    private static Type getBoxedType(final Type type) {
+    private static Type getBoxedType(@NotNull final Type type) {
         switch (type.getSort()) {
         case Type.BYTE:
             return BYTE_TYPE;
@@ -933,7 +936,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the top stack value.
      */
-    public void box(final Type type) {
+    public void box(@NotNull final Type type) {
         if (type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY) {
             return;
         }
@@ -965,7 +968,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the top stack value.
      */
-    public void valueOf(final Type type) {
+    public void valueOf(@NotNull final Type type) {
         if (type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY) {
             return;
         }
@@ -985,7 +988,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the top stack value.
      */
-    public void unbox(final Type type) {
+    public void unbox(@NotNull final Type type) {
         Type t = NUMBER_TYPE;
         Method sig = null;
         switch (type.getSort()) {
@@ -1030,6 +1033,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * 
      * @return a new {@link Label}.
      */
+    @NotNull
     public Label newLabel() {
         return new Label();
     }
@@ -1049,6 +1053,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * 
      * @return the label that was created to mark the current code position.
      */
+    @NotNull
     public Label mark() {
         Label label = new Label();
         mv.visitLabel(label);
@@ -1067,7 +1072,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param label
      *            where to jump if the comparison result is <tt>true</tt>.
      */
-    public void ifCmp(final Type type, final int mode, final Label label) {
+    public void ifCmp(@NotNull final Type type, final int mode, final Label label) {
         switch (type.getSort()) {
         case Type.LONG:
             mv.visitInsn(Opcodes.LCMP);
@@ -1199,8 +1204,8 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param generator
      *            a generator to generate the code for the switch cases.
      */
-    public void tableSwitch(final int[] keys,
-            final TableSwitchGenerator generator) {
+    public void tableSwitch(@NotNull final int[] keys,
+            @NotNull final TableSwitchGenerator generator) {
         float density;
         if (keys.length == 0) {
             density = 0;
@@ -1222,8 +1227,8 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      *            <tt>true</tt> to use a TABLESWITCH instruction, or
      *            <tt>false</tt> to use a LOOKUPSWITCH instruction.
      */
-    public void tableSwitch(final int[] keys,
-            final TableSwitchGenerator generator, final boolean useTable) {
+    public void tableSwitch(@NotNull final int[] keys,
+            @NotNull final TableSwitchGenerator generator, final boolean useTable) {
         for (int i = 1; i < keys.length; ++i) {
             if (keys[i] < keys[i - 1]) {
                 throw new IllegalArgumentException(
@@ -1291,8 +1296,8 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param fieldType
      *            the type of the field.
      */
-    private void fieldInsn(final int opcode, final Type ownerType,
-            final String name, final Type fieldType) {
+    private void fieldInsn(final int opcode, @NotNull final Type ownerType,
+            final String name, @NotNull final Type fieldType) {
         mv.visitFieldInsn(opcode, ownerType.getInternalName(), name,
                 fieldType.getDescriptor());
     }
@@ -1308,7 +1313,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the field.
      */
-    public void getStatic(final Type owner, final String name, final Type type) {
+    public void getStatic(@NotNull final Type owner, final String name, @NotNull final Type type) {
         fieldInsn(Opcodes.GETSTATIC, owner, name, type);
     }
 
@@ -1322,7 +1327,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the field.
      */
-    public void putStatic(final Type owner, final String name, final Type type) {
+    public void putStatic(@NotNull final Type owner, final String name, @NotNull final Type type) {
         fieldInsn(Opcodes.PUTSTATIC, owner, name, type);
     }
 
@@ -1337,7 +1342,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the field.
      */
-    public void getField(final Type owner, final String name, final Type type) {
+    public void getField(@NotNull final Type owner, final String name, @NotNull final Type type) {
         fieldInsn(Opcodes.GETFIELD, owner, name, type);
     }
 
@@ -1352,7 +1357,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the field.
      */
-    public void putField(final Type owner, final String name, final Type type) {
+    public void putField(@NotNull final Type owner, final String name, @NotNull final Type type) {
         fieldInsn(Opcodes.PUTFIELD, owner, name, type);
     }
 
@@ -1370,8 +1375,8 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param method
      *            the method to be invoked.
      */
-    private void invokeInsn(final int opcode, final Type type,
-            final Method method) {
+    private void invokeInsn(final int opcode, @NotNull final Type type,
+            @NotNull final Method method) {
         String owner = type.getSort() == Type.ARRAY ? type.getDescriptor()
                 : type.getInternalName();
         mv.visitMethodInsn(opcode, owner, method.getName(),
@@ -1386,7 +1391,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param method
      *            the method to be invoked.
      */
-    public void invokeVirtual(final Type owner, final Method method) {
+    public void invokeVirtual(@NotNull final Type owner, @NotNull final Method method) {
         invokeInsn(Opcodes.INVOKEVIRTUAL, owner, method);
     }
 
@@ -1398,7 +1403,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param method
      *            the constructor to be invoked.
      */
-    public void invokeConstructor(final Type type, final Method method) {
+    public void invokeConstructor(@NotNull final Type type, @NotNull final Method method) {
         invokeInsn(Opcodes.INVOKESPECIAL, type, method);
     }
 
@@ -1410,7 +1415,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param method
      *            the method to be invoked.
      */
-    public void invokeStatic(final Type owner, final Method method) {
+    public void invokeStatic(@NotNull final Type owner, @NotNull final Method method) {
         invokeInsn(Opcodes.INVOKESTATIC, owner, method);
     }
 
@@ -1422,7 +1427,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param method
      *            the method to be invoked.
      */
-    public void invokeInterface(final Type owner, final Method method) {
+    public void invokeInterface(@NotNull final Type owner, @NotNull final Method method) {
         invokeInsn(Opcodes.INVOKEINTERFACE, owner, method);
     }
 
@@ -1459,7 +1464,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the instruction's operand.
      */
-    private void typeInsn(final int opcode, final Type type) {
+    private void typeInsn(final int opcode, @NotNull final Type type) {
         mv.visitTypeInsn(opcode, type.getInternalName());
     }
 
@@ -1469,7 +1474,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the class of the object to be created.
      */
-    public void newInstance(final Type type) {
+    public void newInstance(@NotNull final Type type) {
         typeInsn(Opcodes.NEW, type);
     }
 
@@ -1479,7 +1484,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            the type of the array elements.
      */
-    public void newArray(final Type type) {
+    public void newArray(@NotNull final Type type) {
         int typ;
         switch (type.getSort()) {
         case Type.BOOLEAN:
@@ -1540,7 +1545,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param msg
      *            the detailed message of the exception.
      */
-    public void throwException(final Type type, final String msg) {
+    public void throwException(@NotNull final Type type, final String msg) {
         newInstance(type);
         dup();
         push(msg);
@@ -1555,7 +1560,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            a class or interface type.
      */
-    public void checkCast(final Type type) {
+    public void checkCast(@NotNull final Type type) {
         if (!type.equals(OBJECT_TYPE)) {
             typeInsn(Opcodes.CHECKCAST, type);
         }
@@ -1568,7 +1573,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      * @param type
      *            a class or interface type.
      */
-    public void instanceOf(final Type type) {
+    public void instanceOf(@NotNull final Type type) {
         typeInsn(Opcodes.INSTANCEOF, type);
     }
 
@@ -1612,7 +1617,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      *            handler.
      */
     public void catchException(final Label start, final Label end,
-            final Type exception) {
+            @Nullable final Type exception) {
         if (exception == null) {
             mv.visitTryCatchBlock(start, end, mark(), null);
         } else {

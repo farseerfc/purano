@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.FieldVisitor;
@@ -53,6 +54,7 @@ public final class TraceFieldVisitor extends FieldVisitor {
         this.p = p;
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {

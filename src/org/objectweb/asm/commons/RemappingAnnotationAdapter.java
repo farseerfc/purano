@@ -30,6 +30,7 @@
 
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -63,6 +64,7 @@ public class RemappingAnnotationAdapter extends AnnotationVisitor {
         av.visitEnum(name, remapper.mapDesc(desc), value);
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(String name, String desc) {
         AnnotationVisitor v = av.visitAnnotation(name, remapper.mapDesc(desc));
@@ -70,6 +72,7 @@ public class RemappingAnnotationAdapter extends AnnotationVisitor {
                 : new RemappingAnnotationAdapter(v, remapper));
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitArray(String name) {
         AnnotationVisitor v = av.visitArray(name);

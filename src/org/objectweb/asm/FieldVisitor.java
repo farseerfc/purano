@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * A visitor to visit a Java field. The methods of this class must be called in
  * the following order: ( <tt>visitAnnotation</tt> | <tt>visitAttribute</tt> )*
@@ -89,6 +91,7 @@ public abstract class FieldVisitor {
      * @return a visitor to visit the annotation values, or <tt>null</tt> if
      *         this visitor is not interested in visiting this annotation.
      */
+    @Nullable
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         if (fv != null) {
             return fv.visitAnnotation(desc, visible);

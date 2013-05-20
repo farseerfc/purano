@@ -47,6 +47,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -92,7 +94,7 @@ public class JarOptimizer {
         optimize(new File(args[argIndex]));
     }
 
-    static void optimize(final File f) throws IOException {
+    static void optimize(@NotNull final File f) throws IOException {
         if (nodebug && f.getName().contains("debug")) {
             return;
         }
@@ -158,6 +160,7 @@ public class JarOptimizer {
             }
         }
 
+        @Nullable
         @Override
         public FieldVisitor visitField(final int access, final String name,
                 final String desc, final String signature, final Object value) {
@@ -167,6 +170,7 @@ public class JarOptimizer {
             return null;
         }
 
+        @Nullable
         @Override
         public MethodVisitor visitMethod(final int access, final String name,
                 final String desc, final String signature,
@@ -195,6 +199,7 @@ public class JarOptimizer {
             owner = name;
         }
 
+        @NotNull
         @Override
         public MethodVisitor visitMethod(final int access, final String name,
                 final String desc, final String signature,
@@ -203,19 +208,19 @@ public class JarOptimizer {
             return new MethodVisitor(Opcodes.ASM4) {
                 @Override
                 public void visitFieldInsn(final int opcode,
-                        final String owner, final String name, final String desc) {
+                        @NotNull final String owner, final String name, final String desc) {
                     check(owner, name);
                 }
 
                 @Override
                 public void visitMethodInsn(final int opcode,
-                        final String owner, final String name, final String desc) {
+                        @NotNull final String owner, final String name, final String desc) {
                     check(owner, name + desc);
                 }
             };
         }
 
-        void check(String owner, String member) {
+        void check(@NotNull String owner, String member) {
             if (owner.startsWith("java/")) {
                 String o = owner;
                 while (o != null) {

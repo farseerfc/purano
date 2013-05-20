@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -102,7 +104,7 @@ public class Analyzer<V extends Value> implements Opcodes {
      * @throws AnalyzerException
      *             if a problem occurs during the analysis.
      */
-    public Frame<V>[] analyze(final String owner, final MethodNode m)
+    public Frame<V>[] analyze(final String owner, @NotNull final MethodNode m)
             throws AnalyzerException {
         if ((m.access & (ACC_ABSTRACT | ACC_NATIVE)) != 0) {
             frames = (Frame<V>[]) new Frame<?>[0];
@@ -301,8 +303,8 @@ public class Analyzer<V extends Value> implements Opcodes {
         return frames;
     }
 
-    private void findSubroutine(int insn, final Subroutine sub,
-            final List<AbstractInsnNode> calls) throws AnalyzerException {
+    private void findSubroutine(int insn, @NotNull final Subroutine sub,
+            @NotNull final List<AbstractInsnNode> calls) throws AnalyzerException {
         while (true) {
             if (insn < 0 || insn >= n) {
                 throw new AnalyzerException(null,
@@ -418,6 +420,7 @@ public class Analyzer<V extends Value> implements Opcodes {
      *            the maximum stack size of the frame.
      * @return the created frame.
      */
+    @NotNull
     protected Frame<V> newFrame(final int nLocals, final int nStack) {
         return new Frame<V>(nLocals, nStack);
     }
@@ -429,7 +432,8 @@ public class Analyzer<V extends Value> implements Opcodes {
      *            a frame.
      * @return the created frame.
      */
-    protected Frame<V> newFrame(final Frame<? extends V> src) {
+    @NotNull
+    protected Frame<V> newFrame(@NotNull final Frame<? extends V> src) {
         return new Frame<V>(src);
     }
 
@@ -487,14 +491,14 @@ public class Analyzer<V extends Value> implements Opcodes {
      *         newControlFlowExceptionEdge(int, int)}.
      */
     protected boolean newControlFlowExceptionEdge(final int insn,
-            final TryCatchBlockNode tcb) {
+            @NotNull final TryCatchBlockNode tcb) {
         return newControlFlowExceptionEdge(insn, insns.indexOf(tcb.handler));
     }
 
     // -------------------------------------------------------------------------
 
-    private void merge(final int insn, final Frame<V> frame,
-            final Subroutine subroutine) throws AnalyzerException {
+    private void merge(final int insn, @NotNull final Frame<V> frame,
+            @Nullable final Subroutine subroutine) throws AnalyzerException {
         Frame<V> oldFrame = frames[insn];
         Subroutine oldSubroutine = subroutines[insn];
         boolean changes;
@@ -522,8 +526,8 @@ public class Analyzer<V extends Value> implements Opcodes {
         }
     }
 
-    private void merge(final int insn, final Frame<V> beforeJSR,
-            final Frame<V> afterRET, final Subroutine subroutineBeforeJSR,
+    private void merge(final int insn, @NotNull final Frame<V> beforeJSR,
+            @NotNull final Frame<V> afterRET, @Nullable final Subroutine subroutineBeforeJSR,
             final boolean[] access) throws AnalyzerException {
         Frame<V> oldFrame = frames[insn];
         Subroutine oldSubroutine = subroutines[insn];

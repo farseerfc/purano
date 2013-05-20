@@ -4,6 +4,7 @@ import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper=true)
 public abstract class FieldEffect extends Effect {
@@ -19,7 +20,8 @@ public abstract class FieldEffect extends Effect {
 	private final @Getter String owner;
 	private final @Getter String name;
 	
-	public String getKey(){
+	@NotNull
+    public String getKey(){
 		return desc+owner;//+name;
 	}
 }

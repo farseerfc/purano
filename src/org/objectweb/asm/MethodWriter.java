@@ -29,6 +29,9 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * A {@link MethodVisitor} that generates methods in bytecode form. Each visit
  * method of this class appends the bytecode corresponding to the visited
@@ -119,6 +122,7 @@ class MethodWriter extends MethodVisitor {
     /**
      * The class writer to which this method must be added.
      */
+    @NotNull
     final ClassWriter cw;
 
     /**
@@ -141,6 +145,7 @@ class MethodWriter extends MethodVisitor {
     /**
      * The descriptor of this method.
      */
+    @NotNull
     private final String descriptor;
 
     /**
@@ -216,6 +221,7 @@ class MethodWriter extends MethodVisitor {
     /**
      * The bytecode of this method.
      */
+    @NotNull
     private ByteVector code = new ByteVector();
 
     /**
@@ -241,6 +247,7 @@ class MethodWriter extends MethodVisitor {
     /**
      * The StackMapTable attribute.
      */
+    @Nullable
     private ByteVector stackMap;
 
     /**
@@ -254,6 +261,7 @@ class MethodWriter extends MethodVisitor {
      * 
      * @see #frame
      */
+    @Nullable
     private int[] previousFrame;
 
     /**
@@ -265,6 +273,7 @@ class MethodWriter extends MethodVisitor {
      * nStack, frame[3] = nLocal. All types are encoded as integers, with the
      * same format as the one used in {@link Label}, but limited to BASE types.
      */
+    @Nullable
     private int[] frame;
 
     /**
@@ -275,6 +284,7 @@ class MethodWriter extends MethodVisitor {
     /**
      * The first element in the exception handler list.
      */
+    @Nullable
     private Handler firstHandler;
 
     /**
@@ -365,6 +375,7 @@ class MethodWriter extends MethodVisitor {
     /**
      * The current basic block.
      */
+    @Nullable
     private Label currentBlock;
 
     /**
@@ -412,9 +423,9 @@ class MethodWriter extends MethodVisitor {
      *            <tt>true</tt> if the stack map tables must be recomputed from
      *            scratch.
      */
-    MethodWriter(final ClassWriter cw, final int access, final String name,
-            final String desc, final String signature,
-            final String[] exceptions, final boolean computeMaxs,
+    MethodWriter(@NotNull final ClassWriter cw, final int access, @NotNull final String name,
+            @NotNull final String desc, final String signature,
+            @Nullable final String[] exceptions, final boolean computeMaxs,
             final boolean computeFrames) {
         super(Opcodes.ASM4);
         if (cw.firstMethod == null) {
@@ -461,6 +472,7 @@ class MethodWriter extends MethodVisitor {
     // Implementation of the MethodVisitor abstract class
     // ------------------------------------------------------------------------
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         if (!ClassReader.ANNOTATIONS) {
@@ -470,8 +482,9 @@ class MethodWriter extends MethodVisitor {
         return new AnnotationWriter(cw, false, annd, null, 0);
     }
 
+    @Nullable
     @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
+    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
             return null;
@@ -490,9 +503,10 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
-            final String desc, final boolean visible) {
+            @NotNull final String desc, final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
             return null;
         }
@@ -523,7 +537,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitAttribute(final Attribute attr) {
+    public void visitAttribute(@NotNull final Attribute attr) {
         if (attr.isCodeAttribute()) {
             attr.next = cattrs;
             cattrs = attr;
@@ -748,7 +762,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, final String type) {
+    public void visitTypeInsn(final int opcode, @NotNull final String type) {
         Item i = cw.newClassItem(type);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -769,8 +783,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitFieldInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+    public void visitFieldInsn(final int opcode, @NotNull final String owner,
+            @NotNull final String name, @NotNull final String desc) {
         Item i = cw.newFieldItem(owner, name, desc);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -807,8 +821,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+    public void visitMethodInsn(final int opcode, @NotNull final String owner,
+            @NotNull final String name, @NotNull final String desc) {
         boolean itf = opcode == Opcodes.INVOKEINTERFACE;
         Item i = cw.newMethodItem(owner, name, desc, itf);
         int argSize = i.intVal;
@@ -859,8 +873,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(final String name, final String desc,
-            final Handle bsm, final Object... bsmArgs) {
+    public void visitInvokeDynamicInsn(@NotNull final String name, @NotNull final String desc,
+            @NotNull final Handle bsm, final Object... bsmArgs) {
         Item i = cw.newInvokeDynamicItem(name, desc, bsm, bsmArgs);
         int argSize = i.intVal;
         // Label currentBlock = this.currentBlock;
@@ -899,7 +913,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitJumpInsn(final int opcode, final Label label) {
+    public void visitJumpInsn(final int opcode, @NotNull final Label label) {
         Label nextInsn = null;
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -989,7 +1003,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLabel(final Label label) {
+    public void visitLabel(@NotNull final Label label) {
         // resolves previous forward references to label, if any
         resize |= label.resolve(this, code.length, code.data);
         // updates currentBlock
@@ -1101,7 +1115,7 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, final Label... labels) {
+            @NotNull final Label dflt, @NotNull final Label... labels) {
         // adds the instruction to the bytecode of the method
         int source = code.length;
         code.putByte(Opcodes.TABLESWITCH);
@@ -1116,8 +1130,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            final Label[] labels) {
+    public void visitLookupSwitchInsn(@NotNull final Label dflt, final int[] keys,
+            @NotNull final Label[] labels) {
         // adds the instruction to the bytecode of the method
         int source = code.length;
         code.putByte(Opcodes.LOOKUPSWITCH);
@@ -1132,7 +1146,7 @@ class MethodWriter extends MethodVisitor {
         visitSwitchInsn(dflt, labels);
     }
 
-    private void visitSwitchInsn(final Label dflt, final Label[] labels) {
+    private void visitSwitchInsn(@NotNull final Label dflt, @NotNull final Label[] labels) {
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
             if (compute == FRAMES) {
@@ -1159,7 +1173,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(final String desc, final int dims) {
+    public void visitMultiANewArrayInsn(@NotNull final String desc, final int dims) {
         Item i = cw.newClassItem(desc);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -1177,7 +1191,7 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, final String type) {
+            final Label handler, @Nullable final String type) {
         ++handlerCount;
         Handler h = new Handler();
         h.start = start;
@@ -1194,8 +1208,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLocalVariable(final String name, final String desc,
-            final String signature, final Label start, final Label end,
+    public void visitLocalVariable(@NotNull final String name, @NotNull final String desc,
+            @Nullable final String signature, @NotNull final Label start, @NotNull final Label end,
             final int index) {
         if (signature != null) {
             if (localVarType == null) {
@@ -1226,7 +1240,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLineNumber(final int line, final Label start) {
+    public void visitLineNumber(final int line, @NotNull final Label start) {
         if (lineNumber == null) {
             lineNumber = new ByteVector();
         }
@@ -1529,7 +1543,7 @@ class MethodWriter extends MethodVisitor {
      * @param f
      *            the frame that must be visited.
      */
-    private void visitFrame(final Frame f) {
+    private void visitFrame(@NotNull final Frame f) {
         int i, t;
         int nTop = 0;
         int nLocal = 0;
@@ -1954,7 +1968,7 @@ class MethodWriter extends MethodVisitor {
      *            the byte vector into which the bytecode of this method must be
      *            copied.
      */
-    final void put(final ByteVector out) {
+    final void put(@NotNull final ByteVector out) {
         final int FACTOR = ClassWriter.TO_ACC_SYNTHETIC;
         int mask = ACC_CONSTRUCTOR | Opcodes.ACC_DEPRECATED
                 | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE
@@ -2640,7 +2654,7 @@ class MethodWriter extends MethodVisitor {
      *            index of the first byte of the target instruction.
      * @return the future value of the given bytecode offset.
      */
-    static int getNewOffset(final int[] indexes, final int[] sizes,
+    static int getNewOffset(@NotNull final int[] indexes, final int[] sizes,
             final int begin, final int end) {
         int offset = end - begin;
         for (int i = 0; i < indexes.length; ++i) {
@@ -2675,8 +2689,8 @@ class MethodWriter extends MethodVisitor {
      * @param label
      *            the label whose offset must be updated.
      */
-    static void getNewOffset(final int[] indexes, final int[] sizes,
-            final Label label) {
+    static void getNewOffset(@NotNull final int[] indexes, final int[] sizes,
+            @NotNull final Label label) {
         if ((label.status & Label.RESIZED) == 0) {
             label.position = getNewOffset(indexes, sizes, 0, label.position);
             label.status |= Label.RESIZED;

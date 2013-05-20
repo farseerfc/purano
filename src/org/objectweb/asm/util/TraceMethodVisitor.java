@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -55,6 +56,7 @@ public final class TraceMethodVisitor extends MethodVisitor {
         this.p = p;
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -70,6 +72,7 @@ public final class TraceMethodVisitor extends MethodVisitor {
         super.visitAttribute(attr);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         Printer p = this.p.visitAnnotationDefault();
@@ -77,6 +80,7 @@ public final class TraceMethodVisitor extends MethodVisitor {
         return new TraceAnnotationVisitor(av, p);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible) {

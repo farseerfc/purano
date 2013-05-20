@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 
 /**
@@ -46,8 +47,10 @@ import org.objectweb.asm.Type;
  */
 public class NameMapping {
 
+    @NotNull
     public final Properties mapping;
 
+    @NotNull
     public final Set<Object> unused;
 
     public NameMapping(final String file) throws IOException {
@@ -64,7 +67,7 @@ public class NameMapping {
         }
     }
 
-    public String map(final String name) {
+    public String map(@NotNull final String name) {
         String s = (String) mapping.get(name);
         if (s == null) {
             int p = name.indexOf('.');
@@ -84,7 +87,8 @@ public class NameMapping {
         return s;
     }
 
-    public String fix(final String desc) {
+    @NotNull
+    public String fix(@NotNull final String desc) {
         if (desc.startsWith("(")) {
             Type[] arguments = Type.getArgumentTypes(desc);
             Type result = Type.getReturnType(desc);
@@ -98,7 +102,8 @@ public class NameMapping {
         }
     }
 
-    private Type fix(final Type t) {
+    @NotNull
+    private Type fix(@NotNull final Type t) {
         if (t.getSort() == Type.OBJECT) {
             return Type.getObjectType(map(t.getInternalName()));
         } else if (t.getSort() == Type.ARRAY) {

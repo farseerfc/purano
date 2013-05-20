@@ -31,6 +31,7 @@ package org.objectweb.asm.util;
 
 import java.io.PrintWriter;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -156,6 +157,7 @@ public final class TraceClassVisitor extends ClassVisitor {
         super.visitOuterClass(owner, name, desc);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -178,6 +180,7 @@ public final class TraceClassVisitor extends ClassVisitor {
         super.visitInnerClass(name, outerName, innerName, access);
     }
 
+    @NotNull
     @Override
     public FieldVisitor visitField(final int access, final String name,
             final String desc, final String signature, final Object value) {
@@ -187,6 +190,7 @@ public final class TraceClassVisitor extends ClassVisitor {
         return new TraceFieldVisitor(fv, p);
     }
 
+    @NotNull
     @Override
     public MethodVisitor visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions) {

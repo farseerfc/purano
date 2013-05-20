@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -195,7 +197,7 @@ public class ClassNode extends ClassVisitor {
     @Override
     public void visit(final int version, final int access, final String name,
             final String signature, final String superName,
-            final String[] interfaces) {
+            @Nullable final String[] interfaces) {
         this.version = version;
         this.access = access;
         this.name = name;
@@ -220,6 +222,7 @@ public class ClassNode extends ClassVisitor {
         outerMethodDesc = desc;
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -254,6 +257,7 @@ public class ClassNode extends ClassVisitor {
         innerClasses.add(icn);
     }
 
+    @NotNull
     @Override
     public FieldVisitor visitField(final int access, final String name,
             final String desc, final String signature, final Object value) {
@@ -262,6 +266,7 @@ public class ClassNode extends ClassVisitor {
         return fn;
     }
 
+    @NotNull
     @Override
     public MethodVisitor visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions) {
@@ -298,7 +303,7 @@ public class ClassNode extends ClassVisitor {
      * @param cv
      *            a class visitor.
      */
-    public void accept(final ClassVisitor cv) {
+    public void accept(@NotNull final ClassVisitor cv) {
         // visits header
         String[] interfaces = new String[this.interfaces.size()];
         this.interfaces.toArray(interfaces);

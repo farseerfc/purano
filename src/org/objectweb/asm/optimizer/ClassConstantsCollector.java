@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.optimizer;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -52,9 +54,9 @@ public class ClassConstantsCollector extends ClassVisitor {
     }
 
     @Override
-    public void visit(final int version, final int access, final String name,
-            final String signature, final String superName,
-            final String[] interfaces) {
+    public void visit(final int version, final int access, @NotNull final String name,
+            @Nullable final String signature, @Nullable final String superName,
+            @Nullable final String[] interfaces) {
         if ((access & Opcodes.ACC_DEPRECATED) != 0) {
             cp.newUTF8("Deprecated");
         }
@@ -78,7 +80,7 @@ public class ClassConstantsCollector extends ClassVisitor {
     }
 
     @Override
-    public void visitSource(final String source, final String debug) {
+    public void visitSource(@Nullable final String source, @Nullable final String debug) {
         if (source != null) {
             cp.newUTF8("SourceFile");
             cp.newUTF8(source);
@@ -90,8 +92,8 @@ public class ClassConstantsCollector extends ClassVisitor {
     }
 
     @Override
-    public void visitOuterClass(final String owner, final String name,
-            final String desc) {
+    public void visitOuterClass(@NotNull final String owner, @Nullable final String name,
+            @Nullable final String desc) {
         cp.newUTF8("EnclosingMethod");
         cp.newClass(owner);
         if (name != null && desc != null) {
@@ -100,8 +102,9 @@ public class ClassConstantsCollector extends ClassVisitor {
         cv.visitOuterClass(owner, name, desc);
     }
 
+    @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
+    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         cp.newUTF8(desc);
         if (visible) {
@@ -120,8 +123,8 @@ public class ClassConstantsCollector extends ClassVisitor {
     }
 
     @Override
-    public void visitInnerClass(final String name, final String outerName,
-            final String innerName, final int access) {
+    public void visitInnerClass(@Nullable final String name, @Nullable final String outerName,
+            @Nullable final String innerName, final int access) {
         cp.newUTF8("InnerClasses");
         if (name != null) {
             cp.newClass(name);
@@ -135,9 +138,10 @@ public class ClassConstantsCollector extends ClassVisitor {
         cv.visitInnerClass(name, outerName, innerName, access);
     }
 
+    @NotNull
     @Override
-    public FieldVisitor visitField(final int access, final String name,
-            final String desc, final String signature, final Object value) {
+    public FieldVisitor visitField(final int access, @NotNull final String name,
+            @NotNull final String desc, @Nullable final String signature, @Nullable final Object value) {
         if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
             cp.newUTF8("Synthetic");
         }
@@ -157,9 +161,10 @@ public class ClassConstantsCollector extends ClassVisitor {
                 signature, value), cp);
     }
 
+    @NotNull
     @Override
-    public MethodVisitor visitMethod(final int access, final String name,
-            final String desc, final String signature, final String[] exceptions) {
+    public MethodVisitor visitMethod(final int access, @NotNull final String name,
+            @NotNull final String desc, @Nullable final String signature, @Nullable final String[] exceptions) {
         if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
             cp.newUTF8("Synthetic");
         }

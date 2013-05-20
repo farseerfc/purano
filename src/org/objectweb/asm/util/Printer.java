@@ -33,6 +33,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -48,6 +49,7 @@ public abstract class Printer {
     /**
      * The names of the Java Virtual Machine opcodes.
      */
+    @NotNull
     public static final String[] OPCODES;
 
     /**
@@ -55,12 +57,14 @@ public abstract class Printer {
      * {@link org.objectweb.asm.MethodVisitor#visitIntInsn} method when
      * <code>opcode</code> is <code>NEWARRAY</code>.
      */
+    @NotNull
     public static final String[] TYPES;
 
     /**
      * The names of the <code>tag</code> field values for
      * {@link org.objectweb.asm.Handle}.
      */
+    @NotNull
     public static final String[] HANDLE_TAG;
 
     static {
@@ -123,6 +127,7 @@ public abstract class Printer {
     /**
      * A buffer that can be used to create strings.
      */
+    @NotNull
     protected final StringBuffer buf;
 
     /**
@@ -137,6 +142,7 @@ public abstract class Printer {
      * string list that can contain other string lists, which can themselves
      * contain other string lists, and so on.
      */
+    @NotNull
     public final List<Object> text;
 
     /**
@@ -427,6 +433,7 @@ public abstract class Printer {
      * 
      * @return the text constructed by this visitor.
      */
+    @NotNull
     public List<Object> getText() {
         return text;
     }
@@ -437,7 +444,7 @@ public abstract class Printer {
      * @param pw
      *            the print writer to be used.
      */
-    public void print(final PrintWriter pw) {
+    public void print(@NotNull final PrintWriter pw) {
         printList(pw, text);
     }
 
@@ -449,7 +456,7 @@ public abstract class Printer {
      * @param s
      *            the string to be added.
      */
-    public static void appendString(final StringBuffer buf, final String s) {
+    public static void appendString(@NotNull final StringBuffer buf, @NotNull final String s) {
         buf.append('\"');
         for (int i = 0; i < s.length(); ++i) {
             char c = s.charAt(i);
@@ -487,7 +494,7 @@ public abstract class Printer {
      *            a string tree, i.e., a string list that can contain other
      *            string lists, and so on recursively.
      */
-    static void printList(final PrintWriter pw, final List<?> l) {
+    static void printList(@NotNull final PrintWriter pw, @NotNull final List<?> l) {
         for (int i = 0; i < l.size(); ++i) {
             Object o = l.get(i);
             if (o instanceof List) {

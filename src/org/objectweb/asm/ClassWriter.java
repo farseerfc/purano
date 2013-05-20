@@ -29,6 +29,9 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * A {@link ClassVisitor} that generates classes in bytecode form. More
  * precisely this visitor generates a byte array conforming to the Java class
@@ -170,6 +173,7 @@ public class ClassWriter extends ClassVisitor {
     /**
      * The instruction types of all JVM opcodes.
      */
+    @NotNull
     static final byte[] TYPE;
 
     /**
@@ -295,6 +299,7 @@ public class ClassWriter extends ClassVisitor {
     /**
      * The constant pool of this class.
      */
+    @NotNull
     final ByteVector pool;
 
     /**
@@ -310,21 +315,25 @@ public class ClassWriter extends ClassVisitor {
     /**
      * A reusable key used to look for items in the {@link #items} hash table.
      */
+    @NotNull
     final Item key;
 
     /**
      * A reusable key used to look for items in the {@link #items} hash table.
      */
+    @NotNull
     final Item key2;
 
     /**
      * A reusable key used to look for items in the {@link #items} hash table.
      */
+    @NotNull
     final Item key3;
 
     /**
      * A reusable key used to look for items in the {@link #items} hash table.
      */
+    @NotNull
     final Item key4;
 
     /**
@@ -640,7 +649,7 @@ public class ClassWriter extends ClassVisitor {
      *            these methods</i>. See {@link #COMPUTE_MAXS},
      *            {@link #COMPUTE_FRAMES}.
      */
-    public ClassWriter(final ClassReader classReader, final int flags) {
+    public ClassWriter(@NotNull final ClassReader classReader, final int flags) {
         this(flags);
         classReader.copyPool(this);
         this.cr = classReader;
@@ -652,8 +661,8 @@ public class ClassWriter extends ClassVisitor {
 
     @Override
     public final void visit(final int version, final int access,
-            final String name, final String signature, final String superName,
-            final String[] interfaces) {
+            @NotNull final String name, @Nullable final String signature, @Nullable final String superName,
+            @Nullable final String[] interfaces) {
         this.version = version;
         this.access = access;
         this.name = newClass(name);
@@ -672,7 +681,7 @@ public class ClassWriter extends ClassVisitor {
     }
 
     @Override
-    public final void visitSource(final String file, final String debug) {
+    public final void visitSource(@Nullable final String file, @Nullable final String debug) {
         if (file != null) {
             sourceFile = newUTF8(file);
         }
@@ -682,16 +691,17 @@ public class ClassWriter extends ClassVisitor {
     }
 
     @Override
-    public final void visitOuterClass(final String owner, final String name,
-            final String desc) {
+    public final void visitOuterClass(@NotNull final String owner, @Nullable final String name,
+            @Nullable final String desc) {
         enclosingMethodOwner = newClass(owner);
         if (name != null && desc != null) {
             enclosingMethod = newNameType(name, desc);
         }
     }
 
+    @Nullable
     @Override
-    public final AnnotationVisitor visitAnnotation(final String desc,
+    public final AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
             return null;
@@ -711,14 +721,14 @@ public class ClassWriter extends ClassVisitor {
     }
 
     @Override
-    public final void visitAttribute(final Attribute attr) {
+    public final void visitAttribute(@NotNull final Attribute attr) {
         attr.next = attrs;
         attrs = attr;
     }
 
     @Override
-    public final void visitInnerClass(final String name,
-            final String outerName, final String innerName, final int access) {
+    public final void visitInnerClass(@Nullable final String name,
+            @Nullable final String outerName, @Nullable final String innerName, final int access) {
         if (innerClasses == null) {
             innerClasses = new ByteVector();
         }
@@ -729,12 +739,14 @@ public class ClassWriter extends ClassVisitor {
         innerClasses.putShort(access);
     }
 
+    @NotNull
     @Override
     public final FieldVisitor visitField(final int access, final String name,
             final String desc, final String signature, final Object value) {
         return new FieldWriter(this, access, name, desc, signature, value);
     }
 
+    @NotNull
     @Override
     public final MethodVisitor visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions) {
@@ -1002,7 +1014,7 @@ public class ClassWriter extends ClassVisitor {
      *            the String value.
      * @return the index of a new or already existing UTF8 item.
      */
-    public int newUTF8(final String value) {
+    public int newUTF8(@NotNull final String value) {
         key.set(UTF8, value, null, null);
         Item result = get(key);
         if (result == null) {
@@ -1023,7 +1035,7 @@ public class ClassWriter extends ClassVisitor {
      *            the internal name of the class.
      * @return a new or already existing class reference item.
      */
-    Item newClassItem(final String value) {
+    Item newClassItem(@NotNull final String value) {
         key2.set(CLASS, value, null, null);
         Item result = get(key2);
         if (result == null) {
@@ -1044,7 +1056,7 @@ public class ClassWriter extends ClassVisitor {
      *            the internal name of the class.
      * @return the index of a new or already existing class reference item.
      */
-    public int newClass(final String value) {
+    public int newClass(@NotNull final String value) {
         return newClassItem(value).index;
     }
 
@@ -1058,7 +1070,7 @@ public class ClassWriter extends ClassVisitor {
      *            method descriptor of the method type.
      * @return a new or already existing method type reference item.
      */
-    Item newMethodTypeItem(final String methodDesc) {
+    Item newMethodTypeItem(@NotNull final String methodDesc) {
         key2.set(MTYPE, methodDesc, null, null);
         Item result = get(key2);
         if (result == null) {
@@ -1080,7 +1092,7 @@ public class ClassWriter extends ClassVisitor {
      * @return the index of a new or already existing method type reference
      *         item.
      */
-    public int newMethodType(final String methodDesc) {
+    public int newMethodType(@NotNull final String methodDesc) {
         return newMethodTypeItem(methodDesc).index;
     }
 
@@ -1106,8 +1118,8 @@ public class ClassWriter extends ClassVisitor {
      *            the descriptor of the field or method.
      * @return a new or an already existing method type reference item.
      */
-    Item newHandleItem(final int tag, final String owner, final String name,
-            final String desc) {
+    Item newHandleItem(final int tag, @NotNull final String owner, @NotNull final String name,
+            @NotNull final String desc) {
         key4.set(HANDLE_BASE + tag, owner, name, desc);
         Item result = get(key4);
         if (result == null) {
@@ -1148,8 +1160,8 @@ public class ClassWriter extends ClassVisitor {
      * @return the index of a new or already existing method type reference
      *         item.
      */
-    public int newHandle(final int tag, final String owner, final String name,
-            final String desc) {
+    public int newHandle(final int tag, @NotNull final String owner, @NotNull final String name,
+            @NotNull final String desc) {
         return newHandleItem(tag, owner, name, desc).index;
     }
 
@@ -1170,8 +1182,8 @@ public class ClassWriter extends ClassVisitor {
      * 
      * @return a new or an already existing invokedynamic type reference item.
      */
-    Item newInvokeDynamicItem(final String name, final String desc,
-            final Handle bsm, final Object... bsmArgs) {
+    Item newInvokeDynamicItem(@NotNull final String name, @NotNull final String desc,
+            @NotNull final Handle bsm, @NotNull final Object... bsmArgs) {
         // cache for performance
         ByteVector bootstrapMethods = this.bootstrapMethods;
         if (bootstrapMethods == null) {
@@ -1255,8 +1267,8 @@ public class ClassWriter extends ClassVisitor {
      * @return the index of a new or already existing invokedynamic reference
      *         item.
      */
-    public int newInvokeDynamic(final String name, final String desc,
-            final Handle bsm, final Object... bsmArgs) {
+    public int newInvokeDynamic(@NotNull final String name, @NotNull final String desc,
+            @NotNull final Handle bsm, final Object... bsmArgs) {
         return newInvokeDynamicItem(name, desc, bsm, bsmArgs).index;
     }
 
@@ -1272,7 +1284,7 @@ public class ClassWriter extends ClassVisitor {
      *            the field's descriptor.
      * @return a new or already existing field reference item.
      */
-    Item newFieldItem(final String owner, final String name, final String desc) {
+    Item newFieldItem(@NotNull final String owner, @NotNull final String name, @NotNull final String desc) {
         key3.set(FIELD, owner, name, desc);
         Item result = get(key3);
         if (result == null) {
@@ -1297,7 +1309,7 @@ public class ClassWriter extends ClassVisitor {
      *            the field's descriptor.
      * @return the index of a new or already existing field reference item.
      */
-    public int newField(final String owner, final String name, final String desc) {
+    public int newField(@NotNull final String owner, @NotNull final String name, @NotNull final String desc) {
         return newFieldItem(owner, name, desc).index;
     }
 
@@ -1315,8 +1327,8 @@ public class ClassWriter extends ClassVisitor {
      *            <tt>true</tt> if <tt>owner</tt> is an interface.
      * @return a new or already existing method reference item.
      */
-    Item newMethodItem(final String owner, final String name,
-            final String desc, final boolean itf) {
+    Item newMethodItem(@NotNull final String owner, @NotNull final String name,
+            @NotNull final String desc, final boolean itf) {
         int type = itf ? IMETH : METH;
         key3.set(type, owner, name, desc);
         Item result = get(key3);
@@ -1344,8 +1356,8 @@ public class ClassWriter extends ClassVisitor {
      *            <tt>true</tt> if <tt>owner</tt> is an interface.
      * @return the index of a new or already existing method reference item.
      */
-    public int newMethod(final String owner, final String name,
-            final String desc, final boolean itf) {
+    public int newMethod(@NotNull final String owner, @NotNull final String name,
+            @NotNull final String desc, final boolean itf) {
         return newMethodItem(owner, name, desc, itf).index;
     }
 
@@ -1435,7 +1447,7 @@ public class ClassWriter extends ClassVisitor {
      *            the String value.
      * @return a new or already existing string item.
      */
-    private Item newString(final String value) {
+    private Item newString(@NotNull final String value) {
         key2.set(STR, value, null, null);
         Item result = get(key2);
         if (result == null) {
@@ -1458,7 +1470,7 @@ public class ClassWriter extends ClassVisitor {
      *            a type descriptor.
      * @return the index of a new or already existing name and type item.
      */
-    public int newNameType(final String name, final String desc) {
+    public int newNameType(@NotNull final String name, @NotNull final String desc) {
         return newNameTypeItem(name, desc).index;
     }
 
@@ -1472,7 +1484,7 @@ public class ClassWriter extends ClassVisitor {
      *            a type descriptor.
      * @return a new or already existing name and type item.
      */
-    Item newNameTypeItem(final String name, final String desc) {
+    Item newNameTypeItem(@NotNull final String name, @NotNull final String desc) {
         key2.set(NAME_TYPE, name, desc, null);
         Item result = get(key2);
         if (result == null) {
@@ -1491,7 +1503,7 @@ public class ClassWriter extends ClassVisitor {
      *            the internal name to be added to the type table.
      * @return the index of this internal name in the type table.
      */
-    int addType(final String type) {
+    int addType(@NotNull final String type) {
         key.set(TYPE_NORMAL, type, null, null);
         Item result = get(key);
         if (result == null) {
@@ -1512,7 +1524,7 @@ public class ClassWriter extends ClassVisitor {
      *            UNINITIALIZED type value.
      * @return the index of this internal name in the type table.
      */
-    int addUninitializedType(final String type, final int offset) {
+    int addUninitializedType(@NotNull final String type, final int offset) {
         key.type = TYPE_UNINIT;
         key.intVal = offset;
         key.strVal1 = type;
@@ -1532,6 +1544,7 @@ public class ClassWriter extends ClassVisitor {
      * @return the added Item, which a new Item instance with the same value as
      *         the given Item.
      */
+    @NotNull
     private Item addType(final Item item) {
         ++typeCount;
         Item result = new Item(typeCount, key);
@@ -1591,7 +1604,7 @@ public class ClassWriter extends ClassVisitor {
      * @return the internal name of the common super class of the two given
      *         classes.
      */
-    protected String getCommonSuperClass(final String type1, final String type2) {
+    protected String getCommonSuperClass(@NotNull final String type1, @NotNull final String type2) {
         Class<?> c, d;
         ClassLoader classLoader = getClass().getClassLoader();
         try {
@@ -1625,7 +1638,7 @@ public class ClassWriter extends ClassVisitor {
      * @return the constant pool's hash table item which is equal to the given
      *         item, or <tt>null</tt> if there is no such item.
      */
-    private Item get(final Item key) {
+    private Item get(@NotNull final Item key) {
         Item i = items[key.hashCode % items.length];
         while (i != null && (i.type != key.type || !key.isEqualTo(i))) {
             i = i.next;
@@ -1640,7 +1653,7 @@ public class ClassWriter extends ClassVisitor {
      * @param i
      *            the item to be added to the constant pool's hash table.
      */
-    private void put(final Item i) {
+    private void put(@NotNull final Item i) {
         if (index + typeCount > threshold) {
             int ll = items.length;
             int nl = ll * 2 + 1;

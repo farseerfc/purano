@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * A visitor to visit a Java method. The methods of this class must be called in
  * the following order: [ <tt>visitAnnotationDefault</tt> ] (
@@ -103,6 +105,7 @@ public abstract class MethodVisitor {
      *         ignored. Moreover, exacly one visit method must be called on this
      *         annotation visitor, followed by visitEnd.
      */
+    @Nullable
     public AnnotationVisitor visitAnnotationDefault() {
         if (mv != null) {
             return mv.visitAnnotationDefault();
@@ -120,6 +123,7 @@ public abstract class MethodVisitor {
      * @return a visitor to visit the annotation values, or <tt>null</tt> if
      *         this visitor is not interested in visiting this annotation.
      */
+    @Nullable
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         if (mv != null) {
             return mv.visitAnnotation(desc, visible);
@@ -139,6 +143,7 @@ public abstract class MethodVisitor {
      * @return a visitor to visit the annotation values, or <tt>null</tt> if
      *         this visitor is not interested in visiting this annotation.
      */
+    @Nullable
     public AnnotationVisitor visitParameterAnnotation(int parameter,
             String desc, boolean visible) {
         if (mv != null) {

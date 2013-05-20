@@ -31,6 +31,7 @@ package org.objectweb.asm.tree;
 
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -71,10 +72,11 @@ public class IincInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(final MethodVisitor mv) {
+    public void accept(@NotNull final MethodVisitor mv) {
         mv.visitIincInsn(var, incr);
     }
 
+    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
         return new IincInsnNode(var, incr);

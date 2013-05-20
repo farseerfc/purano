@@ -32,6 +32,8 @@ package org.objectweb.asm.xml;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -57,6 +59,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     SAXAdapter sa;
 
+    @NotNull
     private final Map<Label, String> labelNames;
 
     /**
@@ -65,7 +68,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
      * @param sa
      *            content handler that will be used to send SAX 2.0 events.
      */
-    public SAXCodeAdapter(final SAXAdapter sa, final int access) {
+    public SAXCodeAdapter(@NotNull final SAXAdapter sa, final int access) {
         super(Opcodes.ASM4);
         this.sa = sa;
         this.labelNames = new HashMap<Label, String>();
@@ -185,8 +188,8 @@ public final class SAXCodeAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
-            Object... bsmArgs) {
+    public void visitInvokeDynamicInsn(String name, String desc, @NotNull Handle bsm,
+            @NotNull Object... bsmArgs) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "name", "name", "", name);
         attrs.addAttribute("", "desc", "desc", "", desc);
@@ -214,11 +217,12 @@ public final class SAXCodeAdapter extends MethodVisitor {
     }
 
     @Override
-    public final void visitLdcInsn(final Object cst) {
+    public final void visitLdcInsn(@NotNull final Object cst) {
         sa.addElement(Printer.OPCODES[Opcodes.LDC], getConstantAttribute(cst));
     }
 
-    private static AttributesImpl getConstantAttribute(final Object cst) {
+    @NotNull
+    private static AttributesImpl getConstantAttribute(@NotNull final Object cst) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "cst", "cst", "",
                 SAXClassAdapter.encode(cst.toString()));
@@ -237,7 +241,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public final void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, final Label... labels) {
+            final Label dflt, @NotNull final Label... labels) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "min", "min", "", Integer.toString(min));
         attrs.addAttribute("", "max", "max", "", Integer.toString(max));
@@ -254,7 +258,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public final void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            final Label[] labels) {
+            @NotNull final Label[] labels) {
         AttributesImpl att = new AttributesImpl();
         att.addAttribute("", "dflt", "dflt", "", getLabel(dflt));
         String o = Printer.OPCODES[Opcodes.LOOKUPSWITCH];
@@ -278,7 +282,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public final void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, final String type) {
+            final Label handler, @Nullable final String type) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "start", "start", "", getLabel(start));
         attrs.addAttribute("", "end", "end", "", getLabel(end));
@@ -303,7 +307,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public void visitLocalVariable(final String name, final String desc,
-            final String signature, final Label start, final Label end,
+            @Nullable final String signature, final Label start, final Label end,
             final int index) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "name", "name", "", name);
@@ -326,11 +330,13 @@ public final class SAXCodeAdapter extends MethodVisitor {
         sa.addElement("LineNumber", attrs);
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         return new SAXAnnotationAdapter(sa, "annotationDefault", 0, null, null);
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -338,6 +344,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
                 null, desc);
     }
 
+    @NotNull
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible) {

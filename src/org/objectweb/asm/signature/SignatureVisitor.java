@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm.signature;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 
 /**
@@ -102,6 +104,7 @@ public abstract class SignatureVisitor {
      * 
      * @return a non null visitor to visit the signature of the class bound.
      */
+    @NotNull
     public SignatureVisitor visitClassBound() {
         return this;
     }
@@ -111,6 +114,7 @@ public abstract class SignatureVisitor {
      * 
      * @return a non null visitor to visit the signature of the interface bound.
      */
+    @NotNull
     public SignatureVisitor visitInterfaceBound() {
         return this;
     }
@@ -121,6 +125,7 @@ public abstract class SignatureVisitor {
      * @return a non null visitor to visit the signature of the super class
      *         type.
      */
+    @NotNull
     public SignatureVisitor visitSuperclass() {
         return this;
     }
@@ -130,6 +135,7 @@ public abstract class SignatureVisitor {
      * 
      * @return a non null visitor to visit the signature of the interface type.
      */
+    @NotNull
     public SignatureVisitor visitInterface() {
         return this;
     }
@@ -139,6 +145,7 @@ public abstract class SignatureVisitor {
      * 
      * @return a non null visitor to visit the signature of the parameter type.
      */
+    @NotNull
     public SignatureVisitor visitParameterType() {
         return this;
     }
@@ -148,6 +155,7 @@ public abstract class SignatureVisitor {
      * 
      * @return a non null visitor to visit the signature of the return type.
      */
+    @Nullable
     public SignatureVisitor visitReturnType() {
         return this;
     }
@@ -157,6 +165,7 @@ public abstract class SignatureVisitor {
      * 
      * @return a non null visitor to visit the signature of the exception type.
      */
+    @NotNull
     public SignatureVisitor visitExceptionType() {
         return this;
     }
@@ -186,6 +195,7 @@ public abstract class SignatureVisitor {
      * @return a non null visitor to visit the signature of the array element
      *         type.
      */
+    @NotNull
     public SignatureVisitor visitArrayType() {
         return this;
     }
@@ -223,6 +233,7 @@ public abstract class SignatureVisitor {
      *            '+', '-' or '='.
      * @return a non null visitor to visit the signature of the type argument.
      */
+    @NotNull
     public SignatureVisitor visitTypeArgument(char wildcard) {
         return this;
     }

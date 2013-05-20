@@ -10,6 +10,7 @@ import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
@@ -26,13 +27,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 
-
+@Slf4j
 public class MethodRep extends MethodVisitor {
-	private static final Logger log = LoggerFactory.getLogger(MethodRep.class);
 	
 	@NotNull
     private final @Getter MethodInsnNode insnNode;
-	//private final @Getter Method reflect;
 	private final @Getter Map<String, MethodRep> overrides = new HashMap<>();
 	private final @Getter Set<MethodInsnNode> calls = new HashSet<>();
 	
@@ -80,14 +79,8 @@ public class MethodRep extends MethodVisitor {
 	
 	@Override
 	public boolean equals(@Nullable Object other){
-		if(other == null){
-			return false;
-		}
-		if(other instanceof MethodRep){
-			return this.equals(other);
-		}
-		return false;
-	}
+        return other != null && other instanceof MethodRep && this.equals(other);
+    }
 	
 	@Override
 	public String toString(){
@@ -103,14 +96,10 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean equals(@NotNull MethodRep other){
-		if (!Objects.equal(this.insnNode.desc, other.insnNode.desc))
-			return false;
-		if (!Objects.equal(this.insnNode.name, other.insnNode.name))
-			return false;
-		if (!Objects.equal(this.insnNode.owner, other.insnNode.owner))
-			return false;
-		return true;
-	}
+        return Objects.equal(this.insnNode.desc, other.insnNode.desc) &&
+                Objects.equal(this.insnNode.name, other.insnNode.name) &&
+                Objects.equal(this.insnNode.owner, other.insnNode.owner);
+    }
 	
 	@NotNull
     public List<String> dump(@NotNull ClassFinder classFinder, @NotNull Types table){
@@ -213,7 +202,7 @@ public class MethodRep extends MethodVisitor {
 						}
 					}, 0);
 				}else{
-					Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(analyzeResult, this,cf));
+					Analyzer<DepValue> ana = new Analyzer<>(new DepInterpreter(analyzeResult, this,cf));
 					try {
 						/*Frame<DepValue> [] frames =*/ ana.analyze("dep", methodNode);
 					} catch (AnalyzerException e) {

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -340,7 +341,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+            final String name, @NotNull final String desc) {
         mv.visitFieldInsn(opcode, owner, name, desc);
         if (constructor) {
             char c = desc.charAt(0);
@@ -513,7 +514,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
 
     @Override
     public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            final Label[] labels) {
+            @NotNull final Label[] labels) {
         mv.visitLookupSwitchInsn(dflt, keys, labels);
         if (constructor) {
             popValue();
@@ -523,7 +524,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, final Label... labels) {
+            final Label dflt, @NotNull final Label... labels) {
         mv.visitTableSwitchInsn(min, max, dflt, labels);
         if (constructor) {
             popValue();
@@ -542,7 +543,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    private void addBranches(final Label dflt, final Label[] labels) {
+    private void addBranches(final Label dflt, @NotNull final Label[] labels) {
         addBranch(dflt);
         for (int i = 0; i < labels.length; i++) {
             addBranch(labels[i]);

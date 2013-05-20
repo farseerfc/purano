@@ -30,6 +30,8 @@
 
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A reference to a field or a method.
  * 
@@ -160,6 +162,7 @@ public final class Handle {
      * 
      * . As this format is unambiguous, it can be parsed if necessary.
      */
+    @NotNull
     @Override
     public String toString() {
         return owner + '.' + name + desc + " (" + tag + ')';

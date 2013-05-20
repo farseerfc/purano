@@ -29,6 +29,8 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Information about the input and output stack map frames of a basic block.
  * 
@@ -229,6 +231,7 @@ final class Frame {
      * stack variation is equal to the size of the values produced by an
      * instruction, minus the size of the values consumed by this instruction.
      */
+    @NotNull
     static final int[] SIZE;
 
     /**
@@ -602,7 +605,7 @@ final class Frame {
      *            descriptor (in this case this method pushes its return type
      *            onto the output frame stack).
      */
-    private void push(final ClassWriter cw, final String desc) {
+    private void push(@NotNull final ClassWriter cw, @NotNull final String desc) {
         int type = type(cw, desc);
         if (type != 0) {
             push(type);
@@ -621,7 +624,7 @@ final class Frame {
      *            a type descriptor.
      * @return the int encoding of the given type.
      */
-    private static int type(final ClassWriter cw, final String desc) {
+    private static int type(@NotNull final ClassWriter cw, @NotNull final String desc) {
         String t;
         int index = desc.charAt(0) == '(' ? desc.indexOf(')') + 1 : 0;
         switch (desc.charAt(index)) {
@@ -726,7 +729,7 @@ final class Frame {
      *            descriptor (in this case this method pops the types
      *            corresponding to the method arguments).
      */
-    private void pop(final String desc) {
+    private void pop(@NotNull final String desc) {
         char c = desc.charAt(0);
         if (c == '(') {
             pop((Type.getArgumentsAndReturnSizes(desc) >> 2) - 1);
@@ -770,7 +773,7 @@ final class Frame {
      * @return t or, if t is one of the types on which a constructor is invoked
      *         in the basic block, the type corresponding to this constructor.
      */
-    private int init(final ClassWriter cw, final int t) {
+    private int init(@NotNull final ClassWriter cw, final int t) {
         int s;
         if (t == UNINITIALIZED_THIS) {
             s = OBJECT | cw.addType(cw.thisName);
@@ -809,8 +812,8 @@ final class Frame {
      * @param maxLocals
      *            the maximum number of local variables of this method.
      */
-    void initInputFrame(final ClassWriter cw, final int access,
-            final Type[] args, final int maxLocals) {
+    void initInputFrame(@NotNull final ClassWriter cw, final int access,
+            @NotNull final Type[] args, final int maxLocals) {
         inputLocals = new int[maxLocals];
         inputStack = new int[0];
         int i = 0;
@@ -845,8 +848,8 @@ final class Frame {
      * @param item
      *            the operand of the instructions, if any.
      */
-    void execute(final int opcode, final int arg, final ClassWriter cw,
-            final Item item) {
+    void execute(final int opcode, final int arg, @NotNull final ClassWriter cw,
+            @NotNull final Item item) {
         int t1, t2, t3, t4;
         switch (opcode) {
         case Opcodes.NOP:
@@ -1283,7 +1286,7 @@ final class Frame {
      * @return <tt>true</tt> if the input frame of the given label has been
      *         changed by this operation.
      */
-    boolean merge(final ClassWriter cw, final Frame frame, final int edge) {
+    boolean merge(@NotNull final ClassWriter cw, @NotNull final Frame frame, final int edge) {
         boolean changed = false;
         int i, s, dim, kind, t;
 
@@ -1392,7 +1395,7 @@ final class Frame {
      * @return <tt>true</tt> if the type array has been modified by this
      *         operation.
      */
-    private static boolean merge(final ClassWriter cw, int t,
+    private static boolean merge(@NotNull final ClassWriter cw, int t,
             final int[] types, final int index) {
         int u = types[index];
         if (u == t) {

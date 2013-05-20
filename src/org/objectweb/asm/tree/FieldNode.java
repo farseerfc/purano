@@ -32,6 +32,7 @@ package org.objectweb.asm.tree;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -165,6 +166,7 @@ public class FieldNode extends FieldVisitor {
     // Implementation of the FieldVisitor abstract class
     // ------------------------------------------------------------------------
 
+    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -218,7 +220,7 @@ public class FieldNode extends FieldVisitor {
      * @param cv
      *            a class visitor.
      */
-    public void accept(final ClassVisitor cv) {
+    public void accept(@NotNull final ClassVisitor cv) {
         FieldVisitor fv = cv.visitField(access, name, desc, signature, value);
         if (fv == null) {
             return;

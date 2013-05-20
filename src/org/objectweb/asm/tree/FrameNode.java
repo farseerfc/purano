@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -141,7 +142,7 @@ public class FrameNode extends AbstractInsnNode {
      *            a method visitor.
      */
     @Override
-    public void accept(final MethodVisitor mv) {
+    public void accept(@NotNull final MethodVisitor mv) {
         switch (type) {
         case Opcodes.F_NEW:
         case Opcodes.F_FULL:
@@ -163,8 +164,9 @@ public class FrameNode extends AbstractInsnNode {
         }
     }
 
+    @NotNull
     @Override
-    public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
+    public AbstractInsnNode clone(@NotNull final Map<LabelNode, LabelNode> labels) {
         FrameNode clone = new FrameNode();
         clone.type = type;
         if (local != null) {
@@ -192,11 +194,13 @@ public class FrameNode extends AbstractInsnNode {
 
     // ------------------------------------------------------------------------
 
+    @NotNull
     private static List<Object> asList(final int n, final Object[] o) {
         return Arrays.asList(o).subList(0, n);
     }
 
-    private static Object[] asArray(final List<Object> l) {
+    @NotNull
+    private static Object[] asArray(@NotNull final List<Object> l) {
         Object[] objs = new Object[l.size()];
         for (int i = 0; i < objs.length; ++i) {
             Object o = l.get(i);

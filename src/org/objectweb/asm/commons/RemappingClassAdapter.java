@@ -30,6 +30,8 @@
 
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -59,13 +61,14 @@ public class RemappingClassAdapter extends ClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature,
-            String superName, String[] interfaces) {
+            String superName, @Nullable String[] interfaces) {
         this.className = name;
         super.visit(version, access, remapper.mapType(name), remapper
                 .mapSignature(signature, false), remapper.mapType(superName),
                 interfaces == null ? null : remapper.mapTypes(interfaces));
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         AnnotationVisitor av;
@@ -73,6 +76,7 @@ public class RemappingClassAdapter extends ClassVisitor {
         return av == null ? null : createRemappingAnnotationAdapter(av);
     }
 
+    @Nullable
     @Override
     public FieldVisitor visitField(int access, String name, String desc,
             String signature, Object value) {
@@ -83,9 +87,10 @@ public class RemappingClassAdapter extends ClassVisitor {
         return fv == null ? null : createRemappingFieldAdapter(fv);
     }
 
+    @Nullable
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc,
-            String signature, String[] exceptions) {
+            String signature, @Nullable String[] exceptions) {
         String newDesc = remapper.mapMethodDesc(desc);
         MethodVisitor mv = super.visitMethod(access, remapper.mapMethodName(
                 className, name, desc), newDesc, remapper.mapSignature(
@@ -96,7 +101,7 @@ public class RemappingClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visitInnerClass(String name, String outerName,
+    public void visitInnerClass(String name, @Nullable String outerName,
             String innerName, int access) {
         // TODO should innerName be changed?
         super.visitInnerClass(remapper.mapType(name), outerName == null ? null
@@ -104,12 +109,13 @@ public class RemappingClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visitOuterClass(String owner, String name, String desc) {
+    public void visitOuterClass(String owner, @Nullable String name, @Nullable String desc) {
         super.visitOuterClass(remapper.mapType(owner), name == null ? null
                 : remapper.mapMethodName(owner, name, desc),
                 desc == null ? null : remapper.mapMethodDesc(desc));
     }
 
+    @NotNull
     protected FieldVisitor createRemappingFieldAdapter(FieldVisitor fv) {
         return new RemappingFieldAdapter(fv, remapper);
     }
@@ -119,6 +125,7 @@ public class RemappingClassAdapter extends ClassVisitor {
         return new RemappingMethodAdapter(access, newDesc, mv, remapper);
     }
 
+    @NotNull
     protected AnnotationVisitor createRemappingAnnotationAdapter(
             AnnotationVisitor av) {
         return new RemappingAnnotationAdapter(av, remapper);

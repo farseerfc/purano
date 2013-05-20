@@ -30,6 +30,7 @@
 
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -82,6 +83,7 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
         v.visitTypeVariable(name);
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitArrayType() {
         v.visitArrayType();
@@ -93,42 +95,49 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
         v.visitBaseType(descriptor);
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitClassBound() {
         v.visitClassBound();
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitExceptionType() {
         v.visitExceptionType();
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitInterface() {
         v.visitInterface();
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitInterfaceBound() {
         v.visitInterfaceBound();
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitParameterType() {
         v.visitParameterType();
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitReturnType() {
         v.visitReturnType();
         return this;
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitSuperclass() {
         v.visitSuperclass();
@@ -140,6 +149,7 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
         v.visitTypeArgument();
     }
 
+    @NotNull
     @Override
     public SignatureVisitor visitTypeArgument(char wildcard) {
         v.visitTypeArgument(wildcard);

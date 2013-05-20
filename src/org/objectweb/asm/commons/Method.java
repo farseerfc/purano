@@ -32,6 +32,7 @@ package org.objectweb.asm.commons;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 
 /**
@@ -56,6 +57,7 @@ public class Method {
     /**
      * Maps primitive Java type names to their descriptors.
      */
+    @NotNull
     private static final Map<String, String> DESCRIPTORS;
 
     static {
@@ -107,7 +109,8 @@ public class Method {
      * @return a {@link Method} corresponding to the given Java method
      *         declaration.
      */
-    public static Method getMethod(java.lang.reflect.Method m) {
+    @NotNull
+    public static Method getMethod(@NotNull java.lang.reflect.Method m) {
         return new Method(m.getName(), Type.getMethodDescriptor(m));
     }
 
@@ -119,6 +122,7 @@ public class Method {
      * @return a {@link Method} corresponding to the given Java constructor
      *         declaration.
      */
+    @NotNull
     public static Method getMethod(java.lang.reflect.Constructor<?> c) {
         return new Method("<init>", Type.getConstructorDescriptor(c));
     }
@@ -139,7 +143,8 @@ public class Method {
      * @throws IllegalArgumentException
      *             if <code>method</code> could not get parsed.
      */
-    public static Method getMethod(final String method)
+    @NotNull
+    public static Method getMethod(@NotNull final String method)
             throws IllegalArgumentException {
         return getMethod(method, false);
     }
@@ -166,7 +171,8 @@ public class Method {
      * @throws IllegalArgumentException
      *             if <code>method</code> could not get parsed.
      */
-    public static Method getMethod(final String method,
+    @NotNull
+    public static Method getMethod(@NotNull final String method,
             final boolean defaultPackage) throws IllegalArgumentException {
         int space = method.indexOf(' ');
         int start = method.indexOf('(', space) + 1;
@@ -195,7 +201,8 @@ public class Method {
         return new Method(methodName, sb.toString());
     }
 
-    private static String map(final String type, final boolean defaultPackage) {
+    @NotNull
+    private static String map(@NotNull final String type, final boolean defaultPackage) {
         if ("".equals(type)) {
             return type;
         }
@@ -261,6 +268,7 @@ public class Method {
         return Type.getArgumentTypes(desc);
     }
 
+    @NotNull
     @Override
     public String toString() {
         return name + desc;

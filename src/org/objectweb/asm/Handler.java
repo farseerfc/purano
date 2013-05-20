@@ -29,6 +29,9 @@
  */
 package org.objectweb.asm;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Information about an exception handler block.
  * 
@@ -39,6 +42,7 @@ class Handler {
     /**
      * Beginning of the exception handler's scope (inclusive).
      */
+    @Nullable
     Label start;
 
     /**
@@ -66,6 +70,7 @@ class Handler {
     /**
      * Next exception handler block info.
      */
+    @Nullable
     Handler next;
 
     /**
@@ -80,7 +85,8 @@ class Handler {
      *            the end of the range to be removed. Maybe null.
      * @return the exception handler list with the start-end range removed.
      */
-    static Handler remove(Handler h, Label start, Label end) {
+    @Nullable
+    static Handler remove(@Nullable Handler h, @NotNull Label start, @Nullable Label end) {
         if (h == null) {
             return null;
         } else {

@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -150,7 +152,7 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
      * inlining.
      */
     @Override
-    public void visitJumpInsn(final int opcode, final Label lbl) {
+    public void visitJumpInsn(final int opcode, @NotNull final Label lbl) {
         super.visitJumpInsn(opcode, lbl);
         LabelNode ln = ((JumpInsnNode) instructions.getLast()).label;
         if (opcode == JSR && !subroutineHeads.containsKey(ln)) {
@@ -222,8 +224,8 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
      *            indexes of the already visited instructions, i.e. marked as
      *            part of this subroutine or any previously computed subroutine.
      */
-    private void markSubroutineWalk(final BitSet sub, final int index,
-            final BitSet anyvisited) {
+    private void markSubroutineWalk(@NotNull final BitSet sub, final int index,
+            @NotNull final BitSet anyvisited) {
         if (LOGGING) {
             log("markSubroutineWalk: sub=" + sub + " index=" + index);
         }
@@ -279,8 +281,8 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
      *            indexes of the already visited instructions, i.e. marked as
      *            part of this subroutine or any previously computed subroutine.
      */
-    private void markSubroutineWalkDFS(final BitSet sub, int index,
-            final BitSet anyvisited) {
+    private void markSubroutineWalkDFS(@NotNull final BitSet sub, int index,
+            @NotNull final BitSet anyvisited) {
         while (true) {
             AbstractInsnNode node = instructions.get(index);
 
@@ -397,10 +399,10 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
      *            the exception handler list to which the instantiated handlers
      *            must be appended.
      */
-    private void emitSubroutine(final Instantiation instant,
-            final List<Instantiation> worklist, final InsnList newInstructions,
-            final List<TryCatchBlockNode> newTryCatchBlocks,
-            final List<LocalVariableNode> newLocalVariables) {
+    private void emitSubroutine(@NotNull final Instantiation instant,
+            @NotNull final List<Instantiation> worklist, @NotNull final InsnList newInstructions,
+            @NotNull final List<TryCatchBlockNode> newTryCatchBlocks,
+            @NotNull final List<LocalVariableNode> newLocalVariables) {
         LabelNode duplbl = null;
 
         if (LOGGING) {
@@ -571,6 +573,7 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
          * Previous instantiations; the stack must be statically predictable to
          * be inlinable.
          */
+        @Nullable
         final Instantiation previous;
 
         /**
@@ -597,9 +600,10 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
         /**
          * All returns for this instantiation will be mapped to this label
          */
+        @Nullable
         public final LabelNode returnLabel;
 
-        Instantiation(final Instantiation prev, final BitSet sub) {
+        Instantiation(@Nullable final Instantiation prev, final BitSet sub) {
             previous = prev;
             subroutine = sub;
             for (Instantiation p = prev; p != null; p = p.previous) {
@@ -671,6 +675,7 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
          * @return the "owner" of a particular instruction relative to this
          *         instantiation.
          */
+        @Nullable
         public Instantiation findOwner(final int i) {
             if (!subroutine.get(i)) {
                 return null;
@@ -698,7 +703,7 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
          * @return a label for use by a branch instruction in the inlined code
          * @see #rangeLabel
          */
-        public LabelNode gotoLabel(final LabelNode l) {
+        public LabelNode gotoLabel(@NotNull final LabelNode l) {
             // owner should never be null, because owner is only null
             // if an instruction cannot be reached from this subroutine
             Instantiation owner = findOwner(instructions.indexOf(l));
@@ -723,6 +728,7 @@ public class JSRInlinerAdapter extends MethodNode implements Opcodes {
 
         // AbstractMap implementation
 
+        @NotNull
         @Override
         public Set<Map.Entry<LabelNode, LabelNode>> entrySet() {
             return null;

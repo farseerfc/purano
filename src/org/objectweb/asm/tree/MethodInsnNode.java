@@ -33,6 +33,7 @@ import java.util.Map;
 
 import lombok.EqualsAndHashCode;
 
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.MethodVisitor;
 
 /**
@@ -101,10 +102,11 @@ public class MethodInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(final MethodVisitor mv) {
+    public void accept(@NotNull final MethodVisitor mv) {
         mv.visitMethodInsn(opcode, owner, name, desc);
     }
 
+    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
         return new MethodInsnNode(opcode, owner, name, desc);
