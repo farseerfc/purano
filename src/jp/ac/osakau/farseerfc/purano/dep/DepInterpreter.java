@@ -36,7 +36,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		this.classFinder = null;
 	}
 	
-	public DepInterpreter(DepEffect effect, MethodRep method, ClassFinder classFinder) {
+	public DepInterpreter(DepEffect effect, MethodRep method, @Nullable ClassFinder classFinder) {
 		super(ASM4);
 		this.effect = effect;
 		this.method = method;
@@ -155,8 +155,11 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		case GETSTATIC:
 			{ 
 				FieldInsnNode fin = (FieldInsnNode) insn;
-				DepValue v =newValue(Type.getType(fin.desc));
-				v.getDeps().getStatics().add(new FieldDep(fin.desc,fin.owner,fin.name));
+				DepValue v = newValue(Type.getType(fin.desc));
+                if (v == null) {
+                    throw new AssertionError("Cannot get static member from type void");
+                }
+                v.getDeps().getStatics().add(new FieldDep(fin.desc,fin.owner,fin.name));
 				
 				return v;
 			}
@@ -293,8 +296,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             }
         case ANEWARRAY:{
             String desc = ((TypeInsnNode) insn).desc;
-            DepValue v = new DepValue(Type.getType("[" + Type.getObjectType(desc)),value.getDeps());
-            return v;
+            return new DepValue(Type.getType("[" + Type.getObjectType(desc)),value.getDeps());
         }
         case ARRAYLENGTH:
             return new DepValue(Type.INT_TYPE, value.getDeps());
@@ -443,9 +445,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 									f.getName(), deps, null));
 				}
 
-			} else if (arrayref.getDeps().dependOnlyLocal(method)) {
-				// Nothing changed ?
-			} else if (arrayref.getDeps().dependOnlyLocalArgs()) {
+			} else if (arrayref.getDeps().dependOnlyArgs(method)) {
 				// arg[index] = value
 				for (int local : arrayref.getDeps().getLocals()) {
 					if (method.isArg(local)) {
@@ -502,7 +502,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	for(DepValue value :values){
     		deps.merge(value.getDeps());
     	}
-    	String callType="";
+    	String callType;
     	switch(insn.getOpcode()){
     	case MULTIANEWARRAY:
     		return new DepValue(Type.getType(((MultiANewArrayInsnNode) insn).desc), deps);

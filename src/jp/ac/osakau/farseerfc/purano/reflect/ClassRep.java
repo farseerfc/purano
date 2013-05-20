@@ -13,7 +13,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 
@@ -32,7 +31,6 @@ public class ClassRep extends ClassVisitor {
 	public ClassRep(String className, ClassFinder cf){
 		super(Opcodes.ASM4);
 		this.name = className;
-		Class<? extends Object> cls = null;
 //		try {
 //			cls = Class.forName(className);
 //		} catch (ClassNotFoundException e) {
@@ -116,7 +114,7 @@ public class ClassRep extends ClassVisitor {
 		MethodRep overridded = methodMap.get(id);
 		if(overridded != null){
 //			log.info("{} {} override {}",id ,overrider.getInsnNode().owner, name);
-			overridded.getOverrides().put(overrider.getInsnNode().owner, overrider);
+			overridded.override(overrider);
 		}
 		for(ClassRep s : supers){
 			s.override(overrider.getId(),overrider);
@@ -135,9 +133,12 @@ public class ClassRep extends ClassVisitor {
 		}
 		
 		this.supers.addAll(Lists.transform(Arrays.asList(interfaces), new Function<String,ClassRep>(){
-			@Override @Nullable
-			public ClassRep apply(@Nullable String name) {
-				return classFinder.loadClass(Types.binaryName2NormalName(name));
-			}}));
+			@Override @javax.annotation.Nullable
+			public ClassRep apply(@javax.annotation.Nullable String name) {
+                if (name == null) {
+                    return null;
+                }
+                return classFinder.loadClass(Types.binaryName2NormalName(name));
+            }}));
 	}
 }

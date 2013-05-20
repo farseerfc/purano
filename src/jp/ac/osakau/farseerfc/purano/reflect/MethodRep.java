@@ -145,14 +145,8 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean isArg(int local){
-		if(isThis(local)){
-			return false;
-		}
-		if(local < argCount()){
-			return true;
-		}
-		return false;
-	}
+        return !isThis(local) && local < argCount();
+    }
 	
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
@@ -188,7 +182,7 @@ public class MethodRep extends MethodVisitor {
 								public void visitEnd() {
 									super.visitEnd();
 									methodNode = this;
-									Analyzer<DepValue> ana = new Analyzer<DepValue>(new DepInterpreter(analyzeResult, thisRep,cf));
+									Analyzer<DepValue> ana = new Analyzer<>(new DepInterpreter(analyzeResult, thisRep,cf));
 									try {
 										/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 									} catch (AnalyzerException e) {
@@ -263,4 +257,11 @@ public class MethodRep extends MethodVisitor {
 		}
 		return false;
 	}
+
+    public void override(MethodRep overrider) {
+        if (!getId().equals(overrider.getId())) {
+            throw new AssertionError("Overrider and overridee should have same Id :" + getId());
+        }
+        overrides.put(overrider.getInsnNode().owner, overrider);
+    }
 }

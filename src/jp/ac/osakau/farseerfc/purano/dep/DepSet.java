@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -70,8 +71,9 @@ public final @Data class DepSet {
 
 		final Function<FieldDep,String> dumper = new Function<FieldDep,String>(){
 			@Override
-			public String apply(@NotNull FieldDep fd) {
-				return fd.dump(table);
+			public String apply(@Nullable FieldDep fd) {
+                assert fd != null;
+                return fd.dump(table);
 			}
 		};
 		
@@ -129,22 +131,10 @@ public final @Data class DepSet {
 	}
 	
 	public boolean dependOnlyLocalArgs() {
-		if(getStatics().size() > 0){
-			return false;
-		}
-		if(getFields().size() > 0){
-			return false;
-		}
-		return true;
-	}
+        return getStatics().size() <= 0 && getFields().size() <= 0;
+    }
 	
 	public boolean dependOnlyArgs(@NotNull MethodRep rep){
-		if(!dependOnlyLocalArgs()){
-			return false;
-		}
-		if(dependOnlyLocal(rep)){
-			return false;
-		}
-		return true;
-	}
+        return dependOnlyLocalArgs() && !dependOnlyLocal(rep);
+    }
 }

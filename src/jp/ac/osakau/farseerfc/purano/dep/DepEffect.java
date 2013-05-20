@@ -1,7 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
 import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Escape;
@@ -41,7 +40,7 @@ public class DepEffect {
 			callEffects.add((CallEffect)effect.duplicate(over));
 		}
 		for(Effect effect: other.getOtherEffects()){
-			otherEffects.add((Effect)effect.duplicate(over));
+			otherEffects.add(effect.duplicate(over));
 		}
 	}
 
@@ -58,16 +57,17 @@ public class DepEffect {
 	}
 	
 	public void addOtherField(@NotNull OtherFieldEffect ofe){
-		if(otherField.containsKey(ofe.getKey())){
+        if (!otherField.containsKey(ofe.getKey())) {
+            otherField.put(ofe.getKey(), ofe);
+        }
+//        else {
 //			DepSet ds = new DepSet();
 //			ds.merge(otherField.get(ofe.getKey()).getDeps());
 //			ds.merge(ofe.getDeps());
 //			otherField.get(ofe.getKey()).setDeps(ds);
 //			otherField.get(ofe.getKey()).getDeps().merge(ofe.getDeps());
-		}else{
-			otherField.put(ofe.getKey(), ofe);
-		}
-	}
+//        }
+    }
 	
 	public void addStaticField(@NotNull StaticFieldEffect sfe){
 		if(staticField.containsKey(sfe.getKey())){
@@ -155,39 +155,32 @@ public class DepEffect {
 	}
 
 
-	@Override
-	public boolean equals(Object o){
-		if(o instanceof DepEffect){
-			return ((DepEffect)o).equals(this);
-		}
-		return false;
-	}
-	
-	public boolean equals(@NotNull DepEffect other){
-		if(!thisField.keySet().containsAll(other.thisField.keySet())
-				&& other.thisField.keySet().containsAll(thisField.keySet())){
-			return false;
-		}
-		if(!otherField.keySet().containsAll(other.otherField.keySet())
-				&& other.otherField.keySet().containsAll(otherField.keySet())){
-			return false;
-		}
-		if(!staticField.keySet().containsAll(other.staticField.keySet())
-				&& other.staticField.keySet().containsAll(staticField.keySet())){
-			return false;
-		}
-		if(!argumentEffects.containsAll(other .argumentEffects)){
-			return false;
-		}
-		if(!otherEffects.containsAll(otherEffects)){
-			return false;
-		}
-		
-		return true;
-	}
-	
-	public int hashcode()
-	{
-		return Objects.hashCode(thisField.keySet(),otherField.keySet(),staticField.keySet(),argumentEffects,otherEffects);
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DepEffect depEffect = (DepEffect) o;
+
+        return argumentEffects.equals(depEffect.argumentEffects) &&
+                callEffects.equals(depEffect.callEffects) &&
+                otherEffects.equals(depEffect.otherEffects) &&
+                otherField.equals(depEffect.otherField) &&
+                ret.equals(depEffect.ret) &&
+                staticField.equals(depEffect.staticField) &&
+                thisField.equals(depEffect.thisField);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = ret.hashCode();
+        result = 31 * result + thisField.hashCode();
+        result = 31 * result + otherField.hashCode();
+        result = 31 * result + staticField.hashCode();
+        result = 31 * result + argumentEffects.hashCode();
+        result = 31 * result + callEffects.hashCode();
+        result = 31 * result + otherEffects.hashCode();
+        return result;
+    }
 }
