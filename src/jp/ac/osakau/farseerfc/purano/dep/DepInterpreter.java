@@ -397,7 +397,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         	return null;
         case PUTFIELD:{
         	FieldInsnNode fin = (FieldInsnNode) insn;        	
-			if (value1.isThis()) {
+			if (!method.isStatic() && value1.maybeThis()) {
 				effect.addThisField(
 						new ThisFieldEffect(fin.desc, fin.owner, fin.name,
 								value2.getDeps(), null));
@@ -553,18 +553,47 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     			return addCallEffect(deps, callType, min);
     		}
 
-            transitive(values, rep, callEffect);
+            transitive(values, rep, callEffect,deps);
 
     		return new DepValue(Type.getReturnType(min.desc), callEffect.getRet());
     	}
     }
 
-    private void transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect) {
-        if(rep.isInit()){
-            for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
-                effect.addOtherField((OtherFieldEffect)ofe.duplicate(rep));
-            }
+    private void transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
+        if (rep.isNative()) {
+            effect.getOtherEffects().add(new NativeEffect(deps, rep));
+            return;
         }
+
+        // transitive from origin
+        for(StaticFieldEffect sfe:callEffect.getStaticField().values()){
+            effect.addStaticField((StaticFieldEffect)sfe.duplicate(rep));
+        }
+
+        for(Effect e :callEffect.getOtherEffects()){
+            effect.getOtherEffects().add(e.duplicate(rep));
+        }
+
+
+        if (rep.isInit()) {
+            for (OtherFieldEffect ofe : callEffect.getOtherField().values()) {
+                effect.addOtherField((OtherFieldEffect) ofe.duplicate(rep));
+            }
+            return;
+        }
+
+        if (rep.isStatic() || values.size() == 0) {
+            if ( callEffect.getThisField().size() > 0) {
+                throw new RuntimeException("Static method invokation generates this effect :" + rep.toString(new Types(false)));
+            }
+            for (OtherFieldEffect ofe : callEffect.getOtherField().values()) {
+                effect.addOtherField((OtherFieldEffect) ofe.duplicate(rep));
+            }
+            return;
+        }
+
+        DepValue obj = values.get(0);
+        // TODO continue write obj.rep(*values)
     }
 
     private void transitiveOld(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect) {
@@ -606,7 +635,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                 }
             }
 
-            if(otherObject.isThis()){
+            if(otherObject.maybeThis()){
                 for(ThisFieldEffect tfe:callEffect.getThisField().values()){
                     effect.addThisField((ThisFieldEffect)tfe.duplicate(rep));
                 }

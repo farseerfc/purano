@@ -105,8 +105,8 @@ public final @Data class DepSet {
 	
 	public boolean dependOnThis(@NotNull MethodRep rep) {
 		boolean thisDep=false;
-		if(getLocals().contains(0) &&
-				((rep.getMethodNode().access & Opcodes.ACC_STATIC) == 0) &&
+		if(     !rep.isStatic() &&
+                getLocals().contains(0) &&
 				rep.getMethodNode().localVariables.size()>0){
 			thisDep = true;
 		}

@@ -31,7 +31,7 @@ public class DepValue implements Value {
                 && (type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY);
     }
     
-    public boolean isThis(){
+    public boolean maybeThis(){
     	return type.getSort() == Type.OBJECT && 
     			deps.getFields().size()==0 && 
     			deps.getStatics().size()==0 && 
