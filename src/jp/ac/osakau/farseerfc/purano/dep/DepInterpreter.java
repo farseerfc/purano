@@ -553,16 +553,16 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     			return addCallEffect(deps, callType, min);
     		}
 
-            transitive(values, rep, callEffect,deps);
 
-    		return new DepValue(Type.getReturnType(min.desc), callEffect.getRet());
+
+    		return new DepValue(Type.getReturnType(min.desc), transitive(values, rep, callEffect, deps));
     	}
     }
 
-    private void transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
+    private DepSet transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
         if (rep.isNative()) {
             effect.getOtherEffects().add(new NativeEffect(deps, rep));
-            return;
+            return new DepSet();
         }
 
         // transitive from origin
@@ -579,7 +579,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             for (OtherFieldEffect ofe : callEffect.getOtherField().values()) {
                 effect.addOtherField((OtherFieldEffect) ofe.duplicate(rep));
             }
-            return;
+            return new DepSet();
         }
 
         if (rep.isStatic() || values.size() == 0) {
@@ -589,11 +589,51 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             for (OtherFieldEffect ofe : callEffect.getOtherField().values()) {
                 effect.addOtherField((OtherFieldEffect) ofe.duplicate(rep));
             }
-            return;
+            return new DepSet();
         }
 
-        DepValue obj = values.get(0);
         // TODO continue write obj.rep(*values)
+        DepValue obj = values.get(0);
+        for (ArgumentEffect ae : callEffect.getArgumentEffects()) {
+            // ae.getArgPos  is method call is changing value of argument in position
+//	    			log.info("ArgumentEffect {} values [{}] rep {}",
+//	    					ae.getArgPos(),Joiner.on(",").join(values),rep);
+
+            DepSet ds = values.get(ae.getArgPos()).getDeps();
+            if (ds.dependOnlyArgs(method)) {
+                for (int localPos : ds.getLocals()) {
+                    if (method.isArg(localPos)) {
+                        DepSet newDs = new DepSet();
+                        for (int local : ae.getDeps().getLocals()) {
+                            if (rep.isArg(local)) {
+                                newDs.merge(values.get(local).getDeps());
+                            }
+                        }
+                        if (ae.getDeps().getFields().size() > 0) {
+                            newDs.merge(obj.getDeps());
+                        }
+                        for (FieldDep fd : ae.getDeps().getStatics()) {
+                            newDs.getStatics().add(fd);
+                        }
+                        effect.getArgumentEffects().add(new ArgumentEffect(localPos, newDs, rep));
+                    }
+                }
+            } else if(ds.dependOnThis(method)){
+                int countField = 0;
+                for(FieldDep fd : ds.getFields()){
+                    effect.addThisField(new ThisFieldEffect(fd.getDesc(),fd.getOwner(),fd.getName(),deps,rep));
+                    countField ++ ;
+                }
+                if(countField > 1){
+                    throw new RuntimeException(
+                            String.format("Changing %d field during method call %s from method %s ",
+                                    countField,rep,method));
+                }
+            } else {
+                // Do nothing, changing local variables
+            }
+        }
+        return obj.getDeps();
     }
 
     private void transitiveOld(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect) {

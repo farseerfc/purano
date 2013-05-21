@@ -10,7 +10,7 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(exclude="from")
-public abstract class Effect implements Cloneable{
+public abstract class Effect<T extends Effect> implements Cloneable{
 	private @Getter @Setter DepSet deps;
 	private @Getter @Setter  MethodRep from;
 	
@@ -26,11 +26,11 @@ public abstract class Effect implements Cloneable{
 	
 	@NotNull
     @Override
-	public abstract Effect clone();
+	public abstract T clone();
 	
 	@NotNull
-    public Effect duplicate(MethodRep from){
-		Effect cl = clone();
+    public T duplicate(MethodRep from){
+		T cl = clone();
 		cl.setFrom(from);
 		return cl;
 	}
