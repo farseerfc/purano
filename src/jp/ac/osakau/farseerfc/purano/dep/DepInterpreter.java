@@ -561,7 +561,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 
     private DepSet transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
         if (rep.isNative()) {
-            effect.getOtherEffects().add(new NativeEffect(deps, rep));
+            effect.getOtherEffects().add(new NativeEffect(rep));
             return new DepSet();
         }
 

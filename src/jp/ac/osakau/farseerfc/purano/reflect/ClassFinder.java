@@ -49,7 +49,7 @@ public class ClassFinder {
 		int pass = 0;
 		do {
 			changed = false;
-			if(pass < 5){
+			if(pass < 4){
 				allCreps = new HashSet<>(classMap.values());
 			}
 			for (ClassRep crep : allCreps ) {
