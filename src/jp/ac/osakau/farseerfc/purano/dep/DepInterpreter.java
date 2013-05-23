@@ -296,7 +296,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             }
         case ANEWARRAY:{
             String desc = ((TypeInsnNode) insn).desc;
-            return new DepValue(Type.getType("[" + Type.getObjectType(desc)),value.getDeps());
+            return new DepValue(Type.getType("[" + Type.getObjectType(desc)),new DepSet());//value.getDeps());
         }
         case ARRAYLENGTH:
             return new DepValue(Type.INT_TYPE, value.getDeps());
@@ -446,10 +446,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				}
 
 			} else if (arrayref.getDeps().dependOnlyArgs(method)) {
-				// arg[index] = value
+				// arrayref[index] = value
 				for (int local : arrayref.getDeps().getLocals()) {
 					if (method.isArg(local)) {
-//						log.info("Putting ArgumentEffect {} local {}", method, local);
+//						log.info("Putting ArgumentEffect {} local {} deps {}", method, local,value.getDeps());
 						effect.getArgumentEffects().add(
 								new ArgumentEffect(local, value.getDeps(), null));
 					}
@@ -553,9 +553,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     			return addCallEffect(deps, callType, min);
     		}
 
+            DepSet returnValue = new DepSet();
+            returnValue.merge(transitive(values, rep, callEffect, deps));
 
-
-    		return new DepValue(Type.getReturnType(min.desc), transitive(values, rep, callEffect, deps));
+    		return new DepValue(Type.getReturnType(min.desc), returnValue);
     	}
     }
 
@@ -600,7 +601,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //	    					ae.getArgPos(),Joiner.on(",").join(values),rep);
 
             DepSet ds = values.get(ae.getArgPos()).getDeps();
-            if (ds.dependOnlyArgs(method)) {
+            if (ds.dependArgsAndFields(method)) {
                 for (int localPos : ds.getLocals()) {
                     if (method.isArg(localPos)) {
                         DepSet newDs = new DepSet();
@@ -629,8 +630,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                             String.format("Changing %d field during method call %s from method %s ",
                                     countField,rep,method));
                 }
-            } else {
+            } else if(!ds.dependOnlyLocal(method)) {
                 // Do nothing, changing local variables
+//                throw new RuntimeException(String.format("Depset %s during method call %s from method %s ",
+//                        ds,rep,method));
             }
         }
         return obj.getDeps();

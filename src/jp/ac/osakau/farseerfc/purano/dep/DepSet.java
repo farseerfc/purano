@@ -104,13 +104,12 @@ public final @Data class DepSet {
 	}
 	
 	public boolean dependOnThis(@NotNull MethodRep rep) {
-		boolean thisDep=false;
-		if(     !rep.isStatic() &&
-                getLocals().contains(0) &&
-				rep.getMethodNode().localVariables.size()>0){
-			thisDep = true;
+		if( !rep.isStatic() &&
+			rep.getMethodNode().localVariables.size()>0 &&
+            getLocals().contains(0) ){
+			return true;
 		}
-		return thisDep;
+		return false ;
 	}
 
 	public boolean dependOnlyLocal(@NotNull MethodRep rep) {
@@ -136,5 +135,18 @@ public final @Data class DepSet {
 	
 	public boolean dependOnlyArgs(@NotNull MethodRep rep){
         return dependOnlyLocalArgs() && !dependOnlyLocal(rep);
+    }
+
+    public boolean dependArgsAndFields (@NotNull MethodRep rep){
+        int argCount = rep.argCount();
+        for(int local : getLocals()){
+            if(local<argCount){
+                return false;
+            }
+        }
+        if(getStatics().size() > 0){
+            return false;
+        }
+        return true;
     }
 }

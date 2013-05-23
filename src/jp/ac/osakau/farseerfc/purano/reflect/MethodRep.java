@@ -145,7 +145,8 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean isArg(int local){
-        return !isThis(local) && local < argCount();
+        return isStatic ? local < argCount() :
+                local<=argCount() && !isThis(local);
     }
 	
 	@Override

@@ -148,7 +148,7 @@ public class ClassDepVisitor extends ClassVisitor{
 
 	public static void main(String[] args) throws IOException {
 		ClassDepVisitor tt = new ClassDepVisitor();
-		ClassReader cr = new ClassReader("org.reflections.adapters.JavassistAdapter");//readAllBytes("target/TryTree.class"));
+		ClassReader cr = new ClassReader("jp.ac.osakau.farseerfc.purano.effect.Effect");//readAllBytes("target/TryTree.class"));
 		//TraceClassVisitor tcv = new TraceClassVisitor(tt,new Textifier(), new PrintWriter(System.err));
 		cr.accept(tt, 0);
 	}
