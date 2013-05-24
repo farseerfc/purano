@@ -40,19 +40,19 @@ public abstract class Effect<T extends Effect> implements Cloneable{
 		className = className.substring(0,className.length() - 6 );
 		String fromStr="";
 		if(from != null){
-			fromStr = Escape.from(" From "+from.toString(table));
+			fromStr = Escape.from(", inheritedFrom = \""+
+                table.dumpMethodDesc(from.getInsnNode().desc,
+                    String.format("%s#%s",
+                        table.fullClassName(from.getInsnNode().owner),
+                        from.getInsnNode().name))+"\"");
 		}
-		return String.format("%s@%s(%s)%s",
+		return String.format("%s@%s(%s%s)",
 				prefix,
 				Escape.annotation(className),
 				Escape.effect(dumpEffect(rep, table)),
 				fromStr);
 	}
 	
-	@NotNull
-    public String dumpDot(){
-		return "";
-	}
-	
+
 	protected abstract String dumpEffect(MethodRep rep, Types table);
 }

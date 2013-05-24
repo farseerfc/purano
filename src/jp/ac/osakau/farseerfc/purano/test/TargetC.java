@@ -34,7 +34,7 @@ public class TargetC {
 	}
 
 	@CheckDependency()
-	@Return(depends={})
+    @Return(dependArguments = {})
 	public static void main(String [] args) throws InterruptedException{
 		Integer i = null;
 		System.out.println(i.intValue());
