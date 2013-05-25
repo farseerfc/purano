@@ -16,5 +16,6 @@ public @interface Field {
     @NotNull public String inheritedFrom() default "";
 
     @NotNull public Class type();
+    @NotNull public Class owner();
     @NotNull public String name();
 }

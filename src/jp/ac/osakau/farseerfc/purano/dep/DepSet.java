@@ -38,7 +38,7 @@ public final @Data class DepSet {
 	}
 	
 
-	public String dumpDeps(@NotNull final MethodRep rep, @NotNull final Types table){
+	public List<String> dumpDeps(@NotNull final MethodRep rep, @NotNull final Types table){
 		int argCount = rep.argCount();
 		MethodNode methodNode = rep.getMethodNode();
 		
@@ -79,28 +79,28 @@ public final @Data class DepSet {
 		
 		List<String> result=new ArrayList<>();
 		if(thisDep){
-			result.add("this");
+			result.add("dependThis=true");
 		}
 		if(arguments.size() > 0){
-			result.add(String.format("Args: [%s]", 
-					Joiner.on(", ").join(arguments)));
+			result.add(String.format("dependArguments= {\"%s\"}",
+					Joiner.on("\", \"").join(arguments)));
 		}
-		if(locals.size()>0){
-			result.add(String.format("Locals: [%s]", 
-					Joiner.on(", ").join(locals)));
-		}
+//		if(locals.size()>0){
+//			result.add(String.format("Locals: [%s]",
+//					Joiner.on(", ").join(locals)));
+//		}
 		if(getFields().size() > 0){
-			result.add(String.format("Fields: [%s]",
-					Joiner.on(", ").join(Collections2.transform(getFields(), dumper
+			result.add(String.format("dependFields= {\"%s\"}",
+					Joiner.on("\", \"").join(Collections2.transform(getFields(), dumper
 							))));
 		}
 		if(getStatics().size() > 0){
-			result.add(String.format("Statics: [%s]",
-					Joiner.on(", ").join(Collections2.transform(getStatics(), dumper
+			result.add(String.format("dependStaticFields= {\"%s\"}",
+					Joiner.on("\", \"").join(Collections2.transform(getStatics(), dumper
 							))));
 		}
 		
-		return Joiner.on(", ").join(result);
+		return result;
 	}
 	
 	public boolean dependOnThis(@NotNull MethodRep rep) {

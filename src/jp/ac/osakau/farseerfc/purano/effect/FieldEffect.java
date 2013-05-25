@@ -7,7 +7,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 @EqualsAndHashCode(callSuper=true)
-public abstract class FieldEffect extends Effect {
+public abstract class FieldEffect<T extends FieldEffect> extends Effect<T> {
 	public FieldEffect(String desc,String owner,String name, DepSet deps, MethodRep from) {
 		super(deps,from);
 		this.desc = desc;

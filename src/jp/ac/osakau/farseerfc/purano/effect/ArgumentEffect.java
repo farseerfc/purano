@@ -7,8 +7,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @EqualsAndHashCode(callSuper=true)
-public class ArgumentEffect extends Effect implements Cloneable {
+public class ArgumentEffect extends Effect<ArgumentEffect> {
 
 	private final @Getter int argPos;
 	
@@ -19,22 +22,23 @@ public class ArgumentEffect extends Effect implements Cloneable {
 	
 	@NotNull
     @Override
-	public Effect clone() {
+	public ArgumentEffect clone() {
 		return new ArgumentEffect(argPos, getDeps(), getFrom());
 	}
 
 	@Override
-	public String dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
+	public List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
 		if(getArgPos() < rep.getMethodNode().localVariables.size()){
-			return String.format("%s:[%s]",
-					rep.getMethodNode().localVariables.get(getArgPos()).name,
-					getDeps().dumpDeps(rep, table)
-					);
+            ArrayList<String> result = new ArrayList<>();
+            result.add("name=\""+rep.getMethodNode().localVariables.get(getArgPos()).name+"\"");
+            result.addAll(getDeps().dumpDeps(rep, table));
+			return result;
+
 		}else{
-			return String.format("#%d:[%s]",
-					getArgPos(),
-					getDeps().dumpDeps(rep, table)
-					);
+            ArrayList<String> result = new ArrayList<>();
+            result.add("name=#\""+getArgPos()+"\"");
+            result.addAll(getDeps().dumpDeps(rep, table));
+            return result;
 		}
 	}
 

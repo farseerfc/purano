@@ -7,8 +7,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @EqualsAndHashCode(callSuper=true)
-public class CallEffect extends FieldEffect implements Cloneable{
+public class CallEffect extends FieldEffect<CallEffect> implements Cloneable{
 	public CallEffect(String callType,String desc,String owner,String name, DepSet deps, MethodRep from) {
 		super(desc,owner,name,deps,from);
 		this.callType = callType;
@@ -18,19 +22,22 @@ public class CallEffect extends FieldEffect implements Cloneable{
 
 	@NotNull
     @Override
-	public Effect clone(){
+	public CallEffect clone(){
 		return new CallEffect(callType, getDesc(),getOwner(),getName(), getDeps(), getFrom());
 	}
 
 	@Override
-	protected String dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
-		return String.format("%s %s: [%s]",
-				getCallType(),
-				table.dumpMethodDesc(getDesc(),
-						String.format("%s#%s",
-								table.fullClassName(getOwner()), 
-								getName())),
-								getDeps().dumpDeps(rep ,table));
+	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
+        ArrayList<String> result = new ArrayList<>(Arrays.asList(
+                "callType=\""+getCallType()+"\"",
+                "method=\""+
+                        table.dumpMethodDesc(getDesc(),
+                        String.format("%s#%s",
+                                table.fullClassName(getOwner()),
+                                getName())) +"\""
+        ));
+        result.addAll(getDeps().dumpDeps(rep, table));
+        return result;
 	}
 
 }

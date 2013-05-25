@@ -597,8 +597,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         DepValue obj = values.get(0);
         for (ArgumentEffect ae : callEffect.getArgumentEffects()) {
             // ae.getArgPos  is method call is changing value of argument in position
-//	    			log.info("ArgumentEffect {} values [{}] rep {}",
-//	    					ae.getArgPos(),Joiner.on(",").join(values),rep);
+            log.info("ArgumentEffect {} values [{}] rep {}",
+                    ae.getArgPos(),Joiner.on(",").join(values),rep);
 
             DepSet ds = values.get(ae.getArgPos()).getDeps();
             if (ds.dependArgsAndFields(method)) {

@@ -6,8 +6,11 @@ import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @EqualsAndHashCode(callSuper=true)
-public class InvokeDynamicEffect extends Effect implements Cloneable{
+public class InvokeDynamicEffect extends Effect<InvokeDynamicEffect> implements Cloneable{
 	public InvokeDynamicEffect(DepSet deps, MethodRep from) {
 		super(deps, from);
 	}
@@ -18,13 +21,13 @@ public class InvokeDynamicEffect extends Effect implements Cloneable{
 	
 	@NotNull
     @Override
-	public Effect clone() {
+	public InvokeDynamicEffect clone() {
 		return new InvokeDynamicEffect(getDeps(),getFrom());
 	}
 
 	@NotNull
     @Override
-	protected String dumpEffect(MethodRep rep, Types table) {
-		return "";
+    protected List<String> dumpEffect(MethodRep rep, Types table) {
+        return new ArrayList<>();
 	}
 }

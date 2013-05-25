@@ -87,7 +87,7 @@ public class DepEffect {
 
 		deps.add(String.format("%s@%s(%s)",prefix,
 				Escape.annotation("Return"),
-				Escape.effect(ret.dumpDeps(rep,table))));
+				Escape.effect(Joiner.on(", ").join(ret.dumpDeps(rep,table)))));
 		
 		for(ArgumentEffect effect: argumentEffects){
 			deps.add(effect.dump(rep, table, prefix));

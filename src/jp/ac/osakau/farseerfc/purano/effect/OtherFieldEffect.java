@@ -6,8 +6,12 @@ import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @EqualsAndHashCode(callSuper=true)
-public class OtherFieldEffect extends FieldEffect implements Cloneable {
+public class OtherFieldEffect extends FieldEffect<OtherFieldEffect> implements Cloneable {
 	public OtherFieldEffect(String desc, String owner, String name,DepSet deps,DepSet leftValueDeps, MethodRep from) {
 		super(desc,owner,name, null, from);
 //		this.leftValueDeps = leftValueDeps;
@@ -23,15 +27,17 @@ public class OtherFieldEffect extends FieldEffect implements Cloneable {
 	
 	@NotNull
     @Override
-	public Effect clone() {
+	public OtherFieldEffect clone() {
 		return new OtherFieldEffect(getDesc(), getOwner(), getName(), getDeps(), null, getFrom());
 	}
 
 	@Override
-	protected String dumpEffect(MethodRep rep, @NotNull Types table) {
-		return String.format("%s %s#%s",
-				table.desc2full(getDesc()),
-				table.fullClassName(getOwner()),
-				getName());
+	protected List<String> dumpEffect(MethodRep rep, @NotNull Types table) {
+        ArrayList<String> result = new ArrayList<>(Arrays.asList(
+                "type="+table.desc2full(getDesc()),
+                "owner="+table.fullClassName(getOwner()),
+                "name=\""+getName()+"\""
+        ));
+        return result;
 	}
 }
