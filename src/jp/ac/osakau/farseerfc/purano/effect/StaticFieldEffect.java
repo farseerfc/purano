@@ -25,8 +25,8 @@ public final class StaticFieldEffect extends FieldEffect<StaticFieldEffect> impl
 	@Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<String>(Arrays.asList(
-                "type=" + table.desc2full(getDesc()),
-                "owner=" + table.fullClassName(getOwner()),
+                "type=" + table.desc2full(getDesc())+".class",
+                "owner=" + table.fullClassName(getOwner())+".class",
                 "name=\"" + getName() + "\""
         ));
         result.addAll(getDeps().dumpDeps(rep, table));

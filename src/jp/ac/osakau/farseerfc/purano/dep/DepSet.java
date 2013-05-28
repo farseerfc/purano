@@ -149,4 +149,8 @@ public final @Data class DepSet {
         }
         return true;
     }
+
+    public boolean isEmpty(){
+        return statics.isEmpty() && fields.isEmpty() && locals.isEmpty();
+    }
 }

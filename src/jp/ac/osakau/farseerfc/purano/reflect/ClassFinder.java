@@ -49,7 +49,7 @@ public class ClassFinder {
 		int pass = 0;
 		do {
 			changed = false;
-			if(pass < 2){
+			if(pass < 3){
 				allCreps = new HashSet<>(classMap.values());
 			}
 			for (ClassRep crep : allCreps ) {
@@ -159,7 +159,7 @@ public class ClassFinder {
 
 	public static void main(@NotNull String [] argv){
 		long start=System.currentTimeMillis();
-		String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
+		String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}

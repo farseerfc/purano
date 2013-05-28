@@ -12,7 +12,7 @@ import java.util.*;
 
 //@EqualsAndHashCode(callSuper=false)
 public class DepEffect {
-	private final @Getter DepSet ret= new DepSet();
+	private final @Getter DepSet returnDep = new DepSet();
 	private final @Getter Map<String,ThisFieldEffect> thisField = new HashMap<>();
 	private final @Getter Map<String,OtherFieldEffect> otherField = new HashMap<>();
 	private final @Getter Map<String,StaticFieldEffect> staticField = new HashMap<>(); 
@@ -23,7 +23,7 @@ public class DepEffect {
 
 
 	public void merge(@NotNull DepEffect other,MethodRep over){
-		ret.merge(other.ret);
+		returnDep.merge(other.returnDep);
 		for(ThisFieldEffect effect:other.getThisField().values()){
 			addThisField((ThisFieldEffect)effect.duplicate(over));
 		}
@@ -85,9 +85,11 @@ public class DepEffect {
 
 		List<String> deps= new ArrayList<>();
 
-		deps.add(String.format("%s@%s(%s)",prefix,
+        if(!returnDep.isEmpty()){
+		    deps.add(String.format("%s@%s(%s)",prefix,
 				Escape.annotation("Return"),
-				Escape.effect(Joiner.on(", ").join(ret.dumpDeps(rep,table)))));
+				Escape.effect(Joiner.on(", ").join(returnDep.dumpDeps(rep, table)))));
+        }
 		
 		for(ArgumentEffect effect: argumentEffects){
 			deps.add(effect.dump(rep, table, prefix));
@@ -166,7 +168,7 @@ public class DepEffect {
                 callEffects.equals(depEffect.callEffects) &&
                 otherEffects.equals(depEffect.otherEffects) &&
                 otherField.equals(depEffect.otherField) &&
-                ret.equals(depEffect.ret) &&
+                returnDep.equals(depEffect.returnDep) &&
                 staticField.equals(depEffect.staticField) &&
                 thisField.equals(depEffect.thisField);
 
@@ -174,7 +176,7 @@ public class DepEffect {
 
     @Override
     public int hashCode() {
-        int result = ret.hashCode();
+        int result = returnDep.hashCode();
         result = 31 * result + thisField.hashCode();
         result = 31 * result + otherField.hashCode();
         result = 31 * result + staticField.hashCode();

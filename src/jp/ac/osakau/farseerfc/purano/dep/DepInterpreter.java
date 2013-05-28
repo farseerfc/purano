@@ -257,7 +257,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case FRETURN:
         case DRETURN:
         case ARETURN:{
-        	effect.getRet().merge(value.getDeps());
+        	effect.getReturnDep().merge(value.getDeps());
         	return null;
         }
 		case PUTSTATIC: {
@@ -302,7 +302,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             return new DepValue(Type.INT_TYPE, value.getDeps());
         
         case ATHROW:{
-        	// effect.getOtherEffects().add(new ThrowEffect(value.getDeps(), null));
+        	effect.getOtherEffects().add(new ThrowEffect(value.getDeps(), null));
             return null;
         }
         case CHECKCAST:{
@@ -449,7 +449,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				// arrayref[index] = value
 				for (int local : arrayref.getDeps().getLocals()) {
 					if (method.isArg(local)) {
-//						log.info("Putting ArgumentEffect {} local {} deps {}", method, local,value.getDeps());
+						log.info("Putting ArgumentEffect {} local {} deps {}", method, local,value.getDeps());
 						effect.getArgumentEffects().add(
 								new ArgumentEffect(local, value.getDeps(), null));
 					}
@@ -560,7 +560,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	}
     }
 
-    private DepSet transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
+    private DepSet transitiveNew(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
         if (rep.isNative()) {
             effect.getOtherEffects().add(new NativeEffect(rep));
             return new DepSet();
@@ -568,7 +568,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 
         // transitive from origin
         for(StaticFieldEffect sfe:callEffect.getStaticField().values()){
-            effect.addStaticField((StaticFieldEffect)sfe.duplicate(rep));
+            effect.addStaticField(sfe.duplicate(rep));
         }
 
         for(Effect e :callEffect.getOtherEffects()){
@@ -578,7 +578,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 
         if (rep.isInit()) {
             for (OtherFieldEffect ofe : callEffect.getOtherField().values()) {
-                effect.addOtherField((OtherFieldEffect) ofe.duplicate(rep));
+                effect.addOtherField(ofe.duplicate(rep));
             }
             return new DepSet();
         }
@@ -588,7 +588,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                 throw new RuntimeException("Static method invokation generates this effect :" + rep.toString(new Types(false)));
             }
             for (OtherFieldEffect ofe : callEffect.getOtherField().values()) {
-                effect.addOtherField((OtherFieldEffect) ofe.duplicate(rep));
+                effect.addOtherField(ofe.duplicate(rep));
             }
             return new DepSet();
         }
@@ -597,8 +597,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         DepValue obj = values.get(0);
         for (ArgumentEffect ae : callEffect.getArgumentEffects()) {
             // ae.getArgPos  is method call is changing value of argument in position
-            log.info("ArgumentEffect {} values [{}] rep {}",
+            log.info("ArgumentEffect {} values [{}] rep {} method "+method.toString(),
                     ae.getArgPos(),Joiner.on(",").join(values),rep);
+            log.info("Rep dump {}",rep);
 
             DepSet ds = values.get(ae.getArgPos()).getDeps();
             if (ds.dependArgsAndFields(method)) {
@@ -616,7 +617,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                         for (FieldDep fd : ae.getDeps().getStatics()) {
                             newDs.getStatics().add(fd);
                         }
-                        effect.getArgumentEffects().add(new ArgumentEffect(localPos, newDs, rep));
+                        ArgumentEffect tae = new ArgumentEffect(localPos, newDs, rep);
+                        effect.getArgumentEffects().add(tae);
+                        log.info("Add transitive argument effect {}",tae.dump(method,new Types(),""));
                     }
                 }
             } else if(ds.dependOnThis(method)){
@@ -636,10 +639,56 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //                        ds,rep,method));
             }
         }
+
+//        if(obj.maybeThis()){
+//            for(ThisFieldEffect tfe:callEffect.getThisField().values()){
+//                effect.addThisField(tfe.duplicate(rep));
+//            }
+//            for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
+//                effect.addOtherField(ofe.duplicate(rep));
+//            }
+//        }else{
+//            for(ThisFieldEffect tfe : callEffect.getThisField().values()){
+//                 DepSet newDs = new DepSet();
+//                for(int local:tfe.getDeps().getLocals()){
+//                    if(rep.isArg(local)){
+//                        newDs.merge(values.get(local).getDeps());
+//                    }
+//                }
+//                if(tfe.getDeps().getFields().size()>0){
+//                    newDs.merge(obj.getDeps());
+//                }
+//                for(FieldDep fd: tfe.getDeps().getStatics()){
+//                    newDs.getStatics().add(fd);
+//                }
+//                effect.addOtherField(new OtherFieldEffect(
+//                        tfe.getDesc(),tfe.getOwner() , tfe.getName(),
+//                        newDs, obj.getDeps(), rep));
+//            }
+//
+//            for(OtherFieldEffect ofe: callEffect.getOtherField().values()){
+//                 DepSet newDs = new DepSet();
+////						for(int local:ofe.getDeps().getLocals()){
+////							if(rep.isArg(local)){
+////								newDs.merge(values.get(local).getDeps());
+////							}
+////						}
+////						if(ofe.getDeps().getFields().size()>0){
+////    						newDs.merge(otherObject.getDeps());
+////    					}
+////						for(FieldDep fd: ofe.getDeps().getStatics()){
+////							newDs.getStatics().add(fd);
+////						}
+//                effect.addOtherField(new OtherFieldEffect(
+//                        ofe.getDesc(),ofe.getOwner() , ofe.getName(),
+//                        newDs, obj.getDeps(), rep));
+//            }
+//        }
+
         return obj.getDeps();
     }
 
-    private void transitiveOld(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect) {
+    private DepSet transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
         if(rep.isInit()){
             for(OtherFieldEffect ofe:callEffect.getOtherField().values()){
                 effect.addOtherField((OtherFieldEffect)ofe.duplicate(rep));
@@ -735,6 +784,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         for(Effect e :callEffect.getOtherEffects()){
             effect.getOtherEffects().add(e.duplicate(rep));
         }
+
+        return deps;
     }
 
 

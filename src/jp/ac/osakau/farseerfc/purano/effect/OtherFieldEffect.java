@@ -34,8 +34,8 @@ public class OtherFieldEffect extends FieldEffect<OtherFieldEffect> implements C
 	@Override
 	protected List<String> dumpEffect(MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<>(Arrays.asList(
-                "type="+table.desc2full(getDesc()),
-                "owner="+table.fullClassName(getOwner()),
+                "type="+table.desc2full(getDesc())+".class",
+                "owner="+table.fullClassName(getOwner())+".class",
                 "name=\""+getName()+"\""
         ));
         return result;

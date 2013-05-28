@@ -45,22 +45,22 @@ public abstract class Effect<T extends Effect> implements Cloneable{
 	public String dump(MethodRep rep, @NotNull Types table, String prefix){
 		String className = getClass().getSimpleName();
 		className = className.substring(0,className.length() - 6 );
-		String fromStr="";
-		if(from != null){
-			fromStr = Escape.from("inheritedFrom = \""+
-                table.dumpMethodDesc(from.getInsnNode().desc,
-                    String.format("%s#%s",
-                        table.fullClassName(from.getInsnNode().owner),
-                        from.getInsnNode().name))+"\"");
-		}
-        ArrayList<String> result = new ArrayList<>(Lists.transform(dumpEffect(rep, table),new Function<String, String>() {
+        ArrayList<String> result = new ArrayList<>(Lists.transform(dumpEffect(rep, table),
+                new Function<String, String>() {
             @Nullable
             @Override
             public String apply(@Nullable String s) {
                 return Escape.effect(s);
             }
         }));
-        result.add(fromStr);
+		if(from != null){
+            String fromStr = Escape.from("from = \""+
+                table.dumpMethodDesc(from.getInsnNode().desc,
+                    String.format("%s#%s",
+                        table.fullClassName(from.getInsnNode().owner),
+                        from.getInsnNode().name))+"\"");
+            result.add(fromStr);
+		}
 		return String.format("%s@%s(%s)",
 				prefix,
 				Escape.annotation(className),
