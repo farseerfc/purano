@@ -1,6 +1,8 @@
 package jp.ac.osakau.farseerfc.purano.test;
 
 
+import jp.ac.osakau.farseerfc.purano.ano.Argument;
+import jp.ac.osakau.farseerfc.purano.ano.Field;
 import org.jetbrains.annotations.NotNull;
 
 public class TargetA extends TargetC implements TargetInterface{
@@ -23,10 +25,11 @@ public class TargetA extends TargetC implements TargetInterface{
 		return a+c;
 	}
 	
-	public void setC(int c){
-		this.c = c;
+	public void setC(int ac){
+		this.c = ac;
 	}
-	
+
+
 	public void allMember(){
 		setC(12);
 	}
@@ -53,8 +56,21 @@ public class TargetA extends TargetC implements TargetInterface{
 	public void argArrayAccess(int a []){
 		a[1]= c;
 	}
-	
-	public int selfRecursion(int n){
+
+    public void thisArrayModifyThroughArg(){
+        argArrayAccess(ma);
+    }
+
+    public int [] exploitMember(){
+        return ma;
+    }
+
+    public void thisArrayModifyThroughReturn(){
+        argArrayAccess(exploitMember());
+    }
+
+
+    public int selfRecursion(int n){
 		if(n>0){
 			return selfRecursion(n-1)+1;
 		}
@@ -84,4 +100,8 @@ public class TargetA extends TargetC implements TargetInterface{
     public static TargetA factory(int a){
 		return new TargetA(a);
 	}
+
+    public static void modifyFactory(){
+        factory(1).setC(12);
+    }
 }

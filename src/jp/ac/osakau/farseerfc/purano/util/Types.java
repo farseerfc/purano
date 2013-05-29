@@ -269,6 +269,12 @@ public class Types {
 		if(t1.getSort() == Type.ARRAY || t2.getSort() == Type.ARRAY){
 			return Type.getObjectType("Ljava/lang/Object;");
 		}
+        if(t1.getSort() == Type.OBJECT || t2.getSort() == Type.ARRAY){
+            return Type.getObjectType("Ljava/lang/Object;");
+        }
+        if(t1.getSort() == Type.ARRAY || t2.getSort() == Type.OBJECT){
+            return Type.getObjectType("Ljava/lang/Object;");
+        }
 		
 		if(t1.equals(Type.DOUBLE_TYPE) || t2.equals(Type.DOUBLE_TYPE)){
 			return Type.DOUBLE_TYPE;

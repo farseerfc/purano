@@ -153,4 +153,11 @@ public final @Data class DepSet {
     public boolean isEmpty(){
         return statics.isEmpty() && fields.isEmpty() && locals.isEmpty();
     }
+
+    public boolean isThis(){
+        return getFields().size()==0 &&
+                getStatics().size()==0 &&
+                getLocals().size()==1 &&
+                getLocals().contains(0);
+    }
 }
