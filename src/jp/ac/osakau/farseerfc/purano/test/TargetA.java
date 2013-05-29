@@ -84,4 +84,13 @@ public class TargetA extends TargetC implements TargetInterface{
     public static TargetA factory(int a){
 		return new TargetA(a);
 	}
+
+    private int [] tc;
+    public void h(int [] cc){
+         cc[0]=1;
+    }
+
+    public void g(){
+        h(tc);
+    }
 }
