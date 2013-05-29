@@ -1,9 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Objects;
+import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
-import jp.ac.osakau.farseerfc.purano.dep.DepValue;
 import jp.ac.osakau.farseerfc.purano.effect.NativeEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
@@ -19,7 +19,6 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 
 import java.io.IOException;
@@ -182,7 +181,7 @@ public class MethodRep extends MethodVisitor {
 								public void visitEnd() {
 									super.visitEnd();
 									methodNode = this;
-									Analyzer<DepValue> ana = new Analyzer<>(new DepInterpreter(analyzeResult, thisRep,cf));
+									DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, thisRep,cf));
 									try {
 										/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 									} catch (AnalyzerException e) {
@@ -194,7 +193,7 @@ public class MethodRep extends MethodVisitor {
 						}
 					}, 0);
 				}else{
-					Analyzer<DepValue> ana = new Analyzer<>(new DepInterpreter(analyzeResult, this,cf));
+                    DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, this,cf));
 					try {
 						/*Frame<DepValue> [] frames =*/ ana.analyze("dep", methodNode);
 					} catch (AnalyzerException e) {

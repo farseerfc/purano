@@ -7,12 +7,13 @@ import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Type;
 
 import java.util.*;
 
 //@EqualsAndHashCode(callSuper=false)
 public class DepEffect {
-	private final @Getter DepSet returnDep = new DepSet();
+	private final @Getter DepValue returnDep = new DepValue((Type)null);
 	private final @Getter Map<String,ThisFieldEffect> thisField = new HashMap<>();
 	private final @Getter Map<String,OtherFieldEffect> otherField = new HashMap<>();
 	private final @Getter Map<String,StaticFieldEffect> staticField = new HashMap<>(); 
@@ -23,21 +24,23 @@ public class DepEffect {
 
 
 	public void merge(@NotNull DepEffect other,MethodRep over){
-		returnDep.merge(other.returnDep);
+		returnDep.getLvalue().merge(other.returnDep.getLvalue());
+        returnDep.getDeps().merge(other.returnDep.getDeps());
+
 		for(ThisFieldEffect effect:other.getThisField().values()){
-			addThisField((ThisFieldEffect)effect.duplicate(over));
+			addThisField(effect.duplicate(over));
 		}
 		for(OtherFieldEffect effect:other.getOtherField().values()){
-			addOtherField((OtherFieldEffect)effect.duplicate(over));
+			addOtherField(effect.duplicate(over));
 		}
 		for(StaticFieldEffect effect:other.getStaticField().values()){
-			addStaticField((StaticFieldEffect)effect.duplicate(over));
+			addStaticField(effect.duplicate(over));
 		}
 		for(ArgumentEffect effect: other.getArgumentEffects()){
-			argumentEffects.add((ArgumentEffect)effect.duplicate(over));
+			argumentEffects.add(effect.duplicate(over));
 		}
 		for(CallEffect effect: other.getCallEffects()){
-			callEffects.add((CallEffect)effect.duplicate(over));
+			callEffects.add(effect.duplicate(over));
 		}
 		for(Effect effect: other.getOtherEffects()){
 			otherEffects.add(effect.duplicate(over));
@@ -85,10 +88,15 @@ public class DepEffect {
 
 		List<String> deps= new ArrayList<>();
 
-        if(!returnDep.isEmpty()){
+        if(!returnDep.getDeps().isEmpty()){
 		    deps.add(String.format("%s@%s(%s)",prefix,
-				Escape.annotation("Return"),
-				Escape.effect(Joiner.on(", ").join(returnDep.dumpDeps(rep, table)))));
+				Escape.annotation("ReturnDepend"),
+				Escape.effect(Joiner.on(", ").join(returnDep.getDeps().dumpDeps(rep, table)))));
+        }
+        if(!returnDep.getLvalue().isEmpty()){
+            deps.add(String.format("%s@%s(%s)",prefix,
+                    Escape.annotation("ReturnLvalue"),
+                    Escape.effect(Joiner.on(", ").join(returnDep.getLvalue().dumpDeps(rep, table)))));
         }
 		
 		for(ArgumentEffect effect: argumentEffects){
