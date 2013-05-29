@@ -151,7 +151,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 						+ cst);
 			}
 		case JSR:
-			return new DepValue(Type.VOID_TYPE);
+            return null;
+//			return new DepValue(Type.VOID_TYPE);
 		case GETSTATIC:
 			{ 
 				FieldInsnNode fin = (FieldInsnNode) insn;

@@ -18,7 +18,7 @@ public class ClassFinder {
 	private final Set<String> classTargets = new HashSet<>() ;
 	
 	public ClassFinder(@NotNull Collection<String> prefix){
-        findClasses(prefix);
+        findTargetClasses(prefix);
 		
 //		Set<String> toLoadClass;
 //		Set<String> loadedClass = new HashSet<>();
@@ -49,7 +49,7 @@ public class ClassFinder {
 		int pass = 0;
 		do {
 			changed = false;
-			if(pass < 5){
+			if(pass < 2){
 				allCreps = new HashSet<>(classMap.values());
 			}
 			for (ClassRep crep : allCreps ) {
@@ -78,7 +78,7 @@ public class ClassFinder {
 //		return false;
 //	}
 	
-	private void findClasses(@NotNull Collection<String> prefixes){
+	private void findTargetClasses(@NotNull Collection<String> prefixes){
 		
 		for(String prefix:prefixes){
 			Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));

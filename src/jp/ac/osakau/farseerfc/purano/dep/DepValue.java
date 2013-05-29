@@ -8,18 +8,21 @@ import org.objectweb.asm.tree.analysis.Value;
 
 @ToString
 public class DepValue implements Value {
-	@NotNull
-    private final @Getter DepSet deps;
+
+    private final @NotNull @Getter DepSet deps;
+    private final @Getter DepSet lvalue;
 	private final @Getter Type type;
 	
 	public DepValue(Type type) {
 		this.type = type;
 		this.deps = new DepSet();
+        this.lvalue = new DepSet();
 	}
 	
 	public DepValue(Type type,DepSet deps) {
 		this.type = type;
 		this.deps = new DepSet(deps);
+        this.lvalue = new DepSet();
 	}
 	
     public int getSize() {
