@@ -299,9 +299,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             } // else case is local.f , which we do not need to trace
 
             // when we try to get static.f
-            v.getLvalue().getStatics().addAll(value.getLvalue().getStatics()); // add static as root
+            v.getLvalue().getStatics().addAll(value.getLvalue().getStatics()); // add static as root state
             // when we try to get arg.f
-            v.getLvalue().getLocals().addAll(value.getLvalue().getLocals());   // add arg as root
+            v.getLvalue().getLocals().addAll(value.getLvalue().getLocals());   // add arg as root state
         	return v;
         }
         case NEWARRAY:
@@ -338,7 +338,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
         case CHECKCAST:{
             String desc = ((TypeInsnNode) insn).desc;
-            return newValue(Type.getObjectType(desc));
+            DepValue dv = newValue(Type.getObjectType(desc));
+            dv.getDeps().merge(value.getDeps());
+            dv.getLvalue().merge(value.getLvalue());
+            return dv;
         }
         case INSTANCEOF:
             return new DepValue(Type.INT_TYPE);
@@ -416,7 +419,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //        	}else{
 //        		throw new RuntimeException("AALOAD encounter non-array value! "+value1.getType().getInternalName());
 //        	}
-        	return new DepValue(Type.getObjectType("java/lang/Object;"),deps);
+        	return new DepValue(Type.getObjectType("java/lang/Object;"),deps,value1.getLvalue());
         case IF_ICMPEQ:
         case IF_ICMPNE:
         case IF_ICMPLT:
@@ -509,7 +512,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //			arrayref.getDeps().merge(index.getDeps());
 //			arrayref.getDeps().merge(value.getDeps());
 			// effect.getOther().add(new ArrayStoreEffect(deps));
-            arrayref.setDeps(value.getDeps());
+            DepSet depset = new DepSet();
+            depset.merge(index.getDeps());
+            depset.merge(value.getDeps());
+            arrayref.setDeps(depset);
             arrayref.modify(effect,method,null);
 			return null;
 		}
@@ -615,6 +621,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //            return result;
 //        }
 
+        if(callEffect.getOtherField().size()>0){
+            throw new RuntimeException("Found otherFieldEffect in :" + rep.toString(new Types(false)));
+        }
+
         if (rep.isStatic() || values.size() == 0) {
             if ( callEffect.getThisField().size() > 0) {
                 throw new RuntimeException("Static method invocation generates this effect :" + rep.toString(new Types(false)));
@@ -639,13 +649,13 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
 
         if(callEffect.getThisField().size()>0){
-            DepValue dv = new DepValue(obj);
             if(!method.isStatic() && obj.getLvalue().isThis()){
+                DepValue dv = new DepValue(obj);
                 for(ThisFieldEffect tfe: callEffect.getThisField().values()){
                     dv.getLvalue().getFields().add(new FieldDep(tfe.getDesc(),tfe.getOwner(),tfe.getName()));
                 }
+                dv.modify(effect,method,rep);
             }
-            dv.modify(effect,method,rep);
         }
 
         DepValue ret = callEffect.getReturnDep();

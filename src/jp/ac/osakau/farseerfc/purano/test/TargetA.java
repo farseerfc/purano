@@ -104,4 +104,14 @@ public class TargetA extends TargetC implements TargetInterface{
     public static void modifyFactory(){
         factory(1).setC(12);
     }
+
+    public void passByLocal(int [] arr){
+        int [] localArr = arr;
+        localArr[0]=1;
+//        argArrayAccess(localArr);
+    }
+
+    public void passByLocalAndArg(){
+        passByLocal(exploitMember());
+    }
 }
