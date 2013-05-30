@@ -39,4 +39,8 @@ public class TargetC {
 		Integer i = null;
 		System.out.println(i.intValue());
 	}
+
+    void setM(int v){
+        member = v;
+    }
 }
