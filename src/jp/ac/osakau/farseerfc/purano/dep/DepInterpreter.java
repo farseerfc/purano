@@ -643,7 +643,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //                    ae.getArgPos(),Joiner.on(",").join(values),rep);
 //            log.info("Rep dump {}",rep);
 
-            DepValue dv = values.get(ae.getArgPos());
+            DepValue dv = values.get(rep.localToArgumentPos(ae.getArgPos()));
             dv.modify(effect,method,rep);
 
         }
@@ -663,12 +663,13 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         for(int arg:ret.getLvalue().getLocals()){
             if(!rep.isStatic() && arg == 0) continue;
             if(!rep.isArg(arg)){
+                boolean re = rep.isArg(arg);
                 log.info("Getting local beyond argument {} return lvalue \nmethod {} \nrep {} ", arg, method,rep);
                 log.info("Rep dump {}",rep);
                 log.info("ReturnLvalue dump {}", ret.getLvalue());
                 throw new RuntimeException("Getting local beyond argument return lvalue ");
             }
-            result.getLvalue().merge(values.get(arg).getLvalue());
+            result.getLvalue().merge(values.get(rep.localToArgumentPos(arg)).getLvalue());
         }
 
         if(!method.isStatic() && obj.getLvalue().isThis()){

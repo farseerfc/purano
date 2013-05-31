@@ -11,12 +11,10 @@ import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
@@ -39,6 +37,7 @@ public class MethodRep extends MethodVisitor {
 	private final @Getter boolean isNative;
 	private final @Getter boolean isAbstract;
 	private final @Getter boolean isInit;
+    private final int [] argPos;
 	
 	private @Getter int modifiedTimeStamp;
 	private @Getter int resolveTimeStamp;
@@ -58,6 +57,18 @@ public class MethodRep extends MethodVisitor {
 		this.isAbstract = (access & Opcodes.ACC_ABSTRACT) > 0;
 		this.isInit = methodInsnNode.name.equals("<init>");
 		desc=new Types(false).method2full(methodInsnNode.desc);
+
+        List<Type> argTypes = new ArrayList<>(Arrays.asList(Type.getMethodType(this.insnNode.desc).getArgumentTypes()));
+        List<Integer> argPosMap = new ArrayList<>();
+        if(!isStatic){
+            argTypes.add(Type.getObjectType(insnNode.owner));
+        }
+        for(int i=0;i<argTypes.size();++i){
+            for(int j=0;j<argTypes.get(i).getSize();++j)    {
+                argPosMap.add(i);
+            }
+        }
+        argPos = ArrayUtils.toPrimitive(argPosMap.toArray(new Integer [argPosMap.size()]));
 	}
 
 	@NotNull
@@ -78,6 +89,10 @@ public class MethodRep extends MethodVisitor {
 	@Override
 	public boolean equals(@Nullable Object other){
         return other != null && other instanceof MethodRep && this.equals(other);
+    }
+
+    public int localToArgumentPos(int local){
+        return argPos[local];
     }
 	
 	@Override
@@ -145,7 +160,7 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public boolean isArg(int local){
-        return !isThis(local) && local<argCount();
+        return !isThis(local) && local < argPos.length;
     }
 	
 	@Override
