@@ -661,10 +661,17 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         DepValue ret = callEffect.getReturnDep();
 
         for(int arg:ret.getLvalue().getLocals()){
+            if(!rep.isStatic() && arg == 0) continue;
+            if(!rep.isArg(arg)){
+                log.info("Getting local beyond argument {} return lvalue \nmethod {} \nrep {} ", arg, method,rep);
+                log.info("Rep dump {}",rep);
+                log.info("ReturnLvalue dump {}", ret.getLvalue());
+                throw new RuntimeException("Getting local beyond argument return lvalue ");
+            }
             result.getLvalue().merge(values.get(arg).getLvalue());
         }
 
-        if(!rep.isStatic() && obj.getLvalue().isThis()){
+        if(!method.isStatic() && obj.getLvalue().isThis()){
             for(FieldDep fd:ret.getLvalue().getFields()){
                 result.getLvalue().getFields().add(fd);
             }

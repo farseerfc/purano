@@ -31,6 +31,7 @@ public class MethodRep extends MethodVisitor {
     private final @Getter MethodInsnNode insnNode;
 	private final @Getter Map<String, MethodRep> overrides = new HashMap<>();
 	private final @Getter Set<MethodInsnNode> calls = new HashSet<>();
+
 	
 	@Nullable
     private final @Getter MethodDesc desc ;
@@ -150,6 +151,7 @@ public class MethodRep extends MethodVisitor {
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 		calls.add(new MethodInsnNode(opcode,owner,name,desc));
+
 	}
 	
 	public boolean resolve(int newTimeStamp,final ClassFinder cf){
