@@ -196,7 +196,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case ALOAD:{
             int local = ((VarInsnNode) insn).var;
         	deps.getLocals().add(local);
-            DepValue dv = new DepValue(Type.getObjectType("java/lang/Object"), deps);
+            DepValue dv = new DepValue(Type.getObjectType("java/lang/Object"), deps, value.getLvalue());
             if(method.isArg(local)){
                 dv.getLvalue().getLocals().add(local);
             }

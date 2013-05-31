@@ -84,7 +84,7 @@ public class DepValue implements Value {
             effect.addStaticField(new StaticFieldEffect(fd.getDesc(), fd.getOwner(), fd.getName(), deps, from));
         }
         for(int local: lvalue.getLocals()){
-            assert(method.isArg(local));
+            assert(method.isArg(local) || local == 0);
 
             if (method.isStatic() || local != 0) {
                 effect.getArgumentEffects().add(new ArgumentEffect(local, deps, from));

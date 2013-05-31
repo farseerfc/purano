@@ -116,8 +116,7 @@ public class TargetA extends TargetC implements TargetInterface{
 
     public void passByLocal(int [] arr){
         int [] localArr = arr;
-        localArr[0]=1;
-//        argArrayAccess(localArr);
+        argArrayAccess(localArr);
     }
 
     public void passByLocalAndArg(){
