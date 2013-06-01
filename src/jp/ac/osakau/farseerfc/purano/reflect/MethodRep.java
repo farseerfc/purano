@@ -75,7 +75,8 @@ public class MethodRep extends MethodVisitor {
     public String getId(){
 		return getId(insnNode);
 	}
-	
+
+
 	@NotNull
     public static String getId(@NotNull MethodInsnNode insnNode){
 		return insnNode.name+insnNode.desc;
