@@ -27,9 +27,9 @@ public class MethodRep extends MethodVisitor {
 	
 	@NotNull
     private final @Getter MethodInsnNode insnNode;
-	private final @Getter Map<String, MethodRep> overrides = new HashMap<>();
+	private final @Getter Map<String, MethodRep> overrided = new HashMap<>();
 	private final @Getter Set<MethodInsnNode> calls = new HashSet<>();
-
+	private final @Getter Set<MethodRep> called = new HashSet<>();
 	
 	@Nullable
     private final @Getter MethodDesc desc ;
@@ -121,7 +121,7 @@ public class MethodRep extends MethodVisitor {
 		if(dynamicEffects != null && getMethodNode() != null){
 			
 			result.add("    "+Escape.methodName(toString(table)));
-			for(MethodRep rep : overrides.values()){
+			for(MethodRep rep : overrided.values()){
 				result.add(String.format("        # %s", rep.toString(table)));
 			}
 			for(MethodInsnNode insn : calls){
@@ -167,7 +167,6 @@ public class MethodRep extends MethodVisitor {
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
 		calls.add(new MethodInsnNode(opcode,owner,name,desc));
-
 	}
 	
 	public boolean resolve(int newTimeStamp,final ClassFinder cf){
@@ -222,7 +221,7 @@ public class MethodRep extends MethodVisitor {
 			
 			staticEffects = new DepEffect();
 			staticEffects.merge(analyzeResult, null);
-			for(MethodRep over:overrides.values()){
+			for(MethodRep over:overrided.values()){
 				if(over.getDynamicEffects() != null){
 					analyzeResult.merge(over.getDynamicEffects(),over);
 				}
@@ -246,7 +245,7 @@ public class MethodRep extends MethodVisitor {
 		if(modifiedTimeStamp == 0){
 			return true;
 		}
-		for(MethodRep rep:overrides.values()){
+		for(MethodRep rep:overrided.values()){
 			if(rep.getModifiedTimeStamp() == 0){
 				return true;
 			}
@@ -279,6 +278,6 @@ public class MethodRep extends MethodVisitor {
         if (!getId().equals(overrider.getId())) {
             throw new AssertionError("Overrider and overridee should have same Id :" + getId());
         }
-        overrides.put(overrider.getInsnNode().owner, overrider);
+        overrided.put(overrider.getInsnNode().owner, overrider);
     }
 }

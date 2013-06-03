@@ -470,48 +470,6 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		case FASTORE:
 		case DASTORE:
 		case AASTORE: {
-//			if (arrayref.getDeps().dependOnThis(method)) {
-//				// this.field [index] = value
-//				DepSet deps = new DepSet(index.getDeps());
-//				deps.merge(value.getDeps());
-//				for (FieldDep f : arrayref.getDeps().getFields()) {
-//					effect.addThisField(
-//							new ThisFieldEffect(
-//									f.getDesc(),
-//									f.getOwner(),
-//									f.getName(), deps, null));
-//				}
-//
-//			} else if (arrayref.getDeps().dependOnlyArgs(method)) {
-//				// arrayref[index] = value
-//				for (int local : arrayref.getDeps().getLocals()) {
-//					if (method.isArg(local)) {
-////						log.info("Putting ArgumentEffect {} local {} deps {}", method, local,value.getDeps());
-//						effect.getArgumentEffects().add(
-//								new ArgumentEffect(local, value.getDeps(), null));
-//					}
-//				}
-//			} else {
-//				// something.field[index] = value
-//				// where something is argument or static or other class member
-//				DepSet leftDeps = new DepSet(arrayref.getDeps());
-//				leftDeps.merge(index.getDeps());
-//				for (FieldDep f : arrayref.getDeps().getFields()) {
-//					effect.addOtherField(
-//							new OtherFieldEffect(f.getDesc(), f.getOwner(), f
-//									.getName(), value.getDeps(), leftDeps, null));
-//				}
-//			}
-
-//			Types table = new Types(false);
-//			log.info("ArrayRef {} index {} value {}", arrayref.getDeps()
-//					.dumpDeps(method, table),
-//					index.getDeps().dumpDeps(method, table), value.getDeps()
-//							.dumpDeps(method, table));
-			
-//			arrayref.getDeps().merge(index.getDeps());
-//			arrayref.getDeps().merge(value.getDeps());
-			// effect.getOther().add(new ArrayStoreEffect(deps));
             DepSet depset = new DepSet();
             depset.merge(index.getDeps());
             depset.merge(value.getDeps());
@@ -580,6 +538,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		if(rep == null){
     			return addCallEffect(deps, callType, min);
     		}
+    		
+    		rep.getCalled().add(method);
     		
     		DepEffect callEffect = null;
    			if(rep.getDynamicEffects() != null){
