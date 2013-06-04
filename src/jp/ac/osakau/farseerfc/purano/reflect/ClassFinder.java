@@ -13,8 +13,8 @@ import java.util.*;
 @Slf4j
 public class ClassFinder {
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
-    @NotNull
-//    private @Getter List<MethodRep> toResolve = new ArrayList<>();
+
+    private @NotNull @Getter List<MethodRep> toResolve = new ArrayList<>();
 	private final Set<String> classTargets = new HashSet<>() ;
 	
 	public ClassFinder(@NotNull Collection<String> prefix){

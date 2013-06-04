@@ -253,9 +253,11 @@ public class MethodRep extends MethodVisitor {
 
                 for(MethodRep methodRep:called){
                     methodRep.setNeedResolve(true);
+                    cf.getToResolve().add(methodRep);
                 }
                 for(MethodRep methodRep:overrides){
                     methodRep.setNeedResolve(true);
+                    cf.getToResolve().add(methodRep);
                 }
 
 				return true;
