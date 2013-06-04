@@ -14,7 +14,7 @@ import java.util.*;
 public class ClassFinder {
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
     @NotNull
-    private @Getter List<MethodRep> toResolve = new ArrayList<>();
+//    private @Getter List<MethodRep> toResolve = new ArrayList<>();
 	private final Set<String> classTargets = new HashSet<>() ;
 	
 	public ClassFinder(@NotNull Collection<String> prefix){
@@ -33,12 +33,12 @@ public class ClassFinder {
 		int pass = 0;
 		do {
 			changed = false;
-			if(pass < 3){
+			if(pass < 4){
 				allCreps = new HashSet<>(classMap.values());
 			}
 			for (ClassRep crep : allCreps ) {
 				for (MethodRep mrep : crep.getAllMethods()) {
-					if (mrep.needResolve(this)) {
+					if (mrep.isNeedResolve(this)) {
 						if (mrep.resolve(++timestamp, this)) {
 							changed = true;
 						}
@@ -89,7 +89,7 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv){
 		long start=System.currentTimeMillis();
 //		String targetPackage []={"sun.util.calendar"};
-        String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
+        String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}

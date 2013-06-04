@@ -28,6 +28,7 @@ public class MethodRep extends MethodVisitor {
 	@NotNull
     private final @Getter MethodInsnNode insnNode;
 	private final @Getter Map<String, MethodRep> overrided = new HashMap<>();
+    private final @Getter Set<MethodRep> overrides = new HashSet<>();
 	private final @Getter Set<MethodInsnNode> calls = new HashSet<>();
 	private final @Getter Set<MethodRep> called = new HashSet<>();
 	
@@ -46,6 +47,8 @@ public class MethodRep extends MethodVisitor {
 	private @Getter @Setter MethodNode methodNode;
 
 	private @Getter int access;
+
+    private @Getter @Setter boolean needResolve;
 
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access){
@@ -69,6 +72,8 @@ public class MethodRep extends MethodVisitor {
             }
         }
         argPos = ArrayUtils.toPrimitive(argPosMap.toArray(new Integer [argPosMap.size()]));
+
+        needResolve = true;
 	}
 
 	@NotNull
@@ -86,10 +91,22 @@ public class MethodRep extends MethodVisitor {
 	public int hashCode(){
 		return Objects.hashCode(insnNode.desc, insnNode.name,insnNode.owner);
 	}
-	
+
 	@Override
 	public boolean equals(@Nullable Object other){
-        return other != null && other instanceof MethodRep && this.equals(other);
+        if( other == null )
+            return false;
+        if(!( other instanceof MethodRep ))
+            return false;
+
+        MethodRep obj = (MethodRep) other;
+        if(!obj.insnNode.desc.equals(this.insnNode.desc))
+            return false;
+        if(!obj.insnNode.name.equals(this.insnNode.name))
+            return false;
+        if(!obj.insnNode.owner.equals(this.insnNode.owner))
+            return false;
+        return true;
     }
 
     public int localToArgumentPos(int local){
@@ -226,22 +243,38 @@ public class MethodRep extends MethodVisitor {
 					analyzeResult.merge(over.getDynamicEffects(),over);
 				}
 			}
-			
+
+            needResolve = false;
+
 			if( dynamicEffects == null || !dynamicEffects.equals(analyzeResult) ){
 				dynamicEffects = analyzeResult;
 				this.modifiedTimeStamp = newTimeStamp;
 				this.resolveTimeStamp = newTimeStamp;
+
+                for(MethodRep methodRep:called){
+                    methodRep.setNeedResolve(true);
+                }
+                for(MethodRep methodRep:overrides){
+                    methodRep.setNeedResolve(true);
+                }
+
 				return true;
 			}else{
 				this.resolveTimeStamp = newTimeStamp;
 				return false;
 			}
+
+
 		} catch (IOException e) {
 			throw new RuntimeException("Class not found :"+insnNode.owner,e);
 		}
 	}
-	
-	public boolean needResolve(@NotNull final ClassFinder cf){
+
+    public boolean isNeedResolveNew(@NotNull final ClassFinder cf){
+        return needResolve;
+    }
+
+	public boolean isNeedResolve(@NotNull final ClassFinder cf){
 		if(modifiedTimeStamp == 0){
 			return true;
 		}
@@ -255,15 +288,15 @@ public class MethodRep extends MethodVisitor {
 		}
 		for(MethodInsnNode insn: calls){
 			ClassRep crep = cf.loadClass(Types.binaryName2NormalName(insn.owner));
-			
+
 			MethodRep mrep = crep.getMethodVirtual(new MethodRep(insn,0).getId());
-			
+
 			if(mrep == null){
 				log.error("Cannot find method {} in class {} opcode {} ",new MethodRep(insn,0).getId(),crep.getName(), insn.getOpcode());
 				Types.notFound("Cannot find method ", null);
 				return false;
 			}
-			
+
 			if(mrep.getModifiedTimeStamp() == 0){
 				return true;
 			}
@@ -279,5 +312,6 @@ public class MethodRep extends MethodVisitor {
             throw new AssertionError("Overrider and overridee should have same Id :" + getId());
         }
         overrided.put(overrider.getInsnNode().owner, overrider);
+        overrider.getOverrides().add(this);
     }
 }

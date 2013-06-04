@@ -106,7 +106,7 @@ public class MethodRepTest {
 		ma.resolve(3, cl);
 		mc.resolve(4, cl);
 		
-		assertTrue(mc.getOverrides().get(0) == ma);
+		assertTrue(mc.getOverrided().get(0) == ma);
 		DepEffect dec = mc.getDynamicEffects();
 		DepEffect dea = ma.getDynamicEffects();
 		assertTrue(dea.isSubset(dec));

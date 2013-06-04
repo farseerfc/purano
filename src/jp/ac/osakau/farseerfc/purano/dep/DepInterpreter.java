@@ -538,8 +538,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		if(rep == null){
     			return addCallEffect(deps, callType, min);
     		}
-    		
-    		rep.getCalled().add(method);
+
+
+            if(!rep.getCalled().contains(method)){
+                rep.getCalled().add(method);
+            }
+
     		
     		DepEffect callEffect = null;
    			if(rep.getDynamicEffects() != null){
@@ -616,7 +620,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         for(int arg:ret.getLvalue().getLocals()){
             if(!rep.isStatic() && arg == 0) continue;
             if(!rep.isArg(arg)){
-                boolean re = rep.isArg(arg);
+//                boolean re = rep.isArg(arg);
                 log.info("Getting local beyond argument {} return lvalue \nmethod {} \nrep {} ", arg, method,rep);
                 log.info("Rep dump {}",rep);
                 log.info("ReturnLvalue dump {}", ret.getLvalue());
