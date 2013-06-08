@@ -20,8 +20,8 @@ public abstract class FieldEffect<T extends FieldEffect> extends Effect<T> {
 	private final @Getter String owner;
 	private final @Getter String name;
 	
-	@NotNull
-    public String getKey(){
-		return desc+owner;//+name;
-	}
+//	@NotNull
+//    public String getKey(){
+//		return desc+owner;//+name;
+//	}
 }

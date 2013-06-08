@@ -23,27 +23,27 @@ public class DepEffect {
 	
 
 
-	public void merge(@NotNull DepEffect other,MethodRep over){
+	public void merge(@NotNull DepEffect other,MethodRep from){
 		returnDep.getLvalue().merge(other.returnDep.getLvalue());
         returnDep.getDeps().merge(other.returnDep.getDeps());
 
 		for(ThisFieldEffect effect:other.getThisField().values()){
-			addThisField(effect.duplicate(over));
+			addThisField(effect.duplicate(from));
 		}
 		for(OtherFieldEffect effect:other.getOtherField().values()){
-			addOtherField(effect.duplicate(over));
+			addOtherField(effect.duplicate(from));
 		}
 		for(StaticFieldEffect effect:other.getStaticField().values()){
-			addStaticField(effect.duplicate(over));
+			addStaticField(effect.duplicate(from));
 		}
 		for(ArgumentEffect effect: other.getArgumentEffects()){
-			argumentEffects.add(effect.duplicate(over));
+			argumentEffects.add(effect.duplicate(from));
 		}
 		for(CallEffect effect: other.getCallEffects()){
-			callEffects.add(effect.duplicate(over));
+			callEffects.add(effect.duplicate(from));
 		}
 		for(Effect effect: other.getOtherEffects()){
-			otherEffects.add(effect.duplicate(over));
+			otherEffects.add(effect.duplicate(from));
 		}
 	}
 

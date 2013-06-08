@@ -113,7 +113,7 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv){
 		long start=System.currentTimeMillis();
 //		String targetPackage []={"sun.util.calendar"};
-        String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
+        String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}

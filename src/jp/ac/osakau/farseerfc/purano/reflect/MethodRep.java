@@ -42,8 +42,8 @@ public class MethodRep extends MethodVisitor {
 	
 	private @Getter int modifiedTimeStamp;
 	private @Getter int resolveTimeStamp;
-	private @Getter DepEffect staticEffects;
-	private @Getter DepEffect dynamicEffects;
+	private final @Getter DepEffect staticEffects = new DepEffect();
+	private final @Getter DepEffect dynamicEffects = new DepEffect();
 	private @Getter @Setter MethodNode methodNode;
 
 	private @Getter int access;
@@ -236,7 +236,6 @@ public class MethodRep extends MethodVisitor {
 				}
 			}
 			
-			staticEffects = new DepEffect();
 			staticEffects.merge(analyzeResult, null);
 			for(MethodRep over:overrided.values()){
 				if(over.getDynamicEffects() != null){
@@ -246,8 +245,9 @@ public class MethodRep extends MethodVisitor {
 
             needResolve = false;
 
-			if( dynamicEffects == null || !dynamicEffects.equals(analyzeResult) ){
-				dynamicEffects = analyzeResult;
+			if(!dynamicEffects.equals(analyzeResult) ){
+				dynamicEffects.merge(analyzeResult, null);
+				
 				this.modifiedTimeStamp = newTimeStamp;
 				this.resolveTimeStamp = newTimeStamp;
 

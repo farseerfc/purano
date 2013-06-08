@@ -37,7 +37,9 @@ public abstract class Effect<T extends Effect> implements Cloneable{
 	@NotNull
     public T duplicate(MethodRep from){
 		T cl = clone();
-		cl.setFrom(from);
+		if(from!=null){
+			cl.setFrom(from);
+		}
 		return cl;
 	}
 	
