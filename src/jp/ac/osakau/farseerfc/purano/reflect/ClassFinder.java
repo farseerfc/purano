@@ -35,9 +35,9 @@ public class ClassFinder {
         List<Integer> changedTrace = new ArrayList<>();
 		do {
 			changed = false;
-			if(pass < 4){
+//			if(pass < 4){
 				allCreps = new HashSet<>(classMap.values());
-			}
+//			}
             changedMethod = 0;
             Set<MethodRep> changedSignatures = new HashSet<>();
 			for (ClassRep crep : allCreps ) {
@@ -113,7 +113,7 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv){
 		long start=System.currentTimeMillis();
 //		String targetPackage []={"sun.util.calendar"};
-        String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
+        String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
