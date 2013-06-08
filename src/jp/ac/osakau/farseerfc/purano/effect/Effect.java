@@ -16,7 +16,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(exclude="from")
 public abstract class Effect<T extends Effect> implements Cloneable{
 	private @Getter @Setter DepSet deps;
 	private @Getter @Setter  MethodRep from;
@@ -69,4 +68,17 @@ public abstract class Effect<T extends Effect> implements Cloneable{
 	
 
 	protected abstract List<String> dumpEffect(MethodRep rep, Types table);
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Effect)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = "Effect".hashCode();
+        return result;
+    }
 }

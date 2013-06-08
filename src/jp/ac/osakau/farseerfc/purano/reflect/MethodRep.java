@@ -119,11 +119,11 @@ public class MethodRep extends MethodVisitor {
 	}
 	
 	public String toString(@NotNull Types table){
-		return String.format("%3d %3d %s",resolveTimeStamp,modifiedTimeStamp,
+		return //String.format("%3d %3d %s",resolveTimeStamp,modifiedTimeStamp,
 		table.dumpMethodDesc(insnNode.desc, 
 				String.format("%s#%s", 
 						table.fullClassName(insnNode.owner),
-						insnNode.name)));
+						insnNode.name));//);
 	}
 	
 	public boolean equals(@NotNull MethodRep other){
@@ -270,11 +270,11 @@ public class MethodRep extends MethodVisitor {
 		}
 	}
 
-    public boolean isNeedResolveNew(@NotNull final ClassFinder cf){
+    public boolean isNeedResolve(@NotNull final ClassFinder cf){
         return needResolve;
     }
 
-	public boolean isNeedResolve(@NotNull final ClassFinder cf){
+	public boolean isNeedResolveNew(@NotNull final ClassFinder cf){
 		if(modifiedTimeStamp == 0){
 			return true;
 		}

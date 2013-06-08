@@ -31,21 +31,45 @@ public class ClassFinder {
 		Set<ClassRep> allCreps = new HashSet<>(classMap.values());
 		boolean changed;
 		int pass = 0;
+        int changedMethod = 0;
+        List<Integer> changedTrace = new ArrayList<>();
 		do {
 			changed = false;
 			if(pass < 4){
 				allCreps = new HashSet<>(classMap.values());
 			}
+            changedMethod = 0;
+            Set<MethodRep> changedSignatures = new HashSet<>();
 			for (ClassRep crep : allCreps ) {
 				for (MethodRep mrep : crep.getAllMethods()) {
 					if (mrep.isNeedResolve(this)) {
 						if (mrep.resolve(++timestamp, this)) {
 							changed = true;
+                            changedMethod ++;
+                            changedSignatures.add(mrep);
 						}
 					}
 				}
 			}
-			System.out.println("Pass: " + ++pass + " classes: "+ allCreps.size());
+            changedTrace.add(changedMethod);
+			System.out.println(String.format("Pass: %d Classes: %s Changed Method: %d [%s]",
+                    pass++,allCreps.size(),changedMethod,
+                    Joiner.on(", ").join(changedTrace)));
+            final int maxdump=32;
+            if(changedMethod>maxdump){
+                MethodRep [] top = new MethodRep [maxdump];
+                int i=0;
+                for(MethodRep mid : changedSignatures){
+                    if(i>=maxdump)break;
+                    top[i++]=mid;
+                }
+                System.out.println(Joiner.on(", ").join(top));
+            }else{
+//                System.out.println(Joiner.on(", ").join(changedSignatures));
+                for(MethodRep m:changedSignatures){
+                    System.out.println(Joiner.on(", ").join(m.dump(this, new Types())));
+                }
+            }
 		} while (changed);
 	}
 	

@@ -547,7 +547,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     		
     		DepEffect callEffect = null;
    			if(rep.getDynamicEffects() != null){
-				if(insn.getOpcode() == INVOKESPECIAL ||insn.getOpcode() == INVOKESTATIC){
+				if(insn.getOpcode() == INVOKESPECIAL ||
+                        insn.getOpcode() == INVOKESTATIC){
 					callEffect = rep.getStaticEffects();
 				}else{
 					callEffect = rep.getDynamicEffects();

@@ -13,7 +13,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper=true)
 public final class StaticFieldEffect extends FieldEffect<StaticFieldEffect> implements Cloneable{
 	public StaticFieldEffect(String desc,String owner,String name, DepSet deps, MethodRep from) {
-		super(desc,owner,name,deps, from);
+		//super(desc,owner,name,deps, from);
+        super("","","",deps, from);
 	}
 	
 	@NotNull
@@ -25,9 +26,10 @@ public final class StaticFieldEffect extends FieldEffect<StaticFieldEffect> impl
 	@Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<String>(Arrays.asList(
-                "type=" + table.desc2full(getDesc())+".class",
-                "owner=" + table.fullClassName(getOwner())+".class",
-                "name=\"" + getName() + "\""
+                ""
+//                "type=" + table.desc2full(getDesc())+".class",
+//                "owner=" + table.fullClassName(getOwner())+".class",
+//                "name=\"" + getName() + "\""
         ));
         result.addAll(getDeps().dumpDeps(rep, table));
         return result;

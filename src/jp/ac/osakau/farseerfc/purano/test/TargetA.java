@@ -1,8 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.test;
 
 
-import jp.ac.osakau.farseerfc.purano.ano.Argument;
-import jp.ac.osakau.farseerfc.purano.ano.Field;
 import org.jetbrains.annotations.NotNull;
 
 public class TargetA extends TargetC implements TargetInterface{
@@ -20,7 +18,6 @@ public class TargetA extends TargetC implements TargetInterface{
 	public int memberAdd(int a, int b){
 		return a+b;
 	}
-
 	public int thisAdd(int a){
 		return a+c;
 	}
@@ -61,12 +58,12 @@ public class TargetA extends TargetC implements TargetInterface{
         argArrayAccess(ma);
     }
 
-    public int [] exploitMember(){
+    public int [] exposeMember(){
         return ma;
     }
 
     public void thisArrayModifyThroughReturn(){
-        argArrayAccess(exploitMember());
+        argArrayAccess(exposeMember());
     }
 
 
@@ -120,6 +117,6 @@ public class TargetA extends TargetC implements TargetInterface{
     }
 
     public void passByLocalAndArg(){
-        passByLocal(exploitMember());
+        passByLocal(exposeMember());
     }
 }

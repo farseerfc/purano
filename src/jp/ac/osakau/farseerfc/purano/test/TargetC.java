@@ -16,29 +16,7 @@ public class TargetC {
 		member = mi.intValue();
 		return false;
 	}
-	
-	public boolean isPublic(Object o) {
-		Integer accessFlags = Integer.valueOf(
-				(o instanceof FieldInfo) 
-				? ((FieldInfo) o).getAccessFlags()
-				: (o instanceof ClassFile) 
-					? ((ClassFile) o).getAccessFlags()
-					: ((o instanceof MethodInfo) 
-							? Integer.valueOf(((MethodInfo) o).getAccessFlags())
-							: null)
-						.intValue()
-				);
 
-		return ((accessFlags != null) && (
-				AccessFlag.isPublic(accessFlags.intValue())));
-	}
-
-	@CheckDependency()
-    @Return(dependArguments = {})
-	public static void main(String [] args) throws InterruptedException{
-		Integer i = null;
-		System.out.println(i.intValue());
-	}
 
     void setM(int v){
         member = v;
