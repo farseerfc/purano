@@ -55,7 +55,7 @@ public class ClassFinder {
 			System.out.println(String.format("Pass: %d Classes: %s Changed Method: %d [%s]",
                     pass++,allCreps.size(),changedMethod,
                     Joiner.on(", ").join(changedTrace)));
-            final int maxdump=32;
+            final int maxdump=4;
             if(changedMethod>maxdump){
                 MethodRep [] top = new MethodRep [maxdump];
                 int i=0;
@@ -65,9 +65,8 @@ public class ClassFinder {
                 }
                 System.out.println(Joiner.on(", ").join(top));
             }else{
-//                System.out.println(Joiner.on(", ").join(changedSignatures));
                 for(MethodRep m:changedSignatures){
-                    System.out.println(Joiner.on(", ").join(m.dump(this, new Types())));
+                    System.out.println(Joiner.on("\n").join(m.dump(this, new Types())));
                 }
             }
 		} while (changed);
@@ -113,7 +112,7 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv){
 		long start=System.currentTimeMillis();
 //		String targetPackage []={"sun.util.calendar"};
-        String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
+        String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
