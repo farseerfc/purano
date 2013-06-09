@@ -193,6 +193,7 @@ public abstract class Interpreter<V extends Value> {
      * @throws AnalyzerException
      *             if an error occured during the interpretation.
      */
+    @Nullable
     public abstract V naryOperation(AbstractInsnNode insn,
             List<? extends V> values) throws AnalyzerException;
 
@@ -228,5 +229,6 @@ public abstract class Interpreter<V extends Value> {
      * @return the merged value. If the merged value is equal to <tt>v</tt>,
      *         this method <i>must</i> return <tt>v</tt>.
      */
+    @Nullable
     public abstract V merge(V v, V w);
 }

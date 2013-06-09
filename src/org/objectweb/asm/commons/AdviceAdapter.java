@@ -412,7 +412,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
 
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+            final String name, @NotNull final String desc) {
         mv.visitMethodInsn(opcode, owner, name, desc);
         if (constructor) {
             Type[] types = Type.getArgumentTypes(desc);
@@ -452,7 +452,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
+    public void visitInvokeDynamicInsn(String name, @NotNull String desc, Handle bsm,
             Object... bsmArgs) {
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         if (constructor) {

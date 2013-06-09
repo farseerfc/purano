@@ -66,7 +66,7 @@ public class RemappingClassAdapter extends ClassVisitor {
 
     @Nullable
     @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+    public AnnotationVisitor visitAnnotation(@NotNull String desc, boolean visible) {
         AnnotationVisitor av;
         av = super.visitAnnotation(remapper.mapDesc(desc), visible);
         return av == null ? null : createRemappingAnnotationAdapter(av);
@@ -74,7 +74,7 @@ public class RemappingClassAdapter extends ClassVisitor {
 
     @Nullable
     @Override
-    public FieldVisitor visitField(int access, String name, String desc,
+    public FieldVisitor visitField(int access, String name, @NotNull String desc,
             String signature, Object value) {
         FieldVisitor fv = super.visitField(access,
                 remapper.mapFieldName(className, name, desc),
@@ -85,7 +85,7 @@ public class RemappingClassAdapter extends ClassVisitor {
 
     @Nullable
     @Override
-    public MethodVisitor visitMethod(int access, String name, String desc,
+    public MethodVisitor visitMethod(int access, String name, @NotNull String desc,
             String signature, @Nullable String[] exceptions) {
         String newDesc = remapper.mapMethodDesc(desc);
         MethodVisitor mv = super.visitMethod(access, remapper.mapMethodName(
@@ -116,6 +116,7 @@ public class RemappingClassAdapter extends ClassVisitor {
         return new RemappingFieldAdapter(fv, remapper);
     }
 
+    @NotNull
     protected MethodVisitor createRemappingMethodAdapter(int access,
             String newDesc, MethodVisitor mv) {
         return new RemappingMethodAdapter(access, newDesc, mv, remapper);

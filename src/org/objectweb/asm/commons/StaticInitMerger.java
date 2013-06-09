@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -42,6 +43,7 @@ public class StaticInitMerger extends ClassVisitor {
 
     private String name;
 
+    @Nullable
     private MethodVisitor clinit;
 
     private final String prefix;

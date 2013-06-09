@@ -31,7 +31,8 @@ public class OtherFieldEffect extends FieldEffect<OtherFieldEffect> implements C
 		return new OtherFieldEffect(getDesc(), getOwner(), getName(), getDeps(), null, getFrom());
 	}
 
-	@Override
+	@NotNull
+    @Override
 	protected List<String> dumpEffect(MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<>(Arrays.asList(
                 "type="+table.desc2full(getDesc())+".class",

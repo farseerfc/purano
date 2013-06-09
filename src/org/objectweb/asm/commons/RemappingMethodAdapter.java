@@ -43,33 +43,36 @@ public class RemappingMethodAdapter extends LocalVariablesSorter {
 
     protected final Remapper remapper;
 
-    public RemappingMethodAdapter(final int access, final String desc,
+    public RemappingMethodAdapter(final int access, @NotNull final String desc,
             final MethodVisitor mv, final Remapper remapper) {
         this(Opcodes.ASM4, access, desc, mv, remapper);
     }
 
     protected RemappingMethodAdapter(final int api, final int access,
-            final String desc, final MethodVisitor mv, final Remapper remapper) {
+            @NotNull final String desc, final MethodVisitor mv, final Remapper remapper) {
         super(api, access, desc, mv);
         this.remapper = remapper;
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         AnnotationVisitor av = mv.visitAnnotationDefault();
         return av == null ? av : new RemappingAnnotationAdapter(av, remapper);
     }
 
+    @Nullable
     @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+    public AnnotationVisitor visitAnnotation(@NotNull String desc, boolean visible) {
         AnnotationVisitor av = mv.visitAnnotation(remapper.mapDesc(desc),
                 visible);
         return av == null ? av : new RemappingAnnotationAdapter(av, remapper);
     }
 
+    @Nullable
     @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter,
-            String desc, boolean visible) {
+            @NotNull String desc, boolean visible) {
         AnnotationVisitor av = mv.visitParameterAnnotation(parameter,
                 remapper.mapDesc(desc), visible);
         return av == null ? av : new RemappingAnnotationAdapter(av, remapper);
@@ -102,7 +105,7 @@ public class RemappingMethodAdapter extends LocalVariablesSorter {
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name,
-            String desc) {
+            @NotNull String desc) {
         super.visitFieldInsn(opcode, remapper.mapType(owner),
                 remapper.mapFieldName(owner, name, desc),
                 remapper.mapDesc(desc));
@@ -110,14 +113,14 @@ public class RemappingMethodAdapter extends LocalVariablesSorter {
 
     @Override
     public void visitMethodInsn(int opcode, String owner, String name,
-            String desc) {
+            @NotNull String desc) {
         super.visitMethodInsn(opcode, remapper.mapType(owner),
                 remapper.mapMethodName(owner, name, desc),
                 remapper.mapMethodDesc(desc));
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
+    public void visitInvokeDynamicInsn(String name, @NotNull String desc, Handle bsm,
             @NotNull Object... bsmArgs) {
         for (int i = 0; i < bsmArgs.length; i++) {
             bsmArgs[i] = remapper.mapValue(bsmArgs[i]);
@@ -139,7 +142,7 @@ public class RemappingMethodAdapter extends LocalVariablesSorter {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(String desc, int dims) {
+    public void visitMultiANewArrayInsn(@NotNull String desc, int dims) {
         super.visitMultiANewArrayInsn(remapper.mapDesc(desc), dims);
     }
 
@@ -151,7 +154,7 @@ public class RemappingMethodAdapter extends LocalVariablesSorter {
     }
 
     @Override
-    public void visitLocalVariable(String name, String desc, String signature,
+    public void visitLocalVariable(String name, @NotNull String desc, String signature,
             Label start, Label end, int index) {
         super.visitLocalVariable(name, remapper.mapDesc(desc),
                 remapper.mapSignature(signature, true), start, end, index);

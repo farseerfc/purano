@@ -36,7 +36,7 @@ public class DepValue implements Value {
         this.lvalue = lvalue;
     }
 
-    public DepValue(DepValue value) {
+    public DepValue(@NotNull DepValue value) {
         this.type = value.type;
         this.deps = new DepSet(value.deps);
         this.lvalue = new DepSet(value.lvalue);
@@ -72,7 +72,7 @@ public class DepValue implements Value {
         return type == null ? 0 : type.hashCode();
     }
 
-    public void modify(DepEffect effect, MethodRep method, MethodRep from) {
+    public void modify(@NotNull DepEffect effect, @NotNull MethodRep method, MethodRep from) {
         for(FieldDep fd: lvalue.getFields()){
             assert(!method.isStatic());
             if(method.isStatic()){

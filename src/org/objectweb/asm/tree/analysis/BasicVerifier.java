@@ -425,6 +425,7 @@ public class BasicVerifier extends BasicInterpreter {
         return value.isReference();
     }
 
+    @Nullable
     protected BasicValue getElementValue(final BasicValue objectArrayValue)
             throws AnalyzerException {
         return BasicValue.REFERENCE_VALUE;

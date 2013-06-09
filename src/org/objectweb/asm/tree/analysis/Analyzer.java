@@ -95,7 +95,7 @@ public class Analyzer<V extends Value> implements Opcodes {
      * @throws AnalyzerException
      *             if a problem occurs during the analysis.
      */
-    public Frame<V>[] analyze(final String owner, @NotNull final MethodNode m)
+    public Frame<V>[] analyze(@NotNull final String owner, @NotNull final MethodNode m)
             throws AnalyzerException {
         if ((m.access & (ACC_ABSTRACT | ACC_NATIVE)) != 0) {
             frames = (Frame<V>[]) new Frame<?>[0];

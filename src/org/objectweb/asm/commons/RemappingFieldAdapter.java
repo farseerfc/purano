@@ -30,6 +30,7 @@
 
 package org.objectweb.asm.commons;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.FieldVisitor;
@@ -56,7 +57,7 @@ public class RemappingFieldAdapter extends FieldVisitor {
 
     @Nullable
     @Override
-    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+    public AnnotationVisitor visitAnnotation(@NotNull String desc, boolean visible) {
         AnnotationVisitor av = fv.visitAnnotation(remapper.mapDesc(desc),
                 visible);
         return av == null ? null : new RemappingAnnotationAdapter(av, remapper);

@@ -38,7 +38,8 @@ public final @Data class DepSet {
 	}
 	
 
-	public List<String> dumpDeps(@NotNull final MethodRep rep, @NotNull final Types table){
+	@NotNull
+    public List<String> dumpDeps(@NotNull final MethodRep rep, @NotNull final Types table){
 		int argCount = rep.argCount();
 		MethodNode methodNode = rep.getMethodNode();
 		

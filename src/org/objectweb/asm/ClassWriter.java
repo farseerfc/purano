@@ -741,15 +741,15 @@ public class ClassWriter extends ClassVisitor {
 
     @NotNull
     @Override
-    public final FieldVisitor visitField(final int access, final String name,
-            final String desc, final String signature, final Object value) {
+    public final FieldVisitor visitField(final int access, @NotNull final String name,
+            @NotNull final String desc, final String signature, final Object value) {
         return new FieldWriter(this, access, name, desc, signature, value);
     }
 
     @NotNull
     @Override
-    public final MethodVisitor visitMethod(final int access, final String name,
-            final String desc, final String signature, final String[] exceptions) {
+    public final MethodVisitor visitMethod(final int access, @NotNull final String name,
+            @NotNull final String desc, final String signature, final String[] exceptions) {
         return new MethodWriter(this, access, name, desc, signature,
                 exceptions, computeMaxs, computeFrames);
     }

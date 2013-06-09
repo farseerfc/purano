@@ -177,6 +177,7 @@ public abstract class Printer {
      * Class annotation. See
      * {@link org.objectweb.asm.ClassVisitor#visitAnnotation}.
      */
+    @NotNull
     public abstract Printer visitClassAnnotation(final String desc,
             final boolean visible);
 
@@ -196,12 +197,14 @@ public abstract class Printer {
     /**
      * Class field. See {@link org.objectweb.asm.ClassVisitor#visitField}.
      */
+    @NotNull
     public abstract Printer visitField(final int access, final String name,
             final String desc, final String signature, final Object value);
 
     /**
      * Class method. See {@link org.objectweb.asm.ClassVisitor#visitMethod}.
      */
+    @NotNull
     public abstract Printer visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions);
 
@@ -230,12 +233,14 @@ public abstract class Printer {
      * Nested annotation value. See
      * {@link org.objectweb.asm.AnnotationVisitor#visitAnnotation}.
      */
+    @NotNull
     public abstract Printer visitAnnotation(final String name, final String desc);
 
     /**
      * Annotation array value. See
      * {@link org.objectweb.asm.AnnotationVisitor#visitArray}.
      */
+    @NotNull
     public abstract Printer visitArray(final String name);
 
     /**
@@ -251,6 +256,7 @@ public abstract class Printer {
      * Field annotation. See
      * {@link org.objectweb.asm.FieldVisitor#visitAnnotation}.
      */
+    @NotNull
     public abstract Printer visitFieldAnnotation(final String desc,
             final boolean visible);
 
@@ -273,12 +279,14 @@ public abstract class Printer {
      * Method default annotation. See
      * {@link org.objectweb.asm.MethodVisitor#visitAnnotationDefault}.
      */
+    @NotNull
     public abstract Printer visitAnnotationDefault();
 
     /**
      * Method annotation. See
      * {@link org.objectweb.asm.MethodVisitor#visitAnnotation}.
      */
+    @NotNull
     public abstract Printer visitMethodAnnotation(final String desc,
             final boolean visible);
 
@@ -286,6 +294,7 @@ public abstract class Printer {
      * Method parameter annotation. See
      * {@link org.objectweb.asm.MethodVisitor#visitParameterAnnotation}.
      */
+    @NotNull
     public abstract Printer visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible);
 

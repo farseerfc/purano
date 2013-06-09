@@ -226,11 +226,13 @@ public class GeneratorAdapter extends LocalVariablesSorter {
     /**
      * Return type of the method visited by this adapter.
      */
+    @NotNull
     private final Type returnType;
 
     /**
      * Argument types of the method visited by this adapter.
      */
+    @NotNull
     private final Type[] argumentTypes;
 
     /**
@@ -254,7 +256,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      *            the method's descriptor (see {@link Type Type}).
      */
     public GeneratorAdapter(final MethodVisitor mv, final int access,
-            final String name, final String desc) {
+            final String name, @NotNull final String desc) {
         this(Opcodes.ASM4, mv, access, name, desc);
     }
 
@@ -274,7 +276,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
      *            the method's descriptor (see {@link Type Type}).
      */
     protected GeneratorAdapter(final int api, final MethodVisitor mv,
-            final int access, final String name, final String desc) {
+            final int access, final String name, @NotNull final String desc) {
         super(api, access, desc, mv);
         this.access = access;
         this.returnType = Type.getReturnType(desc);
@@ -902,6 +904,7 @@ public class GeneratorAdapter extends LocalVariablesSorter {
     // Instructions to do boxing and unboxing operations
     // ------------------------------------------------------------------------
 
+    @NotNull
     private static Type getBoxedType(@NotNull final Type type) {
         switch (type.getSort()) {
         case Type.BYTE:

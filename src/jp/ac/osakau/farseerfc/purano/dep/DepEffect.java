@@ -7,13 +7,15 @@ import jp.ac.osakau.farseerfc.purano.util.Escape;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import java.util.*;
 
 //@EqualsAndHashCode(callSuper=false)
 public class DepEffect {
-	private final @Getter DepValue returnDep = new DepValue((Type)null);
+	@Nullable
+    private final @Getter DepValue returnDep = new DepValue((Type)null);
 	private final @Getter Map<String,ThisFieldEffect> thisField = new HashMap<>();
 	private final @Getter Map<String,OtherFieldEffect> otherField = new HashMap<>();
 	private final @Getter Map<String,StaticFieldEffect> staticField = new HashMap<>(); 
@@ -166,7 +168,7 @@ public class DepEffect {
 
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

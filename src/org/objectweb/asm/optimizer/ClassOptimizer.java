@@ -54,7 +54,7 @@ public class ClassOptimizer extends RemappingClassAdapter {
 
     @Nullable
     FieldVisitor syntheticFieldVisitor(final int access, final String name,
-            final String desc) {
+            @NotNull final String desc) {
         return super.visitField(access, name, desc, null, null);
     }
 
@@ -137,7 +137,7 @@ public class ClassOptimizer extends RemappingClassAdapter {
     @Nullable
     @Override
     public MethodVisitor visitMethod(final int access, @NotNull final String name,
-            final String desc, final String signature, final String[] exceptions) {
+            @NotNull final String desc, final String signature, final String[] exceptions) {
         String s = remapper.mapMethodName(className, name, desc);
         if ("-".equals(s)) {
             return null;

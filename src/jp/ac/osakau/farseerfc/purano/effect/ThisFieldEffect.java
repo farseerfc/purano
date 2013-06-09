@@ -22,7 +22,8 @@ public class ThisFieldEffect extends FieldEffect<ThisFieldEffect> implements Clo
 		return new ThisFieldEffect(getDesc(), getOwner(), getName(), getDeps(), getFrom());
 	}
 
-	@Override
+	@NotNull
+    @Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<>(Arrays.asList(
                 "type="+table.desc2full(getDesc())+".class",

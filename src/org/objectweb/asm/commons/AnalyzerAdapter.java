@@ -139,7 +139,7 @@ public class AnalyzerAdapter extends MethodVisitor {
      *            be <tt>null</tt>.
      */
     public AnalyzerAdapter(final String owner, final int access,
-            final String name, final String desc, final MethodVisitor mv) {
+            final String name, @NotNull final String desc, final MethodVisitor mv) {
         this(Opcodes.ASM4, owner, access, name, desc, mv);
     }
 
@@ -162,7 +162,7 @@ public class AnalyzerAdapter extends MethodVisitor {
      *            be <tt>null</tt>.
      */
     protected AnalyzerAdapter(final int api, final String owner,
-            final int access, final String name, final String desc,
+            final int access, final String name, @NotNull final String desc,
             final MethodVisitor mv) {
         super(api, mv);
         this.owner = owner;

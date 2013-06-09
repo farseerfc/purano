@@ -93,7 +93,7 @@ public class LocalVariablesSorter extends MethodVisitor {
      * @param mv
      *            the method visitor to which this adapter delegates calls.
      */
-    public LocalVariablesSorter(final int access, final String desc,
+    public LocalVariablesSorter(final int access, @NotNull final String desc,
             final MethodVisitor mv) {
         this(Opcodes.ASM4, access, desc, mv);
     }
@@ -112,7 +112,7 @@ public class LocalVariablesSorter extends MethodVisitor {
      *            the method visitor to which this adapter delegates calls.
      */
     protected LocalVariablesSorter(final int api, final int access,
-            final String desc, final MethodVisitor mv) {
+            @NotNull final String desc, final MethodVisitor mv) {
         super(api, mv);
         Type[] args = Type.getArgumentTypes(desc);
         nextLocal = (Opcodes.ACC_STATIC & access) == 0 ? 1 : 0;
@@ -167,7 +167,7 @@ public class LocalVariablesSorter extends MethodVisitor {
     }
 
     @Override
-    public void visitLocalVariable(final String name, final String desc,
+    public void visitLocalVariable(final String name, @NotNull final String desc,
             final String signature, final Label start, final Label end,
             final int index) {
         int newIndex = remap(index, Type.getType(desc));

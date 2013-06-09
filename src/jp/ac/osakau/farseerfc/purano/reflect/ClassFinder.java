@@ -8,6 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 @Slf4j
@@ -109,9 +113,9 @@ public class ClassFinder {
 		return result;
 	}
 
-	public static void main(@NotNull String [] argv){
+	public static void main(@NotNull String [] argv) throws MalformedURLException {
 		long start=System.currentTimeMillis();
-//		String targetPackage []={"sun.util.calendar"};
+//		String targetPackage []={"org.argouml"};
         String targetPackage []={"jp.ac.osakau.farseerfc.purano"};
 		if(argv.length > 1){
 			targetPackage=argv;
@@ -119,24 +123,13 @@ public class ClassFinder {
 //		String targetPackage="java.lang";
 		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
 		cf.resolveMethods();
-//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("staticAdd(II)I").resolve(0, cf);
-//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("setC(I)V").resolve(1, cf);
-//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("func(I)V").resolve(2, cf);
-//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("setC(I)V").resolve(3, cf);
-//        cf.loadClass("jp.ac.osakau.farseerfc.purano.test.TargetA").getMethodStatic("func(I)V").resolve(4, cf);
-        
-        //rep.resolve(1);
-        //System.out.println(rep.getEffects().dump(rep.getMethodNode(), new TypeNameTable()));
-//		cf.loadClass("java.lang.AbstractStringBuilder");
-//		ClassRep targetA = cf.loadClass("java.lang.StringBuilder");
-//		MethodRep mr = targetA.getMethodVirtual("getChars(II[CI)V");
-//		System.out.println(targetA.getSupers().get(1).getName());
+
 
         Types table = new Types(true, targetPackage[0]);
-        
+
         System.out.println(Joiner.on("\n").join(cf.dump(table)));
         System.out.println(table.dumpImports());
-        
+
         System.out.println("Runtime :"+(System.currentTimeMillis() - start));
 	}
 }

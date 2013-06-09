@@ -93,7 +93,7 @@ public class DepAnalyzer implements Opcodes {
      * @throws org.objectweb.asm.tree.analysis.AnalyzerException
      *             if a problem occurs during the analysis.
      */
-    public Frame<DepValue>[] analyze(final String owner, @NotNull final MethodNode m)
+    public Frame<DepValue>[] analyze(@NotNull final String owner, @NotNull final MethodNode m)
             throws AnalyzerException {
         if ((m.access & (ACC_ABSTRACT | ACC_NATIVE)) != 0) {
             frames = new Frame[0];
@@ -276,7 +276,7 @@ public class DepAnalyzer implements Opcodes {
         return frames;
     }
 
-    private void initMethodFrame(String owner, MethodNode m, Frame<DepValue> current) {
+    private void initMethodFrame(@NotNull String owner, @NotNull MethodNode m, @NotNull Frame<DepValue> current) {
         current.setReturn(interpreter.newValue(Type.getReturnType(m.desc)));
         Type[] args = Type.getArgumentTypes(m.desc);
         int local = 0;

@@ -443,8 +443,8 @@ public class CheckClassAdapter extends ClassVisitor {
 
     @NotNull
     @Override
-    public FieldVisitor visitField(final int access, final String name,
-            final String desc, @Nullable final String signature, @Nullable final Object value) {
+    public FieldVisitor visitField(final int access, @NotNull final String name,
+            @NotNull final String desc, @Nullable final String signature, @Nullable final Object value) {
         checkState();
         checkAccess(access, Opcodes.ACC_PUBLIC + Opcodes.ACC_PRIVATE
                 + Opcodes.ACC_PROTECTED + Opcodes.ACC_STATIC
@@ -502,7 +502,7 @@ public class CheckClassAdapter extends ClassVisitor {
 
     @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
+    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         checkState();
         CheckMethodAdapter.checkDesc(desc, false);

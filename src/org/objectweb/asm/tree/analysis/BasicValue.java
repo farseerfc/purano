@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.tree.analysis;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
@@ -98,6 +99,7 @@ public class BasicValue implements Value {
         return type == null ? 0 : type.hashCode();
     }
 
+    @NotNull
     @Override
     public String toString() {
         if (this == UNINITIALIZED_VALUE) {

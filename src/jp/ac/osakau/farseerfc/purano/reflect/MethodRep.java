@@ -186,7 +186,7 @@ public class MethodRep extends MethodVisitor {
 		calls.add(new MethodInsnNode(opcode,owner,name,desc));
 	}
 	
-	public boolean resolve(int newTimeStamp,final ClassFinder cf){
+	public boolean resolve(int newTimeStamp, @NotNull final ClassFinder cf){
 		try {			
 			final DepEffect analyzeResult = new DepEffect();
 			
@@ -309,7 +309,7 @@ public class MethodRep extends MethodVisitor {
 		return false;
 	}
 
-    public void override(MethodRep overrider) {
+    public void override(@NotNull MethodRep overrider) {
         if (!getId().equals(overrider.getId())) {
             throw new AssertionError("Overrider and overridee should have same Id :" + getId());
         }

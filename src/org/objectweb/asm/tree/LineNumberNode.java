@@ -80,7 +80,7 @@ public class LineNumberNode extends AbstractInsnNode {
 
     @NotNull
     @Override
-    public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
+    public AbstractInsnNode clone(@NotNull final Map<LabelNode, LabelNode> labels) {
         return new LineNumberNode(line, clone(start, labels));
     }
 }

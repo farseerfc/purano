@@ -52,7 +52,7 @@ import org.objectweb.asm.signature.SignatureWriter;
  */
 public abstract class Remapper {
 
-    public String mapDesc(String desc) {
+    public String mapDesc(@NotNull String desc) {
         Type t = Type.getType(desc);
         switch (t.getSort()) {
         case Type.ARRAY:
@@ -70,6 +70,7 @@ public abstract class Remapper {
         return desc;
     }
 
+    @NotNull
     private Type mapType(@NotNull Type t) {
         switch (t.getSort()) {
         case Type.ARRAY:
@@ -116,7 +117,8 @@ public abstract class Remapper {
         return needMapping ? newTypes : types;
     }
 
-    public String mapMethodDesc(String desc) {
+    @NotNull
+    public String mapMethodDesc(@NotNull String desc) {
         if ("()V".equals(desc)) {
             return desc;
         }

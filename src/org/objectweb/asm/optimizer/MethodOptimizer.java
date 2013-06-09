@@ -29,6 +29,7 @@
  */
 package org.objectweb.asm.optimizer;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Remapper;
@@ -45,7 +46,7 @@ public class MethodOptimizer extends RemappingMethodAdapter implements Opcodes {
     private final ClassOptimizer classOptimizer;
 
     public MethodOptimizer(ClassOptimizer classOptimizer, int access,
-            String desc, MethodVisitor mv, Remapper remapper) {
+            @NotNull String desc, MethodVisitor mv, Remapper remapper) {
         super(access, desc, mv, remapper);
         this.classOptimizer = classOptimizer;
     }

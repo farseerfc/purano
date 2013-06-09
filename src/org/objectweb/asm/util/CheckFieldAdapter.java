@@ -70,7 +70,7 @@ public class CheckFieldAdapter extends FieldVisitor {
 
     @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(final String desc,
+    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
             final boolean visible) {
         checkEnd();
         CheckMethodAdapter.checkDesc(desc, false);

@@ -26,7 +26,8 @@ public class CallEffect extends FieldEffect<CallEffect> implements Cloneable{
 		return new CallEffect(callType, getDesc(),getOwner(),getName(), getDeps(), getFrom());
 	}
 
-	@Override
+	@NotNull
+    @Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<>(Arrays.asList(
                 "callType=\""+getCallType()+"\"",

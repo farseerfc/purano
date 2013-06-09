@@ -25,7 +25,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	private final DepEffect effect;
 	private final MethodRep method;
 
-	@Nullable
+	
+    @Nullable
     private final ClassFinder classFinder;
 
 
@@ -36,7 +37,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		this.classFinder = null;
 	}
 	
-	public DepInterpreter(DepEffect effect, MethodRep method, @Nullable ClassFinder classFinder) {
+	public DepInterpreter(DepEffect effect, MethodRep method, ClassFinder classFinder) {
 		super(ASM4);
 		this.effect = effect;
 		this.method = method;
@@ -51,7 +52,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 				try {
 					
 					v = f.getInt(f);
-				} catch (@NotNull IllegalArgumentException | IllegalAccessException e) {
+				} catch ( @NotNull IllegalArgumentException | IllegalAccessException e) {
 					//e.printStackTrace();
 				}
 				if(opcode == v){
@@ -62,9 +63,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		return Joiner.on(" ").join(result);
     }
 
-    @Nullable
+    
     @Override
-    public DepValue newValue(@Nullable final Type type) {
+    public DepValue newValue( @Nullable final Type type) {
         if (type == null) {
             return new DepValue((Type) null);
         }
@@ -92,9 +93,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
-	@Nullable
+	
     @Override
-	public DepValue newOperation(@NotNull final AbstractInsnNode insn)
+	public DepValue newOperation( @NotNull final AbstractInsnNode insn)
 			throws AnalyzerException {
 		switch (insn.getOpcode()) {
 		case ACONST_NULL:
@@ -174,11 +175,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		}
 	}
 
+    
     @NotNull
     @Override
-    public DepValue copyOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final DepValue value) throws AnalyzerException {
-    	DepSet deps = value.getDeps();
+    public DepValue copyOperation( @NotNull final AbstractInsnNode insn,
+             @NotNull final DepValue value) throws AnalyzerException {
+        DepSet deps = value.getDeps();
     	
         switch (insn.getOpcode()){
         case ILOAD:
@@ -224,10 +226,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
-    @Nullable
+    
     @Override
-    public DepValue unaryOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final DepValue value) throws AnalyzerException {
+    public DepValue unaryOperation( @NotNull final AbstractInsnNode insn,
+             @NotNull final DepValue value) throws AnalyzerException {
         switch (insn.getOpcode()) {
         case INEG:
         case IINC:
@@ -351,16 +353,16 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case IFNONNULL:
             return null;
         default:
-        	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
+        	System.err.println("Unknown copyOperation "+opcode2string(insn.getOpcode()));
 			throw new Error("Internal error.");
         	//return null;
         }
     }
 
-    @Nullable
+    
     @Override
-    public DepValue binaryOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final DepValue value1, @NotNull final DepValue value2)
+    public DepValue binaryOperation( @NotNull final AbstractInsnNode insn,
+             @NotNull final DepValue value1,  @NotNull final DepValue value2)
             throws AnalyzerException {
     	DepSet deps = new DepSet(value1.getDeps());
     	deps.merge(value2.getDeps());
@@ -453,10 +455,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
-	@Nullable
+	
     @Override
-	public DepValue ternaryOperation(@NotNull final AbstractInsnNode insn,
-			@NotNull final DepValue arrayref, @NotNull final DepValue index, @NotNull final DepValue value)
+	public DepValue ternaryOperation( @NotNull final AbstractInsnNode insn,
+			 @NotNull final DepValue arrayref,  @NotNull final DepValue index,  @NotNull final DepValue value)
 			throws AnalyzerException {
 		// DepSet deps = new DepSet(value1.getDeps());
 		// deps.merge(value2.getDeps());
@@ -486,18 +488,20 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	}
 
 
-	@NotNull
+	
+    @NotNull
     private DepValue addCallEffect(DepSet deps, String callType,
-			@NotNull MethodInsnNode min) {
+			 @NotNull MethodInsnNode min) {
 		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
 		effect.getCallEffects().add(ce);
 		return new DepValue(Type.getReturnType(min.desc), deps);
 	}
 	
+    
     @NotNull
     @Override
-    public DepValue naryOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final List<? extends DepValue> values) throws AnalyzerException {
+    public DepValue naryOperation( @NotNull final AbstractInsnNode insn,
+             @NotNull final List<? extends DepValue> values) throws AnalyzerException {
     	DepSet deps = new DepSet();
     	for(DepValue value :values){
     		deps.merge(value.getDeps());
@@ -563,7 +567,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	}
     }
 
-    private DepValue transitive(List<? extends DepValue> values, MethodRep rep, DepEffect callEffect, DepSet deps) {
+    @NotNull
+    private DepValue transitive(@NotNull List<? extends DepValue> values, @NotNull MethodRep rep, @NotNull DepEffect callEffect, DepSet deps) {
         DepValue result = new DepValue(Type.getType(rep.getInsnNode().desc).getReturnType());
         if (rep.isNative()) {
             effect.getOtherEffects().add(new NativeEffect(rep));
@@ -649,9 +654,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             throws AnalyzerException {
     }
 
-    @NotNull
+    
+    @Nullable
     @Override
-    public DepValue merge(@NotNull final DepValue v, @NotNull final DepValue w) {
+    public DepValue merge( @NotNull final DepValue v,  @NotNull final DepValue w) {
         DepSet deps = new DepSet();
         deps.merge(v.getDeps());
         deps.merge(w.getDeps());

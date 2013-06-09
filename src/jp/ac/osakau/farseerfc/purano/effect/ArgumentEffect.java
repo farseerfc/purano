@@ -26,7 +26,8 @@ public class ArgumentEffect extends Effect<ArgumentEffect> {
 		return new ArgumentEffect(argPos, getDeps(), getFrom());
 	}
 
-	@Override
+	@NotNull
+    @Override
 	public List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
 		if(getArgPos() < rep.getMethodNode().localVariables.size()){
             ArrayList<String> result = new ArrayList<>();

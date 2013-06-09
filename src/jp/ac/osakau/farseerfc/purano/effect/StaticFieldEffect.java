@@ -23,7 +23,8 @@ public final class StaticFieldEffect extends FieldEffect<StaticFieldEffect> impl
 		return new StaticFieldEffect(getDesc(), getOwner(), getName(), getDeps(), getFrom());
 	}
 
-	@Override
+	@NotNull
+    @Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<String>(Arrays.asList(
                 ""

@@ -96,7 +96,7 @@ public class Method {
      * @param argumentTypes
      *            the method's argument types.
      */
-    public Method(final String name, final Type returnType,
+    public Method(final String name, @NotNull final Type returnType,
             final Type[] argumentTypes) {
         this(name, Type.getMethodDescriptor(returnType, argumentTypes));
     }
@@ -123,7 +123,7 @@ public class Method {
      *         declaration.
      */
     @NotNull
-    public static Method getMethod(java.lang.reflect.Constructor<?> c) {
+    public static Method getMethod(@NotNull java.lang.reflect.Constructor<?> c) {
         return new Method("<init>", Type.getConstructorDescriptor(c));
     }
 
@@ -255,6 +255,7 @@ public class Method {
      * 
      * @return the return type of the method described by this object.
      */
+    @NotNull
     public Type getReturnType() {
         return Type.getReturnType(desc);
     }
@@ -264,6 +265,7 @@ public class Method {
      * 
      * @return the argument types of the method described by this object.
      */
+    @NotNull
     public Type[] getArgumentTypes() {
         return Type.getArgumentTypes(desc);
     }

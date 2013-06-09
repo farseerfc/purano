@@ -21,14 +21,15 @@ public class ClassRep extends ClassVisitor {
 	
 	private final Map<String, MethodRep> methodMap = new HashMap<>();
 	
-	private final @Getter String name;
+	@NotNull
+    private final @Getter String name;
 	
 	private final ClassFinder classFinder;
 	
 	private final @Getter List<ClassRep> supers = new ArrayList<>();
 //	private final @Getter Class<? extends Object> reflect;
 	
-	public ClassRep(String className, ClassFinder cf){
+	public ClassRep(@NotNull String className, ClassFinder cf){
 		super(Opcodes.ASM4);
 		this.name = className;
 //		try {

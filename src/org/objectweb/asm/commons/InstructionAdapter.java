@@ -464,7 +464,7 @@ public class InstructionAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, final String type) {
+    public void visitTypeInsn(final int opcode, @NotNull final String type) {
         Type t = Type.getObjectType(type);
         switch (opcode) {
         case Opcodes.NEW:

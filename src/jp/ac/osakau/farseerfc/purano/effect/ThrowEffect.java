@@ -5,6 +5,7 @@ import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
 
 import java.util.List;
@@ -21,14 +22,15 @@ public class ThrowEffect extends Effect<ThrowEffect> implements Cloneable{
 		return new ThrowEffect( getDeps(), getFrom());
 	}
 
-	@Override
+	@NotNull
+    @Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
 		return getDeps().dumpDeps(rep, table);
 	}
 
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

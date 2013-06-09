@@ -91,7 +91,7 @@ public class JumpInsnNode extends AbstractInsnNode {
 
     @NotNull
     @Override
-    public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
+    public AbstractInsnNode clone(@NotNull final Map<LabelNode, LabelNode> labels) {
         return new JumpInsnNode(opcode, clone(label, labels));
     }
 }
