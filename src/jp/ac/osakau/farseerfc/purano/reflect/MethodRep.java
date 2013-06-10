@@ -1,6 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import jp.ac.osakau.farseerfc.purano.ano.Purity;
+import jp.ac.osakau.farseerfc.purano.ano.StaticField;
 import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
@@ -23,7 +26,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Slf4j
-public class MethodRep extends MethodVisitor {
+public class MethodRep extends MethodVisitor implements Purity {
 	
 	@NotNull
     private final @Getter MethodInsnNode insnNode;
@@ -135,29 +138,33 @@ public class MethodRep extends MethodVisitor {
 	@NotNull
     public List<String> dump(@NotNull ClassFinder classFinder, @NotNull Types table){
 		List<String> result = new ArrayList<>();
-		if(dynamicEffects != null && getMethodNode() != null){
+		if(getMethodNode() != null){
 			
 			result.add("    "+Escape.methodName(toString(table)));
 			for(MethodRep rep : overrided.values()){
 				result.add(String.format("        # %s", rep.toString(table)));
 			}
-			for(MethodInsnNode insn : calls){
-				//log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));
-				if(classFinder.getClassMap().containsKey(Types.binaryName2NormalName(insn.owner))){
-					MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).getMethodVirtual(MethodRep.getId(insn));
-					if(mr != null){
-						result.add(String.format("        > %s", mr.toString(table)));
-					}
-				}else{
-					result.add(String.format("        >   /   / %s",
-							table.dumpMethodDesc(insn.desc, 
-									String.format("%s#%s", 
-											table.fullClassName(insn.owner),
-											insn.name))));
-				}
-			}
+
+            if(dynamicEffects != null ){
+                for(MethodInsnNode insn : calls){
+                    //log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));
+                    if(classFinder.getClassMap().containsKey(Types.binaryName2NormalName(insn.owner))){
+                        MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).getMethodVirtual(MethodRep.getId(insn));
+                        if(mr != null){
+                            result.add(String.format("        = %s", mr.toString(table)));
+                        }
+                    }else{
+                        result.add(String.format("        ? %s",
+                                table.dumpMethodDesc(insn.desc,
+                                        String.format("%s#%s",
+                                                table.fullClassName(insn.owner),
+                                                insn.name))));
+                    }
+                }
+            }
 		
 //		if(dynamicEffects != null && getMethodNode() != null){
+            result.add("            "+Escape.purity(dumpPurity()));
 			result.add(dynamicEffects.dump(this, table,"            "));
 		}
 		return result;
@@ -200,6 +207,7 @@ public class MethodRep extends MethodVisitor {
 			}else{
 				if(methodNode == null){
 					final MethodRep thisRep = this;
+
 					ClassReader cr=new ClassReader(insnNode.owner);
 					cr.accept(new ClassVisitor(Opcodes.ASM4){
 						@Nullable
@@ -219,7 +227,8 @@ public class MethodRep extends MethodVisitor {
 									try {
 										/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 									} catch (AnalyzerException e) {
-										throw new RuntimeException("Error when analyzing",e);
+										//throw new RuntimeException("Error when analyzing",e);
+                                        log.warn("Error when analyzing {}",e);
 									}
 									
 								}
@@ -231,7 +240,8 @@ public class MethodRep extends MethodVisitor {
 					try {
 						/*Frame<DepValue> [] frames =*/ ana.analyze("dep", methodNode);
 					} catch (AnalyzerException e) {
-						throw new RuntimeException("Error when analyzing",e);
+//						throw new RuntimeException("Error when analyzing",e);
+                        log.warn("Error when analyzing {}",e);
 					}
 				}
 			}
@@ -315,5 +325,59 @@ public class MethodRep extends MethodVisitor {
         }
         overrided.put(overrider.getInsnNode().owner, overrider);
         overrider.getOverrides().add(this);
+    }
+
+    public int purity(){
+        if(dynamicEffects == null){
+            return Unknown;
+        }
+        int result = 0;
+        if(dynamicEffects.getOtherEffects().contains(new NativeEffect(null))){
+            result |= Native;
+        }
+        if(dynamicEffects.getStaticField().size()>0){
+            result |= StaticModifier;
+        }
+        if(dynamicEffects.getThisField().size()>0){
+            result |= FieldModifier;
+        }
+        if(dynamicEffects.getArgumentEffects().size()>0){
+            result |= ArgumentModifier;
+        }
+        if(dynamicEffects.getReturnDep().getDeps().getFields().size() >0){
+            result |= Stateful;
+        }else{
+            result |= Stateless;
+        }
+        return result;
+    }
+
+    public String dumpPurity(){
+        List<String> result=new ArrayList<>();
+        int p = purity();
+        if(p == Unknown){
+            result.add("Unknown");
+        }
+
+        if(p == Stateless){
+            result.add("Stateless");
+        }
+
+        if((p & Stateful) > 0){
+            result.add("Stateful");
+        }
+        if((p & ArgumentModifier) > 0){
+            result.add("ArgumentModifier");
+        }
+        if((p & FieldModifier) > 0){
+            result.add("FieldModifier");
+        }
+        if((p & StaticModifier) > 0){
+            result.add("StaticModifier");
+        }
+        if((p & Native) > 0){
+            result.add("Native");
+        }
+        return Joiner.on(", ").join(result);
     }
 }

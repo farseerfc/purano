@@ -37,4 +37,11 @@ public class Escape {
 		}
 		return "\033[1;36m" + str + "\033[m";
 	}
+
+    public static String purity(String str){
+        if (!use) {
+            return str;
+        }
+        return "\033[1;31m" + str + "\033[m";
+    }
 }
