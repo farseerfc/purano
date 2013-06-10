@@ -29,8 +29,11 @@ public class D {
 		setC(a);
 	}
 
-	@NotNull
     public static D factory(int a){
 		return new D(a);
 	}
+
+    public void change(TargetA [] array){
+        array[0].setC(1);
+    }
 }

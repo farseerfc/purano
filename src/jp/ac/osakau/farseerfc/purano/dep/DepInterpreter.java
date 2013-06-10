@@ -220,7 +220,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case DSTORE:
         	return new DepValue(value);
         default:
-        	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
+        	System.err.println("Unknown copyOperation "+opcode2string(insn.getOpcode()));
 			throw new Error("Internal error.");
         	//return null;
         }
@@ -443,7 +443,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             } else {
                 // sth.name == v2
                 // sth maybe arg or this.otherField or staticField
-                value1.setDeps(value2.getDeps());
+                value1.setDeps(new DepSet(value2.getDeps()));
                 value1.modify(effect, method, null);
             }
         	return null;
