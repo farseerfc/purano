@@ -27,8 +27,7 @@ import java.util.List;
 
 public class ClassDepVisitor extends ClassVisitor{
 	private final Types typeNameTable = new Types();
-	@NotNull
-    private final PrintWriter out;
+    private @NotNull final PrintWriter out;
 	private final StringWriter sw = new StringWriter();
 	private final PrintWriter writer = new PrintWriter(sw);
 	

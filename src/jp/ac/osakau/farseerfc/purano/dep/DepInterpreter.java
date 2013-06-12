@@ -563,7 +563,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     			return addCallEffect(deps, callType, min);
     		}
 
-    		return transitive(values, rep, callEffect,deps);
+    		return transitive(values, rep, callEffect, deps);
     	}
     }
 
