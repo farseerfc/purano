@@ -16,12 +16,11 @@ import java.util.*;
 public class ClassFinder {
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
 
-    private @NotNull @Getter List<MethodRep> toResolve = new ArrayList<>();
 	private final Set<String> classTargets = new HashSet<>() ;
     private @Getter List<Integer> changedMethodsTrace = new ArrayList<>();
     private @Getter List<Integer> loadedClassesTrace = new ArrayList<>();
 
-    private static final int MAX_LOAD_PASS=2;
+    private static final int MAX_LOAD_PASS = 100;
 	
 	public ClassFinder(@NotNull Collection<String> prefix){
         findTargetClasses(prefix);
@@ -157,8 +156,9 @@ public class ClassFinder {
 
 	public static void main(@NotNull String [] argv) throws MalformedURLException {
 		long start=System.currentTimeMillis();
-        String targetPackage []={"jp.ac.osakau.farseerfc.purano.test"};
-        // "org.htmlparser"};
+        String targetPackage []={
+//                "jp.ac.osakau.farseerfc.purano.test"};
+        "org.htmlparser"};
         // "org.argouml"};
         // "org.apache.catalina"};
         // "org.objectweb.asm"

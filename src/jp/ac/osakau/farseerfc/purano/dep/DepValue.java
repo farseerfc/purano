@@ -52,24 +52,25 @@ public class DepValue implements Value {
     }
 
     @Override
-    public boolean equals(final Object value) {
-        if (value == this) {
-            return true;
-        } else if (value instanceof DepValue) {
-            if (type == null) {
-                return ((DepValue) value).type == null;
-            } else {
-                return type.equals(((DepValue) value).type);
-            }
-        } else {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DepValue)) return false;
+
+        DepValue depValue = (DepValue) o;
+
+        if (!deps.equals(depValue.deps)) return false;
+        if (!lvalue.equals(depValue.lvalue)) return false;
+        if (type != null ? !type.equals(depValue.type) : depValue.type != null) return false;
+
+        return true;
     }
-    
 
     @Override
     public int hashCode() {
-        return type == null ? 0 : type.hashCode();
+        int result = deps.hashCode();
+        result = 31 * result + lvalue.hashCode();
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        return result;
     }
 
     public void modify(@NotNull DepEffect effect, @NotNull MethodRep method, MethodRep from) {

@@ -149,7 +149,8 @@ public class MethodRep extends MethodVisitor implements Purity {
                 for(MethodInsnNode insn : calls){
                     //log.info("Load when dump {}",Types.binaryName2NormalName(insn.owner));
                     if(classFinder.getClassMap().containsKey(Types.binaryName2NormalName(insn.owner))){
-                        MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).getMethodVirtual(MethodRep.getId(insn));
+                        MethodRep mr = classFinder.loadClass(Types.binaryName2NormalName(insn.owner)).
+                                getMethodVirtual(MethodRep.getId(insn));
                         if(mr != null){
                             result.add(String.format("        = %s", mr.toString(table)));
                         }
@@ -161,11 +162,11 @@ public class MethodRep extends MethodVisitor implements Purity {
                                                 insn.name))));
                     }
                 }
+
+                result.add("            "+Escape.purity(dumpPurity()));
+                result.add(dynamicEffects.dump(this, table,"            "));
             }
-		
-//		if(dynamicEffects != null && getMethodNode() != null){
-            result.add("            "+Escape.purity(dumpPurity()));
-			result.add(dynamicEffects.dump(this, table,"            "));
+
 		}
 		return result;
 	}
@@ -223,7 +224,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 								public void visitEnd() {
 									super.visitEnd();
 									methodNode = this;
-									DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, thisRep,cf));
+									DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, thisRep, cf));
 									try {
 										/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
 									} catch (AnalyzerException e) {
@@ -247,6 +248,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 			}
 			
 			staticEffects.merge(analyzeResult, null);
+
 			for(MethodRep over:overrided.values()){
 				if(over.getDynamicEffects() != null){
 					analyzeResult.merge(over.getDynamicEffects(),over);
@@ -263,11 +265,9 @@ public class MethodRep extends MethodVisitor implements Purity {
 
                 for(MethodRep methodRep:called){
                     methodRep.setNeedResolve(true);
-                    cf.getToResolve().add(methodRep);
                 }
                 for(MethodRep methodRep:overrides){
                     methodRep.setNeedResolve(true);
-                    cf.getToResolve().add(methodRep);
                 }
 
 				return true;
@@ -286,7 +286,7 @@ public class MethodRep extends MethodVisitor implements Purity {
         return needResolve;
     }
 
-	public boolean isNeedResolveNew(@NotNull final ClassFinder cf){
+	public boolean isNeedResolveOld(@NotNull final ClassFinder cf){
 		if(modifiedTimeStamp == 0){
 			return true;
 		}

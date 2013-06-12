@@ -284,14 +284,16 @@ public class DepAnalyzer implements Opcodes {
             Type ctype = Type.getObjectType(owner);
             DepValue value = interpreter.newValue(ctype);
             value.getLvalue().getLocals().add(0);         // for this pointer
+            value.getDeps().getLocals().add(0);
             current.setLocal(local++, value);
         }
         for (Type arg : args) {
             DepValue value = interpreter.newValue(arg);
             value.getLvalue().getLocals().add(local);
+            value.getDeps().getLocals().add(local);
             current.setLocal(local++, value);
             if (arg.getSize() == 2) {
-                current.setLocal(local++, interpreter.newValue(null));
+                current.setLocal(local++, value);
             }
         }
         while (local < m.maxLocals) {

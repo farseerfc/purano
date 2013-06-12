@@ -180,7 +180,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     @Override
     public DepValue copyOperation( @NotNull final AbstractInsnNode insn,
              @NotNull final DepValue value) throws AnalyzerException {
-        DepSet deps = value.getDeps();
+        DepSet deps = new DepSet(value.getDeps());
     	
         switch (insn.getOpcode()){
         case ILOAD:
@@ -550,26 +550,28 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 
     		
     		DepEffect callEffect = null;
-   			if(rep.getDynamicEffects() != null){
-				if(insn.getOpcode() == INVOKESPECIAL ||
-                        insn.getOpcode() == INVOKESTATIC){
-					callEffect = rep.getStaticEffects();
-				}else{
-					callEffect = rep.getDynamicEffects();
-				}
-			}
+
+            if(insn.getOpcode() == INVOKESPECIAL ||
+                    insn.getOpcode() == INVOKESTATIC){
+                callEffect = rep.getStaticEffects();
+            }else{
+                callEffect = rep.getDynamicEffects();
+            }
+
 
     		if(callEffect == null){
     			return addCallEffect(deps, callType, min);
     		}
 
-    		return transitive(values, rep, callEffect, deps);
+    		return transitive(values, rep, callEffect,deps);
     	}
     }
 
     @NotNull
     private DepValue transitive(@NotNull List<? extends DepValue> values, @NotNull MethodRep rep, @NotNull DepEffect callEffect, DepSet deps) {
         DepValue result = new DepValue(Type.getType(rep.getInsnNode().desc).getReturnType());
+        result.getDeps().merge(deps);
+
         if (rep.isNative()) {
             effect.getOtherEffects().add(new NativeEffect(rep));
             return result;
@@ -598,7 +600,6 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             return result;
         }
 
-        // TODO continue write obj.rep(*values)
         DepValue obj = values.get(0);
         for (ArgumentEffect ae : callEffect.getArgumentEffects()) {
             // ae.getArgPos  is method call is changing value of argument in position
