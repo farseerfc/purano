@@ -277,7 +277,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             // owner.name = value
 			FieldInsnNode fin = (FieldInsnNode) insn;
 //			effect.addStaticField(
-//					new StaticFieldEffect(fin.desc, fin.owner, fin.name,
+//					new StaticEffect(fin.desc, fin.owner, fin.name,
 //							value.getDeps(),null));
             DepValue dv = new DepValue(value);
             dv.getLvalue().getStatics().add(new FieldDep(fin.desc,fin.owner,fin.name));
@@ -578,7 +578,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
 
         // transitive from origin
-        for(StaticFieldEffect sfe:callEffect.getStaticField().values()){
+        for(StaticEffect sfe:callEffect.getStaticField().values()){
             effect.addStaticField(sfe.duplicate(rep));
         }
 
@@ -615,10 +615,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         if(callEffect.getThisField().size()>0){
             if(!method.isStatic() && obj.getLvalue().isThis()){
                 DepValue dv = new DepValue(obj);
-                for(ThisFieldEffect tfe: callEffect.getThisField().values()){
+                for(FieldEffect tfe: callEffect.getThisField().values()){
                     dv.getLvalue().getFields().add(new FieldDep(tfe.getDesc(),tfe.getOwner(),tfe.getName()));
                 }
                 dv.modify(effect,method,rep);
+            }else{
+                obj.modify(effect,method,rep);
             }
         }
 

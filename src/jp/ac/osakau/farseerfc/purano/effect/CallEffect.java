@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper=true)
-public class CallEffect extends FieldEffect<CallEffect> implements Cloneable{
-	public CallEffect(String callType,String desc,String owner,String name, DepSet deps, MethodRep from) {
+public class CallEffect extends AbstractFieldEffect<CallEffect> implements Cloneable{
+	public CallEffect(String callType, String desc, String owner, String name, DepSet deps, MethodRep from) {
 		super(desc,owner,name,deps,from);
 		this.callType = callType;
 	}

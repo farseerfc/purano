@@ -51,11 +51,9 @@ public class ClassDepVisitor extends ClassVisitor{
 			@Override
 			@javax.annotation.Nullable
 			public String apply(@javax.annotation.Nullable String inter) {
-                if (inter == null) {
-                    return null;
-                }
-                return typeNameTable.fullClassName(inter);
+                return inter == null ? null : typeNameTable.fullClassName(inter);
             }});
+
 		printf("%s class %s extends %s %s%s {\n",
 			Types.access2string(access),
 			typeNameTable.fullClassName(name),

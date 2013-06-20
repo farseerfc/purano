@@ -2,26 +2,35 @@ package jp.ac.osakau.farseerfc.purano.effect;
 
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @EqualsAndHashCode(callSuper=true)
-public abstract class FieldEffect<T extends FieldEffect> extends Effect<T> {
-	public FieldEffect(String desc,String owner,String name, DepSet deps, MethodRep from) {
-		super(deps,from);
-		this.desc = desc;
-		this.owner = owner;
-		this.name = name;
-		
+public class FieldEffect extends AbstractFieldEffect<FieldEffect> implements Cloneable{
+	public FieldEffect(String desc, String owner, String name, DepSet deps, MethodRep from) {
+		super(desc,owner,name,deps,from);
 	}
 	
-	private final @Getter String desc;
-	private final @Getter String owner;
-	private final @Getter String name;
-	
 	@NotNull
-    public String getKey(){
-		return desc+owner+name;
+    @Override
+	public FieldEffect clone(){
+		return new FieldEffect(getDesc(), getOwner(), getName(), getDeps(), getFrom());
+	}
+
+	@NotNull
+    @Override
+	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
+        ArrayList<String> result = new ArrayList<>(Arrays.asList(
+                "type="+table.desc2full(getDesc())+".class",
+                "owner="+table.fullClassName(getOwner())+".class",
+                "name=\""+getName()+"\""
+        ));
+        result.addAll(getDeps().dumpDeps(rep,table));
+        return result;
 	}
 }

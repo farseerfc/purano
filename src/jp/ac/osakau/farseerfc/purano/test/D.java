@@ -1,16 +1,10 @@
 package jp.ac.osakau.farseerfc.purano.test;
 
 
-import org.jetbrains.annotations.NotNull;
-
 public class D {
     private static int s;
 
 	private int c;
-
-	public D(int mc){
-		this.c = mc;
-	}
 
 	public int thisAdd(int a){
 		return a+c;
@@ -20,7 +14,7 @@ public class D {
 		this.c = c;
 	}
 	
-	public void allMember(){
+	public void change(){
 		setC(1);
         s=2;
 	}
@@ -29,11 +23,9 @@ public class D {
 		setC(a);
 	}
 
-    public static D factory(int a){
-		return new D(a);
-	}
-
-    public void change(TargetA [] array){
-        array[0].setC(1);
+    public void changeArg(D [] array){
+        array[0].change();
     }
+
+
 }

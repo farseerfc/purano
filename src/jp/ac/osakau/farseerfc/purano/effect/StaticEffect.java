@@ -11,22 +11,22 @@ import java.util.Arrays;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper=true)
-public final class StaticFieldEffect extends FieldEffect<StaticFieldEffect> implements Cloneable{
-	public StaticFieldEffect(String desc,String owner,String name, DepSet deps, MethodRep from) {
-		//super(desc,owner,name,deps, from);
+public final class StaticEffect extends AbstractFieldEffect<StaticEffect> implements Cloneable{
+	public StaticEffect(String desc, String owner, String name, DepSet deps, MethodRep from) {
+//		super(desc,owner,name,deps, from);
         super("","","",deps, from);
 	}
 	
 	@NotNull
     @Override
-	public StaticFieldEffect clone(){
-		return new StaticFieldEffect(getDesc(), getOwner(), getName(), getDeps(), getFrom());
+	public StaticEffect clone(){
+		return new StaticEffect(getDesc(), getOwner(), getName(), getDeps(), getFrom());
 	}
 
 	@NotNull
     @Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
-        ArrayList<String> result = new ArrayList<String>(Arrays.asList(
+        ArrayList<String> result = new ArrayList<>(Arrays.asList(
                 ""
 //                "type=" + table.desc2full(getDesc())+".class",
 //                "owner=" + table.fullClassName(getOwner())+".class",

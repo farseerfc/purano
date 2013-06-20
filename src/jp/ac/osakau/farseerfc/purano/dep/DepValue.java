@@ -1,8 +1,8 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
-import jp.ac.osakau.farseerfc.purano.effect.StaticFieldEffect;
-import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.FieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.StaticEffect;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import lombok.Getter;
 import lombok.Setter;
@@ -79,10 +79,10 @@ public class DepValue implements Value {
             if(method.isStatic()){
                 throw new RuntimeException("Found this field effect in static method!");
             }
-            effect.addThisField(new ThisFieldEffect(fd.getDesc(),fd.getOwner(),fd.getName(),deps,from));
+            effect.addThisField(new FieldEffect(fd.getDesc(),fd.getOwner(),fd.getName(),deps,from));
         }
         for(FieldDep fd: lvalue.getStatics()){
-            effect.addStaticField(new StaticFieldEffect(fd.getDesc(), fd.getOwner(), fd.getName(), deps, from));
+            effect.addStaticField(new StaticEffect(fd.getDesc(), fd.getOwner(), fd.getName(), deps, from));
         }
         for(int local: lvalue.getLocals()){
             assert(method.isArg(local) || local == 0);

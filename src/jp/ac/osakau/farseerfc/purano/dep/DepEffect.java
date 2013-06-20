@@ -16,9 +16,9 @@ import java.util.*;
 public class DepEffect {
 	@Nullable
     private final @Getter DepValue returnDep = new DepValue((Type)null);
-	private final @Getter Map<String,ThisFieldEffect> thisField = new HashMap<>();
+	private final @Getter Map<String,FieldEffect> thisField = new HashMap<>();
 	private final @Getter Map<String,OtherFieldEffect> otherField = new HashMap<>();
-	private final @Getter Map<String,StaticFieldEffect> staticField = new HashMap<>(); 
+	private final @Getter Map<String,StaticEffect> staticField = new HashMap<>();
 	private final @Getter Set<ArgumentEffect> argumentEffects = new HashSet<>();
 	private final @Getter Set<CallEffect> callEffects = new HashSet<>();
 	private final @Getter Set<Effect> otherEffects = new HashSet<>();
@@ -29,13 +29,13 @@ public class DepEffect {
 		returnDep.getLvalue().merge(other.returnDep.getLvalue());
         returnDep.getDeps().merge(other.returnDep.getDeps());
 
-		for(ThisFieldEffect effect:other.getThisField().values()){
+		for(FieldEffect effect:other.getThisField().values()){
 			addThisField(effect.duplicate(from));
 		}
 		for(OtherFieldEffect effect:other.getOtherField().values()){
 			addOtherField(effect.duplicate(from));
 		}
-		for(StaticFieldEffect effect:other.getStaticField().values()){
+		for(StaticEffect effect:other.getStaticField().values()){
 			addStaticField(effect.duplicate(from));
 		}
 		for(ArgumentEffect effect: other.getArgumentEffects()){
@@ -49,7 +49,7 @@ public class DepEffect {
 		}
 	}
 
-	public void addThisField(@NotNull ThisFieldEffect tfe){
+	public void addThisField(@NotNull FieldEffect tfe){
 		if(thisField.containsKey(tfe.getKey())){
 			DepSet ds = new DepSet();
 			ds.merge(thisField.get(tfe.getKey()).getDeps());
@@ -74,7 +74,7 @@ public class DepEffect {
 //        }
     }
 	
-	public void addStaticField(@NotNull StaticFieldEffect sfe){
+	public void addStaticField(@NotNull StaticEffect sfe){
 		if(staticField.containsKey(sfe.getKey())){
 			DepSet ds = new DepSet();
 			ds.merge(staticField.get(sfe.getKey()).getDeps());
@@ -92,12 +92,12 @@ public class DepEffect {
 
         if(!returnDep.getDeps().isEmpty()){
 		    deps.add(String.format("%s@%s(%s)",prefix,
-				Escape.annotation("ReturnDepend"),
+				Escape.annotation("Depend"),
 				Escape.effect(Joiner.on(", ").join(returnDep.getDeps().dumpDeps(rep, table)))));
         }
         if(!returnDep.getLvalue().isEmpty()){
             deps.add(String.format("%s@%s(%s)",prefix,
-                    Escape.annotation("ReturnLvalue"),
+                    Escape.annotation("Expose"),
                     Escape.effect(Joiner.on(", ").join(returnDep.getLvalue().dumpDeps(rep, table)))));
         }
 		
@@ -105,7 +105,7 @@ public class DepEffect {
 			deps.add(effect.dump(rep, table, prefix));
 		}
 		
-		for(ThisFieldEffect effect: thisField.values()){
+		for(FieldEffect effect: thisField.values()){
 			deps.add(effect.dump(rep, table, prefix));
 		}
 		
@@ -115,7 +115,7 @@ public class DepEffect {
 		}
 		
 		
-		for(StaticFieldEffect effect: staticField.values()){
+		for(StaticEffect effect: staticField.values()){
 			deps.add(effect.dump(rep, table, prefix));
 		}
 		
@@ -133,7 +133,7 @@ public class DepEffect {
 
 	public boolean isSubset(@NotNull DepEffect dec) {
 
-		for(ThisFieldEffect e:thisField.values()){
+		for(FieldEffect e:thisField.values()){
 			if(! dec.getThisField().containsValue(e)){
 				return false;
 			}
@@ -145,7 +145,7 @@ public class DepEffect {
 			}
 		}
 		
-		for(StaticFieldEffect e:staticField.values()){
+		for(StaticEffect e:staticField.values()){
 			if(! dec.getStaticField().containsValue(e)){
 				return false;
 			}

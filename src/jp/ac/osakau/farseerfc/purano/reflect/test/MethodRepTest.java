@@ -3,7 +3,7 @@ package jp.ac.osakau.farseerfc.purano.reflect.test;
 import com.google.common.base.Joiner;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
-import jp.ac.osakau.farseerfc.purano.effect.ThisFieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.FieldEffect;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassRep;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
@@ -114,9 +114,9 @@ public class MethodRepTest {
 		System.out.println(dea.dump(ma, new Types(), ""));
 		System.out.println(dec.dump(mc, new Types(), ""));
 		
-		ThisFieldEffect tfe1 = new ThisFieldEffect("A", "B", "C", new DepSet(), null);
-		ThisFieldEffect tfe2 = new ThisFieldEffect("A", "B", "C", new DepSet(), null);
-		ThisFieldEffect tfe3 = new ThisFieldEffect("A", "B", "D", new DepSet(), null);
+		FieldEffect tfe1 = new FieldEffect("A", "B", "C", new DepSet(), null);
+		FieldEffect tfe2 = new FieldEffect("A", "B", "C", new DepSet(), null);
+		FieldEffect tfe3 = new FieldEffect("A", "B", "D", new DepSet(), null);
 		assertEquals(tfe1, tfe2);
 		assertFalse(tfe1.equals(tfe3));
 			

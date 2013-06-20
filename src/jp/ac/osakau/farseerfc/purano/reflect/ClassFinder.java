@@ -17,6 +17,7 @@ public class ClassFinder {
 	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
 
 	private final Set<String> classTargets = new HashSet<>() ;
+    private final Collection<String> prefix;
     private @Getter List<Integer> changedMethodsTrace = new ArrayList<>();
     private @Getter List<Integer> loadedClassesTrace = new ArrayList<>();
 
@@ -24,7 +25,7 @@ public class ClassFinder {
 	
 	public ClassFinder(@NotNull Collection<String> prefix){
         findTargetClasses(prefix);
-
+        this.prefix=prefix;
 	}
 	
 	public ClassFinder(String string) {
@@ -107,42 +108,52 @@ public class ClassFinder {
     public void dump(@NotNull Types table){
         int method = 0, unknown = 0, stateless = 0, stateful = 0, modifier =0 ;
         int fieldM = 0, staticM = 0, argM = 0, nativeE = 0;
+        int classes = 0;
 
 		for(String clsName : classMap.keySet()){
-            if(classTargets.contains(clsName)){
-                ClassRep cls = classMap.get(clsName);
-                System.out.println(Joiner.on("\n").join(cls.dump(table)));
-                for(MethodRep mtd: cls.getAllMethods()){
-                    method++;
-                    int p=mtd.purity();
-                    if(p == Purity.Unknown){
-                        unknown ++;
-                    }
-                    if(p == Purity.Stateless){
-                        stateless ++;
-                    }else if(p == Purity.Stateful){
-                        stateful ++;
-                    }else{
-                        modifier ++;
-                    }
-                    if((p & Purity.ArgumentModifier)>0){
-                        argM ++;
-                    }
-                    if((p & Purity.FieldModifier)>0){
-                        fieldM ++;
-                    }
-                    if((p & Purity.StaticModifier)>0){
-                        staticM ++;
-                    }
-                    if((p & Purity.Native)>0){
-                        nativeE ++;
-                    }
+            boolean isTarget = classTargets.contains(clsName);
+            for(String p:prefix){
+                if(clsName.startsWith(p)){
+                    isTarget = true;
                 }
             }
-		}
+            if (!isTarget) {
+                continue;
+            }
+            ClassRep cls = classMap.get(clsName);
+            System.out.println(Joiner.on("\n").join(cls.dump(table)));
+            for(MethodRep mtd: cls.getAllMethods()){
+                method++;
+                int p=mtd.purity();
+                if(p == Purity.Unknown){
+                    unknown ++;
+                }
+                if(p == Purity.Stateless){
+                    stateless ++;
+                }else if(p == Purity.Stateful){
+                    stateful ++;
+                }else{
+                    modifier ++;
+                }
+                if((p & Purity.ArgumentModifier)>0){
+                    argM ++;
+                }
+                if((p & Purity.FieldModifier)>0){
+                    fieldM ++;
+                }
+                if((p & Purity.StaticModifier)>0){
+                    staticM ++;
+                }
+                if((p & Purity.Native)>0){
+                    nativeE ++;
+                }
+            }
+            classes ++;
+        }
 
         System.out.println(table.dumpImports());
 
+        System.out.println("class "+classes);
         System.out.println("method "+method);
         System.out.println("unknown "+unknown);
         System.out.println("stateless "+stateless);
@@ -160,9 +171,8 @@ public class ClassFinder {
 //                "jp.ac.osakau.farseerfc.purano.test"};
         "org.htmlparser"};
         // "org.argouml"};
-        // "org.apache.catalina"};
-        // "org.objectweb.asm"
-        // "jp.ac.osakau.farseerfc.purano.test"};
+//        "org.apache.catalina"};
+//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
@@ -174,7 +184,7 @@ public class ClassFinder {
 //        Types table = new Types(false);
         cf.dump(table);
 
-        System.out.println("Loaded Classes: "+Joiner.on(", ").join(cf.getLoadedClassesTrace()));
+        System.out.println("Loaded Classes: " + Joiner.on(", ").join(cf.getLoadedClassesTrace()));
         System.out.println("Changed methods: "+Joiner.on(", ").join(cf.getChangedMethodsTrace()));
         System.out.println("Runtime :"+(System.currentTimeMillis() - start));
 	}

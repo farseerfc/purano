@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper=true)
-public class OtherFieldEffect extends FieldEffect<OtherFieldEffect> implements Cloneable {
-	public OtherFieldEffect(String desc, String owner, String name,DepSet deps,DepSet leftValueDeps, MethodRep from) {
+public class OtherFieldEffect extends AbstractFieldEffect<OtherFieldEffect> implements Cloneable {
+	public OtherFieldEffect(String desc, String owner, String name, DepSet deps, DepSet leftValueDeps, MethodRep from) {
 		super(desc,owner,name, null, from);
 //		this.leftValueDeps = leftValueDeps;
 	}
