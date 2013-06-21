@@ -7,8 +7,8 @@ package jp.ac.osakau.farseerfc.purano.test;
  * Time: 9:16 PM
  * To change this template use File | Settings | File Templates.
  */
-public class A extends D {
-    int[] m;
+public class A extends Base {
+    private int[] m;
 
     public void changeA(int a[]){
         int [] local = a;

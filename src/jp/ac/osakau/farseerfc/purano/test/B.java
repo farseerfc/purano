@@ -7,29 +7,8 @@ package jp.ac.osakau.farseerfc.purano.test;
  * Time: 10:10 PM
  * To change this template use File | Settings | File Templates.
  */
-public class B extends D{
+public class B extends Base {
     private A a;
-
-    public int selfRecursion(int n){
-        if(n>0){
-            return selfRecursion(n-1)+1;
-        }
-        return 1;
-    }
-
-    public int crossRecursionA(int n){
-        if(n>0){
-            return crossRecursionB(n-1)+1;
-        }
-        return 1;
-    }
-
-    public int crossRecursionB(int n){
-        if(n>0){
-            return crossRecursionA(n-1)*2;
-        }
-        return 1;
-    }
 
     @Override
     public void change(){

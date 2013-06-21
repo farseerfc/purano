@@ -13,8 +13,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper=true)
 public final class StaticEffect extends AbstractFieldEffect<StaticEffect> implements Cloneable{
 	public StaticEffect(String desc, String owner, String name, DepSet deps, MethodRep from) {
-//		super(desc,owner,name,deps, from);
-        super("","","",deps, from);
+		super(desc,owner,name,deps, from);
+//        super("","","",deps, from);
 	}
 	
 	@NotNull
@@ -27,10 +27,10 @@ public final class StaticEffect extends AbstractFieldEffect<StaticEffect> implem
     @Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
         ArrayList<String> result = new ArrayList<>(Arrays.asList(
-                ""
-//                "type=" + table.desc2full(getDesc())+".class",
-//                "owner=" + table.fullClassName(getOwner())+".class",
-//                "name=\"" + getName() + "\""
+//                ""
+                "type=" + table.desc2full(getDesc())+".class",
+                "owner=" + table.fullClassName(getOwner())+".class",
+                "name=\"" + getName() + "\""
         ));
         result.addAll(getDeps().dumpDeps(rep, table));
         return result;

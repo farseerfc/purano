@@ -1,7 +1,7 @@
 package jp.ac.osakau.farseerfc.purano.test;
 
 
-public class D {
+public class Base {
     private static int s;
 
 	private int c;
@@ -23,9 +23,8 @@ public class D {
 		setC(a);
 	}
 
-    public void changeArg(D [] array){
+    public void changeArg(Base[] array){
         array[0].change();
     }
-
 
 }
