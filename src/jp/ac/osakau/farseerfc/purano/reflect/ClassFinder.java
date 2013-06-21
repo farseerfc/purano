@@ -21,7 +21,7 @@ public class ClassFinder {
     private @Getter List<Integer> changedMethodsTrace = new ArrayList<>();
     private @Getter List<Integer> loadedClassesTrace = new ArrayList<>();
 
-    private static final int MAX_LOAD_PASS = 2;
+    private static final int MAX_LOAD_PASS = 3;
 	
 	public ClassFinder(@NotNull Collection<String> prefix){
         findTargetClasses(prefix);

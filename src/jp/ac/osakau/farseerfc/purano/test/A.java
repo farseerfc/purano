@@ -10,30 +10,30 @@ package jp.ac.osakau.farseerfc.purano.test;
 public class A extends Base {
     private int[] m;
 
-    public void changeA(int a[]){
-        int [] local = a;
-        a = new int [1];
-        local[0]= 1;
+    public void changeArg(int a[]) {
+        int[] local = a;
+        a = new int[1];
+        local[0] = 1;
     }
 
-    public int [] getM(){
-       return m;
+    public int[] getM() {
+        return m;
     }
 
-    public int [] create(){
-        return new int [1];
+    public int[] create() {
+        return new int[1];
     }
 
-    public void modifyM(){
-        changeA(getM());
+    public void modifyM() {
+        changeArg(getM());
     }
 
-    public void modifyTemp(){
-        changeA(create());
+    public void modifyTemp() {
+        changeArg(create());
     }
 
     @Override
-    public void change(){
+    public void change() {
         modifyM();
     }
 }
