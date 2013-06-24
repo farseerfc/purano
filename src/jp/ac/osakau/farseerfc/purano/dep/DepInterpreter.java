@@ -289,7 +289,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         	DepValue v =new DepValue(Type.getType(fin.desc), value.getDeps());
         	v.getDeps().getFields().add(new FieldDep(fin.desc,fin.owner,fin.name));
 
-            if(value.getLvalue().dependOnThis(method)){
+            if(value.getLvalue().isThis()){
                 if(!method.isStatic() &&value.getLvalue().isThis()){
                     // when we try to get this.f
                     v.getLvalue().getFields().add(new FieldDep(fin.desc,fin.owner,fin.name));
@@ -578,8 +578,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
 
         // transitive from origin
-        for(StaticEffect sfe:callEffect.getStaticField().values()){
-            effect.addStaticField(sfe.duplicate(rep));
+
+//        for(StaticEffect sfe:callEffect.getStaticField().values()){
+//            effect.addStaticField(sfe.duplicate(rep));
+//        }
+        if(callEffect.getStaticField().size()>0){
+            effect.addStaticField(new StaticEffect("","","",new DepSet(), rep));
         }
 
         for(Effect e :callEffect.getOtherEffects()){
@@ -619,7 +623,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                     dv.getLvalue().getFields().add(new FieldDep(tfe.getDesc(),tfe.getOwner(),tfe.getName()));
                 }
                 dv.modify(effect,method,rep);
-            }else{
+            }else if(!method.isStatic()){
                 obj.modify(effect,method,rep);
             }
         }
@@ -647,6 +651,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         for(FieldDep fd:ret.getLvalue().getStatics()){
             result.getLvalue().getStatics().add(fd);
         }
+
 
         return result;
     }

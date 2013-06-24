@@ -26,13 +26,19 @@ public final class StaticEffect extends AbstractFieldEffect<StaticEffect> implem
 	@NotNull
     @Override
 	protected List<String> dumpEffect(@NotNull MethodRep rep, @NotNull Types table) {
-        ArrayList<String> result = new ArrayList<>(Arrays.asList(
-//                ""
-                "type=" + table.desc2full(getDesc())+".class",
-                "owner=" + table.fullClassName(getOwner())+".class",
-                "name=\"" + getName() + "\""
-        ));
-        result.addAll(getDeps().dumpDeps(rep, table));
-        return result;
+        if(getName().equals("")){
+            ArrayList<String> result = new ArrayList<>();
+            result.addAll(getDeps().dumpDeps(rep, table));
+            return result;
+        }else{
+            ArrayList<String> result = new ArrayList<>(Arrays.asList(
+    //                ""
+                    "type=" + table.desc2full(getDesc())+".class",
+                    "owner=" + table.fullClassName(getOwner())+".class",
+                    "name=\"" + getName() + "\""
+            ));
+            result.addAll(getDeps().dumpDeps(rep, table));
+            return result;
+        }
 	}
 }

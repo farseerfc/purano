@@ -104,52 +104,52 @@ public final @Data class DepSet {
 		return result;
 	}
 	
-	public boolean dependOnThis(@NotNull MethodRep rep) {
-		if( !rep.isStatic() &&
-			rep.getMethodNode().localVariables.size()>0 &&
-            getLocals().contains(0) ){
-			return true;
-		}
-		return false ;
-	}
-
-	public boolean dependOnlyLocal(@NotNull MethodRep rep) {
-		int argCount = rep.argCount();
-		
-		if(getStatics().size() > 0){
-			return false;
-		}
-		if(getFields().size() > 0){
-			return false;
-		}
-		for(int local : getLocals()){
-			if(local<argCount){
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	public boolean dependOnlyLocalArgs() {
-        return getStatics().size() <= 0 && getFields().size() <= 0;
-    }
-	
-	public boolean dependOnlyArgs(@NotNull MethodRep rep){
-        return dependOnlyLocalArgs() && !dependOnlyLocal(rep);
-    }
-
-    public boolean dependArgsAndFields (@NotNull MethodRep rep){
-        int argCount = rep.argCount();
-        for(int local : getLocals()){
-            if(local<argCount){
-                return false;
-            }
-        }
-        if(getStatics().size() > 0){
-            return false;
-        }
-        return true;
-    }
+//	private boolean dependOnThis(@NotNull MethodRep rep) {
+//		if( !rep.isStatic() &&
+//			rep.getMethodNode().localVariables.size()>0 &&
+//            getLocals().contains(0) ){
+//			return true;
+//		}
+//		return false ;
+//	}
+//
+//    private boolean dependOnlyLocal(@NotNull MethodRep rep) {
+//		int argCount = rep.argCount();
+//
+//		if(getStatics().size() > 0){
+//			return false;
+//		}
+//		if(getFields().size() > 0){
+//			return false;
+//		}
+//		for(int local : getLocals()){
+//			if(local<argCount){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
+//
+//    private boolean dependOnlyLocalArgs() {
+//        return getStatics().size() <= 0 && getFields().size() <= 0;
+//    }
+//
+//    private boolean dependOnlyArgs(@NotNull MethodRep rep){
+//        return dependOnlyLocalArgs() && !dependOnlyLocal(rep);
+//    }
+//
+//    private boolean dependArgsAndFields (@NotNull MethodRep rep){
+//        int argCount = rep.argCount();
+//        for(int local : getLocals()){
+//            if(local<argCount){
+//                return false;
+//            }
+//        }
+//        if(getStatics().size() > 0){
+//            return false;
+//        }
+//        return true;
+//    }
 
     public boolean isEmpty(){
         return statics.isEmpty() && fields.isEmpty() && locals.isEmpty();

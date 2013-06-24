@@ -168,11 +168,12 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws MalformedURLException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "jp.ac.osakau.farseerfc.purano.test"};
+//                "jp.ac.osakau.farseerfc.purano.test"};
 //        "org.htmlparser"};
         // "org.argouml"};
 //        "org.apache.catalina"};
 //        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm"};
+        "jp.ac.osakau.farseerfc.purano","java.lang.Object","java.lang.Comparable"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
