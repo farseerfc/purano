@@ -263,6 +263,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case IFLE:
         case TABLESWITCH:
         case LOOKUPSWITCH:
+            if(!method.getDesc().getReturnType().equals("void")){
+                effect.getReturnDep().getDeps().merge(value.getDeps());
+            }
         	return null;
         case IRETURN:
         case LRETURN:
@@ -430,6 +433,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case IF_ICMPLE:
         case IF_ACMPEQ:
         case IF_ACMPNE:
+            if(!method.getDesc().getReturnType().equals("void")){
+                effect.getReturnDep().getDeps().merge(value1.getDeps());
+                effect.getReturnDep().getDeps().merge(value2.getDeps());
+            }
         	return null;
         case PUTFIELD:{
             // v1.name = v2
@@ -642,10 +649,16 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             result.getLvalue().merge(values.get(rep.localToArgumentPos(arg)).getLvalue());
         }
 
-        if(!method.isStatic() && obj.getLvalue().isThis()){
-            for(FieldDep fd:ret.getLvalue().getFields()){
-                result.getLvalue().getFields().add(fd);
+        if(!method.isStatic() ){
+            if(obj.getLvalue().isThis()){
+                for(FieldDep fd:ret.getLvalue().getFields()){
+                    result.getLvalue().getFields().add(fd);
+                }
+                for(FieldDep fd:ret.getDeps().getFields()){
+                    result.getDeps().getFields().add(fd);
+                }
             }
+            result.getDeps().merge(obj.getDeps());
         }
 
         for(FieldDep fd:ret.getLvalue().getStatics()){

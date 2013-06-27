@@ -14,17 +14,14 @@ public class B extends Base {
 
     private int c;
 
-    public void setC(int c) {
-        this.c = c;
+    public static void setS(int i) {
+        s = i;
     }
 
     @Override
     public void change() {
+        setS(staticAdd());
         a.modifyM();
-    }
-
-    public void indirect(int a) {
-        setC(a);
     }
 
     public void changeArg(Base[] a) {
@@ -33,6 +30,10 @@ public class B extends Base {
 
     public int thisAdd(int a) {
         return a + c;
+    }
+
+    public int staticAdd(){
+        return s + c;
     }
 
 }

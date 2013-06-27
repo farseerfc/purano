@@ -21,7 +21,7 @@ public class ClassFinder {
     private @Getter List<Integer> changedMethodsTrace = new ArrayList<>();
     private @Getter List<Integer> loadedClassesTrace = new ArrayList<>();
 
-    private static final int MAX_LOAD_PASS = 3;
+    private static final int MAX_LOAD_PASS = 100;
 	
 	public ClassFinder(@NotNull Collection<String> prefix){
         findTargetClasses(prefix);
@@ -169,11 +169,11 @@ public class ClassFinder {
 		long start=System.currentTimeMillis();
         String targetPackage []={
 //                "jp.ac.osakau.farseerfc.purano.test"};
-//        "org.htmlparser"};
+//        "org.htmlparser","java.lang.Object"};
         // "org.argouml"};
-//        "org.apache.catalina"};
-//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm"};
-        "jp.ac.osakau.farseerfc.purano","java.lang.Object","java.lang.Comparable"};
+//        "org.apache.catalina","java.lang.Object"};
+        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
+//        "jp.ac.osakau.farseerfc.purano","java.lang"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
