@@ -647,6 +647,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                 throw new RuntimeException("Getting local beyond argument return lvalue ");
             }
             result.getLvalue().merge(values.get(rep.localToArgumentPos(arg)).getLvalue());
+            result.getDeps().merge(values.get(rep.localToArgumentPos(arg)).getDeps());
         }
 
         if(!method.isStatic() ){

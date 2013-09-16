@@ -9,21 +9,20 @@ import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.util.*;
 
 @Slf4j
 public class ClassFinder {
-	private @Getter final Map<String, ClassRep> classMap= new HashMap<>();
+	@Getter final Map<String, ClassRep> classMap= new HashMap<>();
 
-	private final Set<String> classTargets = new HashSet<>() ;
-    private final Collection<String> prefix;
-    private @Getter List<Integer> changedMethodsTrace = new ArrayList<>();
-    private @Getter List<Integer> loadedClassesTrace = new ArrayList<>();
+	final Set<String> classTargets = new HashSet<>() ;
+    final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 100;
-	
-	public ClassFinder(@NotNull Collection<String> prefix){
+    private static final int MAX_LOAD_PASS = 2;
+
+	public ClassFinder(@NotNull List<String> prefix){
         findTargetClasses(prefix);
         this.prefix=prefix;
 	}
@@ -39,8 +38,8 @@ public class ClassFinder {
 		int pass = 0;
         int changedMethod = 0;
 
-        changedMethodsTrace = new ArrayList<>();
-        loadedClassesTrace = new ArrayList<>();
+        List<Integer> changedMethodsTrace = new ArrayList<>();
+        List<Integer> loadedClassesTrace = new ArrayList<>();
 		do {
 			changed = false;
 			if(pass < MAX_LOAD_PASS){
@@ -79,6 +78,9 @@ public class ClassFinder {
 //                }
 //            }
 		} while (changed);
+
+        System.out.println("Loaded Classes: " + Joiner.on(", ").join(loadedClassesTrace));
+        System.out.println("Changed methods: "+Joiner.on(", ").join(changedMethodsTrace));
 	}
 	
 	private void findTargetClasses(@NotNull Collection<String> prefixes){
@@ -105,74 +107,14 @@ public class ClassFinder {
 	}
 
 
-    public void dump(@NotNull Types table){
-        int method = 0, unknown = 0, stateless = 0, stateful = 0, modifier =0 ;
-        int fieldM = 0, staticM = 0, argM = 0, nativeE = 0;
-        int classes = 0;
-
-		for(String clsName : classMap.keySet()){
-            boolean isTarget = classTargets.contains(clsName);
-            for(String p:prefix){
-                if(clsName.startsWith(p)){
-                    isTarget = true;
-                }
-            }
-            if (!isTarget) {
-                continue;
-            }
-            ClassRep cls = classMap.get(clsName);
-            System.out.println(Joiner.on("\n").join(cls.dump(table)));
-            for(MethodRep mtd: cls.getAllMethods()){
-                method++;
-                int p=mtd.purity();
-                if(p == Purity.Unknown){
-                    unknown ++;
-                }
-                if(p == Purity.Stateless){
-                    stateless ++;
-                }else if(p == Purity.Stateful){
-                    stateful ++;
-                }else{
-                    modifier ++;
-                }
-                if((p & Purity.ArgumentModifier)>0){
-                    argM ++;
-                }
-                if((p & Purity.FieldModifier)>0){
-                    fieldM ++;
-                }
-                if((p & Purity.StaticModifier)>0){
-                    staticM ++;
-                }
-                if((p & Purity.Native)>0){
-                    nativeE ++;
-                }
-            }
-            classes ++;
-        }
-
-        System.out.println(table.dumpImports());
-
-        System.out.println("class "+classes);
-        System.out.println("method "+method);
-        System.out.println("unknown "+unknown);
-        System.out.println("stateless "+stateless);
-        System.out.println("stateful "+stateful);
-        System.out.println("modifier "+modifier);
-        System.out.println("fieldM "+fieldM);
-        System.out.println("staticM "+staticM);
-        System.out.println("argM "+argM);
-        System.out.println("nativeE "+nativeE);
-	}
-
 	public static void main(@NotNull String [] argv) throws MalformedURLException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-//                "jp.ac.osakau.farseerfc.purano.test"};
-//        "org.htmlparser","java.lang.Object"};
+                "jp.ac.osakau.farseerfc.purano.test"};
+//        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
-        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
+//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
 //        "jp.ac.osakau.farseerfc.purano","java.lang"};
 		if(argv.length > 1){
 			targetPackage=argv;
@@ -180,13 +122,10 @@ public class ClassFinder {
 		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
 		cf.resolveMethods();
 
+//        ClassFinderDumpper dumpper = new StreamDumpper(System.out, cf);
+        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
+        dumpper.dump();
 
-        Types table = new Types(true, targetPackage[0]);
-//        Types table = new Types(false);
-        cf.dump(table);
-
-        System.out.println("Loaded Classes: " + Joiner.on(", ").join(cf.getLoadedClassesTrace()));
-        System.out.println("Changed methods: "+Joiner.on(", ").join(cf.getChangedMethodsTrace()));
         System.out.println("Runtime :"+(System.currentTimeMillis() - start));
 	}
 }
