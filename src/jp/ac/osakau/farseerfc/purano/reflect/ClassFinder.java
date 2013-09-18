@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.util.*;
@@ -60,7 +63,7 @@ public class ClassFinder {
 				}
 			}
             changedMethodsTrace.add(changedMethod);
-			System.out.println(String.format("Pass: %d Classes: %s Changed Method: %d [%s]",
+            log.info(String.format("Pass: %d Classes: %s Changed Method: %d [%s]",
                     pass++,allCreps.size(),changedMethod,
                     Joiner.on(", ").join(changedMethodsTrace)));
 //            final int maxdump=4;
@@ -79,8 +82,8 @@ public class ClassFinder {
 //            }
 		} while (changed);
 
-        System.out.println("Loaded Classes: " + Joiner.on(", ").join(loadedClassesTrace));
-        System.out.println("Changed methods: "+Joiner.on(", ").join(changedMethodsTrace));
+        log.info("Loaded Classes: " + Joiner.on(", ").join(loadedClassesTrace));
+        log.info("Changed methods: "+Joiner.on(", ").join(changedMethodsTrace));
 	}
 	
 	private void findTargetClasses(@NotNull Collection<String> prefixes){
@@ -107,7 +110,7 @@ public class ClassFinder {
 	}
 
 
-	public static void main(@NotNull String [] argv) throws MalformedURLException {
+	public static void main(@NotNull String [] argv) throws MalformedURLException, FileNotFoundException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
                 "jp.ac.osakau.farseerfc.purano.test"};
@@ -122,10 +125,13 @@ public class ClassFinder {
 		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
 		cf.resolveMethods();
 
-//        ClassFinderDumpper dumpper = new StreamDumpper(System.out, cf);
-        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
+//        ClassFinderDumpper dumpper = new DumyDumpper(); //new StreamDumpper(System.out, cf);
+//        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
+        File output = new File("/tmp/output");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new StreamDumpper(ps,cf);
         dumpper.dump();
 
-        System.out.println("Runtime :"+(System.currentTimeMillis() - start));
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
 	}
 }
