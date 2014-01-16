@@ -52,9 +52,26 @@ public class MethodRep extends MethodVisitor implements Purity {
 	private @Getter int access;
 
     private @Getter @Setter boolean needResolve;
+    private final Set<String> excludeSet = new HashSet<>(Arrays.asList(
+            "String#equals",
+            "String#hashCode",
+            "Map#hashCode",
+            "Set#hashCode",
+            "List#hashCode",
+            "Map#equals",
+            "Set#equals",
+            "List#equals",
+            "Object#equals",
+            "Object#hashCode",
+            "Map#keySet",
+            "Map#entrySet",
+            "Map#entrySet0",
+            "Map#navigableKeySet",
+            "Map#descendingKeySet"
+    ));
 
-	
-	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access){
+
+    public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access){
 		super(Opcodes.ASM4);
 		this.insnNode = methodInsnNode;
 		this.access = access;
@@ -201,10 +218,11 @@ public class MethodRep extends MethodVisitor implements Purity {
 //			log.info("Resolving {}",toString(new Types()));
 			
 			if(isAbstract){
-				// do nothing
 //				log.info("Meet Abstract {}",toString(new Types()));
+                needResolve = false;
 			}else if(isNative){
 				analyzeResult.getOtherEffects().add(new NativeEffect(null));
+                needResolve = false;
 			}else{
 				if(methodNode == null){
 					final MethodRep thisRep = this;
@@ -246,14 +264,32 @@ public class MethodRep extends MethodVisitor implements Purity {
 					}
 				}
 			}
-			
+
+            if(isExlucded()){
+                log.info("Meet excluded function "+getInsnNode().owner+"#"+getInsnNode().name);
+
+                analyzeResult.getThisField().clear();
+                analyzeResult.getOtherField().clear();
+                analyzeResult.getStaticField().clear();
+                analyzeResult.getOtherEffects().clear();
+                analyzeResult.getArgumentEffects().clear();
+            }
+
 			staticEffects.merge(analyzeResult, null);
 
 			for(MethodRep over:overrided.values()){
-				if(over.getDynamicEffects() != null){
+				if(over.getDynamicEffects() != null && ! over.isExlucded()){
 					analyzeResult.merge(over.getDynamicEffects(),over);
 				}
 			}
+
+            if(isExlucded()){
+                analyzeResult.getThisField().clear();
+                analyzeResult.getOtherField().clear();
+                analyzeResult.getStaticField().clear();
+                analyzeResult.getOtherEffects().clear();
+                analyzeResult.getArgumentEffects().clear();
+            }
 
             needResolve = false;
 
@@ -270,7 +306,7 @@ public class MethodRep extends MethodVisitor implements Purity {
                     methodRep.setNeedResolve(true);
                 }
 
-				return true;
+                return true;
 			}else{
 				this.resolveTimeStamp = newTimeStamp;
 				return false;
@@ -281,6 +317,18 @@ public class MethodRep extends MethodVisitor implements Purity {
 			throw new RuntimeException("Class not found :"+insnNode.owner,e);
 		}
 	}
+
+    private boolean isExlucded() {
+//        return false;
+        String id = getInsnNode().owner+"#"+getInsnNode().name;
+
+        for(String exclude : excludeSet){
+            if(id.endsWith(exclude)){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public boolean isNeedResolve(@NotNull final ClassFinder cf){
         return needResolve;
@@ -332,9 +380,9 @@ public class MethodRep extends MethodVisitor implements Purity {
             return Unknown;
         }
         int result = 0;
-        if(dynamicEffects.getOtherEffects().contains(new NativeEffect(null))){
-            result |= Native;
-        }
+//        if(dynamicEffects.getOtherEffects().contains(new NativeEffect(null))){
+//            result |= Native;
+//        }
         if(dynamicEffects.getStaticField().size()>0){
             result |= StaticModifier;
         }
@@ -344,7 +392,8 @@ public class MethodRep extends MethodVisitor implements Purity {
         if(dynamicEffects.getArgumentEffects().size()>0){
             result |= ArgumentModifier;
         }
-        if(dynamicEffects.getReturnDep().getDeps().getFields().size() >0){
+        if(dynamicEffects.getReturnDep().getDeps().getFields().size() >0 ||
+                dynamicEffects.getReturnDep().getDeps().dependOnThis(this))   {
             result |= Stateful;
         }else{
             result |= Stateless;

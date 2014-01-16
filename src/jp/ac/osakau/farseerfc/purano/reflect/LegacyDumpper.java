@@ -39,6 +39,7 @@ public class LegacyDumpper implements ClassFinderDumpper {
                     isTarget = true;
                 }
             }
+
             for(MethodRep mtd: cf.classMap.get(clsName).getAllMethods()){
                 int p=mtd.purity();
                 if(mtd.getInsnNode().name.equals("equals") && mtd.getInsnNode().desc.equals("(Ljava/lang/Object;)Z")){
@@ -91,9 +92,12 @@ public class LegacyDumpper implements ClassFinderDumpper {
                     }
                 }
             }
+
+
             if (!isTarget) {
                 continue;
             }
+
             ClassRep cls = cf.classMap.get(clsName);
             System.out.println(Joiner.on("\n").join(cls.dump(table)));
             for(MethodRep mtd: cls.getAllMethods()){
@@ -150,11 +154,11 @@ public class LegacyDumpper implements ClassFinderDumpper {
         System.out.println("esfn "+esfn);
         System.out.println("en "+en);
 
-        System.out.println("emethod "+hmethod);
-        System.out.println("eunknown "+hunknown);
-        System.out.println("estateless "+hstateless);
-        System.out.println("estateful "+hstateful);
-        System.out.println("emodifier "+hmodifier);
+        System.out.println("hmethod "+hmethod);
+        System.out.println("hunknown "+hunknown);
+        System.out.println("hstateless "+hstateless);
+        System.out.println("hstateful "+hstateful);
+        System.out.println("hmodifier "+hmodifier);
         System.out.println("hsln "+hsln);
         System.out.println("hsfn "+hsfn);
         System.out.println("hn "+hn);

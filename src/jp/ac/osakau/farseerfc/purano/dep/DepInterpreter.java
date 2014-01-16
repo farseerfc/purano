@@ -542,6 +542,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	if(classFinder == null ){
 			return addCallEffect(deps, callType, min);
     	}else{
+            DepEffect callEffect = null;
+
+            String className =  Types.binaryName2NormalName(min.owner);
+
     		MethodRep rep =  classFinder.loadClass(Types.binaryName2NormalName(min.owner))
     				.getMethodVirtual(new MethodRep(min, 0).getId());
     		
@@ -554,9 +558,6 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             if(!rep.getCalled().contains(method)){
                 rep.getCalled().add(method);
             }
-
-    		
-    		DepEffect callEffect = null;
 
             if(insn.getOpcode() == INVOKESPECIAL ||
                     insn.getOpcode() == INVOKESTATIC){
@@ -578,6 +579,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     private DepValue transitive(@NotNull List<? extends DepValue> values, @NotNull MethodRep rep, @NotNull DepEffect callEffect, DepSet deps) {
         DepValue result = new DepValue(Type.getType(rep.getInsnNode().desc).getReturnType());
         result.getDeps().merge(deps);
+
 
         if (rep.isNative()) {
             effect.getOtherEffects().add(new NativeEffect(rep));

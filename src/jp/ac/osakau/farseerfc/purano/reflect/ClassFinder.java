@@ -1,8 +1,6 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Joiner;
-import jp.ac.osakau.farseerfc.purano.ano.Purity;
-import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -113,12 +111,13 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws MalformedURLException, FileNotFoundException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "jp.ac.osakau.farseerfc.purano.test"};
-//        "org.htmlparser","java.lang.Object"dolphin };
-        // "org.argouml"};
-//        "org.apache.catalina","java.lang.Object"};
-//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
-//        "jp.ac.osakau.farseerfc.purano","java.lang"};
+                "jolden.treeadd"};
+//                "jp.ac.osakau.farseerfc.purano.test"};
+//        "org.htmlparser"};
+//        "org.argouml"};
+//        "org.apache.catalina"};
+//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm"};
+//        "jp.ac.osakau.farseerfc.purano","java.lang","java.util"};
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
@@ -126,10 +125,10 @@ public class ClassFinder {
 		cf.resolveMethods();
 
 //        ClassFinderDumpper dumpper = new DumyDumpper(); //new StreamDumpper(System.out, cf);
-//        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
-        File output = new File("/tmp/output");
-        PrintStream ps = new PrintStream(new FileOutputStream(output));
-        ClassFinderDumpper dumpper = new StreamDumpper(ps,cf);
+        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
+//        File output = new File("/tmp/output");
+//        PrintStream ps = new PrintStream(new FileOutputStream(output));
+//        ClassFinderDumpper dumpper = new StreamDumpper(ps,cf);
         dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));

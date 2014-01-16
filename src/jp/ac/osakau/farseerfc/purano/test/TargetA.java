@@ -3,6 +3,8 @@ package jp.ac.osakau.farseerfc.purano.test;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Method;
+
 public class TargetA extends TargetC implements TargetInterface {
     private int c;
     private int[] ma;
@@ -120,5 +122,6 @@ public class TargetA extends TargetC implements TargetInterface {
 
     public void passByLocalAndArg() {
         passByLocal(exposeMember());
+        Method m;
     }
 }
