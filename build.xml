@@ -58,51 +58,16 @@
     <include name="**/?*.ftl"/>
   </patternset>
   
-  <!-- JDK definitions -->
-  
-  <property name="jdk.bin.1.7" value="${jdk.home.1.7}/bin"/>
-  <path id="jdk.classpath.1.7">
-    <fileset dir="${jdk.home.1.7}">
-      <include name="jre/lib/jfxrt.jar"/>
-      <include name="jre/lib/jce.jar"/>
-      <include name="jre/lib/jfr.jar"/>
-      <include name="jre/lib/javaws.jar"/>
-      <include name="jre/lib/rt.jar"/>
-      <include name="jre/lib/resources.jar"/>
-      <include name="jre/lib/management-agent.jar"/>
-      <include name="jre/lib/jsse.jar"/>
-      <include name="jre/lib/charsets.jar"/>
-      <include name="jre/lib/deploy.jar"/>
-      <include name="jre/lib/plugin.jar"/>
-      <include name="jre/lib/ext/sunjce_provider.jar"/>
-      <include name="jre/lib/ext/sunec.jar"/>
-      <include name="jre/lib/ext/localedata.jar"/>
-      <include name="jre/lib/ext/zipfs.jar"/>
-      <include name="jre/lib/ext/sunpkcs11.jar"/>
-      <include name="jre/lib/ext/dnsns.jar"/>
-    </fileset>
-  </path>
-  
-  <property name="project.jdk.home" value="${jdk.home.1.7}"/>
-  <property name="project.jdk.bin" value="${jdk.bin.1.7}"/>
-  <property name="project.jdk.classpath" value="jdk.classpath.1.7"/>
-  
   
   <!-- Project Libraries -->
   
   <path id="library.lib.classpath">
-    <pathelement location="${basedir}/lib/annotations.jar"/>
-    <pathelement location="${basedir}/lib/commons-lang3-3.1.jar"/>
-    <pathelement location="${basedir}/lib/guava-13.0.1.jar"/>
-    <pathelement location="${basedir}/lib/hamcrest-core-1.3.jar"/>
-    <pathelement location="${basedir}/lib/javassist.jar"/>
-    <pathelement location="${basedir}/lib/jsr305.jar"/>
-    <pathelement location="${basedir}/lib/junit-4.11.jar"/>
-    <pathelement location="${basedir}/lib/lombok.jar"/>
-    <pathelement location="${basedir}/lib/reflections-0.9.9-RC1-uberjar.jar"/>
-    <pathelement location="${basedir}/lib/reflections-0.9.9-RC1.jar"/>
-    <pathelement location="${basedir}/lib/slf4j-api-1.7.5.jar"/>
-    <pathelement location="${basedir}/lib/slf4j-simple-1.7.5.jar"/>
+    <fileset dir="${basedir}/lib">
+      <patternset refid="library.patterns"/>
+    </fileset>
+    <fileset dir="${basedir}/lib/target">
+      <patternset refid="library.patterns"/>
+    </fileset>
   </path>
   
   <!-- Modules -->
@@ -113,21 +78,17 @@
   <dirname property="module.purano.basedir" file="${ant.file}"/>
   
   
-  <property name="module.jdk.home.purano" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.purano" value="${project.jdk.bin}"/>
-  <property name="module.jdk.classpath.purano" value="${project.jdk.classpath}"/>
   
   <property name="compiler.args.purano" value="${compiler.args}"/>
   
-  <property name="purano.output.dir" value="${module.purano.basedir}/bin"/>
-  <property name="purano.testoutput.dir" value="${module.purano.basedir}/bin"/>
+  <property name="purano.output.dir" value="${module.purano.basedir}/out/production/purano"/>
+  <property name="purano.testoutput.dir" value="${module.purano.basedir}/out/test/purano"/>
   
   <path id="purano.module.bootclasspath">
     <!-- Paths to be included in compilation bootclasspath -->
   </path>
   
   <path id="purano.module.production.classpath">
-    <path refid="${module.jdk.classpath.purano}"/>
     <path refid="library.lib.classpath"/>
   </path>
   
@@ -137,12 +98,12 @@
   </path>
   
   <path id="purano.module.classpath">
-    <path refid="${module.jdk.classpath.purano}"/>
     <pathelement location="${purano.output.dir}"/>
     <path refid="library.lib.classpath"/>
   </path>
   
   <path id="purano.runtime.module.classpath">
+    <pathelement location="${purano.testoutput.dir}"/>
     <pathelement location="${purano.output.dir}"/>
     <path refid="library.lib.classpath"/>
   </path>
@@ -167,7 +128,7 @@
   
   <target name="compile.module.purano.production" description="Compile module purano; production classes">
     <mkdir dir="${purano.output.dir}"/>
-    <javac destdir="${purano.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.purano}/javac">
+    <javac destdir="${purano.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.purano}"/>
       <bootclasspath refid="purano.module.bootclasspath"/>
       <classpath refid="purano.module.production.classpath"/>

@@ -22,7 +22,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 100;
+    private static int MAX_LOAD_PASS = 100;
 
 	public ClassFinder(@NotNull List<String> prefix){
         findTargetClasses(prefix);
@@ -108,27 +108,14 @@ public class ClassFinder {
 		return classMap.get(classname);
 	}
 
-    public static void analysis() throws MalformedURLException, FileNotFoundException{
+    public static void analysis(String [] targetPackage) throws MalformedURLException, FileNotFoundException{
         long start=System.currentTimeMillis();
-        String targetPackage []={
-                "jolden.treeadd"};
-//                "jp.ac.osakau.farseerfc.purano.test"};
-//        "org.htmlparser"};
-//        "org.argouml"};
-//        "org.apache.catalina"};
-//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm"};
-//        "jp.ac.osakau.farseerfc.purano","java.lang","java.util"};
-//        if(argv.length > 1){
-//            targetPackage=argv;
-//        }
+
         ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
         cf.resolveMethods();
 
-//        ClassFinderDumpper dumpper = new DumyDumpper(); //new StreamDumpper(System.out, cf);
         ClassFinderDumpper dumpper = new LegacyDumpper(cf);
-//        File output = new File("/tmp/output");
-//        PrintStream ps = new PrintStream(new FileOutputStream(output));
-//        ClassFinderDumpper dumpper = new StreamDumpper(ps,cf);
+
         dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));
@@ -139,18 +126,32 @@ public class ClassFinder {
 
         Parameter outputOp = new FlaggedOption("output")
                 .setStringParser(JSAP.STRING_PARSER)
-                .setRequired(true)
+                .setRequired(false)
                 .setShortFlag('o')
                 .setLongFlag("output")
                 .setHelp("output file path. Default to stdout.");
 
-        Parameter helpOp = new FlaggedOption("help")
-                .setRequired(false)
+        Parameter helpOp = new Switch("help")
                 .setShortFlag('h')
                 .setLongFlag("help")
                 .setHelp("Show help and usage.");
 
+        Parameter loadPassOp = new FlaggedOption("maxLoadPass")
+                .setShortFlag('p')
+                .setLongFlag("max-pass")
+                .setStringParser(JSAP.INTEGER_PARSER)
+                .setDefault("100")
+                .setHelp("Max pass number of loading class.");
+
+        Parameter targetOp = new UnflaggedOption("targetPackage")
+                .setRequired(true)
+                .setGreedy(true)
+                .setHelp("Target packages to be analyzed. Full qualified package name is required, eg. \"org.apache\"");
+
         jsap.registerParameter(outputOp);
+        jsap.registerParameter(helpOp);
+        jsap.registerParameter(loadPassOp);
+        jsap.registerParameter(targetOp);
 
         JSAPResult config = jsap.parse(args);
 
@@ -164,17 +165,19 @@ public class ClassFinder {
             }
 
             System.err.println();
-            System.err.println("Usage: java "
-                    + ClassFinder.class.getName());
-            System.err.println("                "
-                    + jsap.getUsage());
+            System.err.println("Usage: java " + ClassFinder.class.getName());
+            System.err.println("                " + jsap.getUsage());
             System.err.println();
             System.err.println(jsap.getHelp());
             System.exit(config.success()?0:1);
         }
 
+        MAX_LOAD_PASS = config.getInt("maxLoadPass");
+        if(MAX_LOAD_PASS <=0 ){
+            System.err.println("Max-pass smaller than 0!");
+            System.exit(1);
+        }
 
-
-
+        analysis(config.getStringArray("targetPackage"));
     }
 }
