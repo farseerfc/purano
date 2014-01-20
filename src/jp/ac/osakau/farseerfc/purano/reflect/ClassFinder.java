@@ -1,6 +1,7 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Joiner;
+import com.martiansoftware.jsap.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 2;
+    private static final int MAX_LOAD_PASS = 100;
 
 	public ClassFinder(@NotNull List<String> prefix){
         findTargetClasses(prefix);
@@ -107,9 +108,8 @@ public class ClassFinder {
 		return classMap.get(classname);
 	}
 
-
-	public static void main(@NotNull String [] argv) throws MalformedURLException, FileNotFoundException {
-		long start=System.currentTimeMillis();
+    public static void analysis() throws MalformedURLException, FileNotFoundException{
+        long start=System.currentTimeMillis();
         String targetPackage []={
                 "jolden.treeadd"};
 //                "jp.ac.osakau.farseerfc.purano.test"};
@@ -118,11 +118,11 @@ public class ClassFinder {
 //        "org.apache.catalina"};
 //        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm"};
 //        "jp.ac.osakau.farseerfc.purano","java.lang","java.util"};
-		if(argv.length > 1){
-			targetPackage=argv;
-		}
-		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
-		cf.resolveMethods();
+//        if(argv.length > 1){
+//            targetPackage=argv;
+//        }
+        ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
+        cf.resolveMethods();
 
 //        ClassFinderDumpper dumpper = new DumyDumpper(); //new StreamDumpper(System.out, cf);
         ClassFinderDumpper dumpper = new LegacyDumpper(cf);
@@ -132,5 +132,49 @@ public class ClassFinder {
         dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));
-	}
+    }
+
+	public static void main(@NotNull String [] args) throws MalformedURLException, FileNotFoundException, JSAPException {
+        JSAP jsap = new JSAP();
+
+        Parameter outputOp = new FlaggedOption("output")
+                .setStringParser(JSAP.STRING_PARSER)
+                .setRequired(true)
+                .setShortFlag('o')
+                .setLongFlag("output")
+                .setHelp("output file path. Default to stdout.");
+
+        Parameter helpOp = new FlaggedOption("help")
+                .setRequired(false)
+                .setShortFlag('h')
+                .setLongFlag("help")
+                .setHelp("Show help and usage.");
+
+        jsap.registerParameter(outputOp);
+
+        JSAPResult config = jsap.parse(args);
+
+        if (!config.success() || config.getBoolean("help")) {
+            // print out specific error messages describing the problems
+            // with the command line, THEN print usage, THEN print full
+            // help.  This is called "beating the user with a clue stick."
+            for (java.util.Iterator errs = config.getErrorMessageIterator();
+                 errs.hasNext();) {
+                System.err.println("Error: " + errs.next());
+            }
+
+            System.err.println();
+            System.err.println("Usage: java "
+                    + ClassFinder.class.getName());
+            System.err.println("                "
+                    + jsap.getUsage());
+            System.err.println();
+            System.err.println(jsap.getHelp());
+            System.exit(config.success()?0:1);
+        }
+
+
+
+
+    }
 }
