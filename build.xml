@@ -65,9 +65,6 @@
     <fileset dir="${basedir}/lib">
       <patternset refid="library.patterns"/>
     </fileset>
-    <fileset dir="${basedir}/lib/target">
-      <patternset refid="library.patterns"/>
-    </fileset>
   </path>
   
   <!-- Modules -->
