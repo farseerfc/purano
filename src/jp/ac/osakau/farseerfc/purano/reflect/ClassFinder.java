@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -108,13 +107,14 @@ public class ClassFinder {
 		return classMap.get(classname);
 	}
 
-    public static void analysis(String [] targetPackage) throws MalformedURLException, FileNotFoundException{
+    public static void analysis(String [] targetPackage,PrintStream out) throws MalformedURLException, FileNotFoundException{
         long start=System.currentTimeMillis();
 
         ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
         cf.resolveMethods();
 
         ClassFinderDumpper dumpper = new LegacyDumpper(cf);
+//        ClassFinderDumpper dumpper = new StreamDumpper(out,cf);
 
         dumpper.dump();
 
@@ -156,12 +156,11 @@ public class ClassFinder {
         JSAPResult config = jsap.parse(args);
 
         if (!config.success() || config.getBoolean("help")) {
-            // print out specific error messages describing the problems
-            // with the command line, THEN print usage, THEN print full
-            // help.  This is called "beating the user with a clue stick."
-            for (java.util.Iterator errs = config.getErrorMessageIterator();
-                 errs.hasNext();) {
-                System.err.println("Error: " + errs.next());
+            if(!config.getBoolean("help")){
+                for (java.util.Iterator errs = config.getErrorMessageIterator();
+                     errs.hasNext();) {
+                    System.err.println("Error: " + errs.next());
+                }
             }
 
             System.err.println();
@@ -178,6 +177,13 @@ public class ClassFinder {
             System.exit(1);
         }
 
-        analysis(config.getStringArray("targetPackage"));
+        PrintStream out ;
+        if(config.getString("output")==null || config.getString("output").isEmpty()){
+            out = System.out;
+        }else{
+            out = new PrintStream(new FileOutputStream(config.getString("output")));
+        }
+
+        analysis(config.getStringArray("targetPackage"),out);
     }
 }
