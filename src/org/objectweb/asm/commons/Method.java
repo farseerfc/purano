@@ -29,11 +29,10 @@
  */
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.Type;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.objectweb.asm.Type;
 
 /**
  * A named method descriptor.
@@ -57,7 +56,6 @@ public class Method {
     /**
      * Maps primitive Java type names to their descriptors.
      */
-    @NotNull
     private static final Map<String, String> DESCRIPTORS;
 
     static {
@@ -96,7 +94,7 @@ public class Method {
      * @param argumentTypes
      *            the method's argument types.
      */
-    public Method(final String name, @NotNull final Type returnType,
+    public Method(final String name, final Type returnType,
             final Type[] argumentTypes) {
         this(name, Type.getMethodDescriptor(returnType, argumentTypes));
     }
@@ -109,8 +107,7 @@ public class Method {
      * @return a {@link Method} corresponding to the given Java method
      *         declaration.
      */
-    @NotNull
-    public static Method getMethod(@NotNull java.lang.reflect.Method m) {
+    public static Method getMethod(java.lang.reflect.Method m) {
         return new Method(m.getName(), Type.getMethodDescriptor(m));
     }
 
@@ -122,8 +119,7 @@ public class Method {
      * @return a {@link Method} corresponding to the given Java constructor
      *         declaration.
      */
-    @NotNull
-    public static Method getMethod(@NotNull java.lang.reflect.Constructor<?> c) {
+    public static Method getMethod(java.lang.reflect.Constructor<?> c) {
         return new Method("<init>", Type.getConstructorDescriptor(c));
     }
 
@@ -143,8 +139,7 @@ public class Method {
      * @throws IllegalArgumentException
      *             if <code>method</code> could not get parsed.
      */
-    @NotNull
-    public static Method getMethod(@NotNull final String method)
+    public static Method getMethod(final String method)
             throws IllegalArgumentException {
         return getMethod(method, false);
     }
@@ -171,8 +166,7 @@ public class Method {
      * @throws IllegalArgumentException
      *             if <code>method</code> could not get parsed.
      */
-    @NotNull
-    public static Method getMethod(@NotNull final String method,
+    public static Method getMethod(final String method,
             final boolean defaultPackage) throws IllegalArgumentException {
         int space = method.indexOf(' ');
         int start = method.indexOf('(', space) + 1;
@@ -201,8 +195,7 @@ public class Method {
         return new Method(methodName, sb.toString());
     }
 
-    @NotNull
-    private static String map(@NotNull final String type, final boolean defaultPackage) {
+    private static String map(final String type, final boolean defaultPackage) {
         if ("".equals(type)) {
             return type;
         }
@@ -255,7 +248,6 @@ public class Method {
      * 
      * @return the return type of the method described by this object.
      */
-    @NotNull
     public Type getReturnType() {
         return Type.getReturnType(desc);
     }
@@ -265,12 +257,10 @@ public class Method {
      * 
      * @return the argument types of the method described by this object.
      */
-    @NotNull
     public Type[] getArgumentTypes() {
         return Type.getArgumentTypes(desc);
     }
 
-    @NotNull
     @Override
     public String toString() {
         return name + desc;

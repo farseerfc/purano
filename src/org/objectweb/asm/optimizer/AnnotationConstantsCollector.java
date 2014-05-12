@@ -29,8 +29,6 @@
  */
 package org.objectweb.asm.optimizer;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -47,12 +45,12 @@ public class AnnotationConstantsCollector extends AnnotationVisitor {
 
     public AnnotationConstantsCollector(final AnnotationVisitor av,
             final ConstantPool cp) {
-        super(Opcodes.ASM4, av);
+        super(Opcodes.ASM5, av);
         this.cp = cp;
     }
 
     @Override
-    public void visit(@Nullable final String name, final Object value) {
+    public void visit(final String name, final Object value) {
         if (name != null) {
             cp.newUTF8(name);
         }
@@ -113,8 +111,8 @@ public class AnnotationConstantsCollector extends AnnotationVisitor {
     }
 
     @Override
-    public void visitEnum(@Nullable final String name, @NotNull final String desc,
-            @NotNull final String value) {
+    public void visitEnum(final String name, final String desc,
+            final String value) {
         if (name != null) {
             cp.newUTF8(name);
         }
@@ -123,10 +121,9 @@ public class AnnotationConstantsCollector extends AnnotationVisitor {
         av.visitEnum(name, desc, value);
     }
 
-    @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(@Nullable final String name,
-            @NotNull final String desc) {
+    public AnnotationVisitor visitAnnotation(final String name,
+            final String desc) {
         if (name != null) {
             cp.newUTF8(name);
         }
@@ -135,9 +132,8 @@ public class AnnotationConstantsCollector extends AnnotationVisitor {
                 cp);
     }
 
-    @NotNull
     @Override
-    public AnnotationVisitor visitArray(@Nullable final String name) {
+    public AnnotationVisitor visitArray(final String name) {
         if (name != null) {
             cp.newUTF8(name);
         }

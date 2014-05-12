@@ -30,7 +30,6 @@
 
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -49,7 +48,7 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
 
     public RemappingSignatureAdapter(final SignatureVisitor v,
             final Remapper remapper) {
-        this(Opcodes.ASM4, v, remapper);
+        this(Opcodes.ASM5, v, remapper);
     }
 
     protected RemappingSignatureAdapter(final int api,
@@ -67,10 +66,12 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
 
     @Override
     public void visitInnerClassType(String name) {
+        String remappedOuter = remapper.mapType(className) + '$';
         className = className + '$' + name;
         String remappedName = remapper.mapType(className);
-        v.visitInnerClassType(remappedName.substring(remappedName
-                .lastIndexOf('$') + 1));
+        int index = remappedName.startsWith(remappedOuter) ? remappedOuter
+                .length() : remappedName.lastIndexOf('$') + 1;
+        v.visitInnerClassType(remappedName.substring(index));
     }
 
     @Override
@@ -83,7 +84,6 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
         v.visitTypeVariable(name);
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitArrayType() {
         v.visitArrayType();
@@ -95,49 +95,42 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
         v.visitBaseType(descriptor);
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitClassBound() {
         v.visitClassBound();
         return this;
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitExceptionType() {
         v.visitExceptionType();
         return this;
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitInterface() {
         v.visitInterface();
         return this;
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitInterfaceBound() {
         v.visitInterfaceBound();
         return this;
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitParameterType() {
         v.visitParameterType();
         return this;
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitReturnType() {
         v.visitReturnType();
         return this;
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitSuperclass() {
         v.visitSuperclass();
@@ -149,7 +142,6 @@ public class RemappingSignatureAdapter extends SignatureVisitor {
         v.visitTypeArgument();
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitTypeArgument(char wildcard) {
         v.visitTypeArgument(wildcard);

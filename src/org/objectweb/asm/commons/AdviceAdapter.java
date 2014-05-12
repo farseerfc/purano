@@ -29,13 +29,16 @@
  */
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * A {@link org.objectweb.asm.MethodVisitor} to insert before, after and around
@@ -80,7 +83,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param mv
      *            the method visitor to which this adapter delegates calls.
      * @param access
@@ -337,7 +340,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner,
-            final String name, @NotNull final String desc) {
+            final String name, final String desc) {
         mv.visitFieldInsn(opcode, owner, name, desc);
         if (constructor) {
             char c = desc.charAt(0);
@@ -410,10 +413,31 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
+    @Deprecated
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-            final String name, @NotNull final String desc) {
-        mv.visitMethodInsn(opcode, owner, name, desc);
+            final String name, final String desc) {
+        if (api >= Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc,
+                opcode == Opcodes.INVOKEINTERFACE);
+    }
+
+    @Override
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc, itf);
+    }
+
+    private void doVisitMethodInsn(int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
+        mv.visitMethodInsn(opcode, owner, name, desc, itf);
         if (constructor) {
             Type[] types = Type.getArgumentTypes(desc);
             for (int i = 0; i < types.length; i++) {
@@ -452,7 +476,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, @NotNull String desc, Handle bsm,
+    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
             Object... bsmArgs) {
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
         if (constructor) {
@@ -510,7 +534,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
 
     @Override
     public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            @NotNull final Label[] labels) {
+            final Label[] labels) {
         mv.visitLookupSwitchInsn(dflt, keys, labels);
         if (constructor) {
             popValue();
@@ -520,7 +544,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, @NotNull final Label... labels) {
+            final Label dflt, final Label... labels) {
         mv.visitTableSwitchInsn(min, max, dflt, labels);
         if (constructor) {
             popValue();
@@ -539,7 +563,7 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
         }
     }
 
-    private void addBranches(final Label dflt, @NotNull final Label[] labels) {
+    private void addBranches(final Label dflt, final Label[] labels) {
         addBranch(dflt);
         for (int i = 0; i < labels.length; i++) {
             addBranch(labels[i]);

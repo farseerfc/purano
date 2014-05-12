@@ -32,7 +32,7 @@ public class ClassRep extends ClassVisitor {
 //	private final @Getter Class<? extends Object> reflect;
 
 	public ClassRep(@NotNull String className, ClassFinder cf){
-		super(Opcodes.ASM4);
+		super(Opcodes.ASM5);
 		this.name = className;
 //		try {
 //			cls = Class.forName(className);

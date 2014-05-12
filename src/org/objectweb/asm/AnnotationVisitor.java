@@ -29,8 +29,6 @@
  */
 package org.objectweb.asm;
 
-import org.jetbrains.annotations.Nullable;
-
 /**
  * A visitor to visit a Java annotation. The methods of this class must be
  * called in the following order: ( <tt>visit</tt> | <tt>visitEnum</tt> |
@@ -43,7 +41,7 @@ public abstract class AnnotationVisitor {
 
     /**
      * The ASM API version implemented by this visitor. The value of this field
-     * must be one of {@link Opcodes#ASM4}.
+     * must be one of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      */
     protected final int api;
 
@@ -58,7 +56,7 @@ public abstract class AnnotationVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      */
     public AnnotationVisitor(final int api) {
         this(api, null);
@@ -69,13 +67,13 @@ public abstract class AnnotationVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param av
      *            the annotation visitor to which this visitor must delegate
      *            method calls. May be null.
      */
     public AnnotationVisitor(final int api, final AnnotationVisitor av) {
-        if (api != Opcodes.ASM4) {
+        if (api != Opcodes.ASM4 && api != Opcodes.ASM5) {
             throw new IllegalArgumentException();
         }
         this.api = api;
@@ -132,7 +130,6 @@ public abstract class AnnotationVisitor {
      *         visited before calling other methods on this annotation
      *         visitor</i>.
      */
-    @Nullable
     public AnnotationVisitor visitAnnotation(String name, String desc) {
         if (av != null) {
             return av.visitAnnotation(name, desc);
@@ -154,7 +151,6 @@ public abstract class AnnotationVisitor {
      *         visitor are ignored. <i>All the array values must be visited
      *         before calling other methods on this annotation visitor</i>.
      */
-    @Nullable
     public AnnotationVisitor visitArray(String name) {
         if (av != null) {
             return av.visitArray(name);

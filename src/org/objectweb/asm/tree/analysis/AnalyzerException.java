@@ -29,7 +29,6 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
 /**
@@ -53,7 +52,7 @@ public class AnalyzerException extends Exception {
         this.node = node;
     }
 
-    public AnalyzerException(final AbstractInsnNode node, @Nullable final String msg,
+    public AnalyzerException(final AbstractInsnNode node, final String msg,
             final Object expected, final Value encountered) {
         super((msg == null ? "Expected " : msg + ": expected ") + expected
                 + ", but found " + encountered);

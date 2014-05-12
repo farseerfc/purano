@@ -29,26 +29,42 @@
  */
 package org.objectweb.asm.xml;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.xml.sax.*;
-import org.xml.sax.ext.LexicalHandler;
-import org.xml.sax.helpers.AttributesImpl;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
-import javax.xml.transform.*;
+import javax.xml.transform.Source;
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.ext.LexicalHandler;
+import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * Processor is a command line tool that can be used for bytecode waving
@@ -214,7 +230,7 @@ public class Processor {
         return i;
     }
 
-    private void copyEntry(@NotNull final InputStream is, @NotNull final OutputStream os)
+    private void copyEntry(final InputStream is, final OutputStream os)
             throws IOException {
         if (outRepresentation == SINGLE_XML) {
             return;
@@ -227,14 +243,14 @@ public class Processor {
         }
     }
 
-    private boolean isClassEntry(@NotNull final ZipEntry ze) {
+    private boolean isClassEntry(final ZipEntry ze) {
         String name = ze.getName();
         return inRepresentation == SINGLE_XML && name.equals(SINGLE_XML_NAME)
                 || name.endsWith(".class") || name.endsWith(".class.xml");
     }
 
-    private void processEntry(@NotNull final ZipInputStream zis, @NotNull final ZipEntry ze,
-            @NotNull final ContentHandlerFactory handlerFactory) {
+    private void processEntry(final ZipInputStream zis, final ZipEntry ze,
+            final ContentHandlerFactory handlerFactory) {
         ContentHandler handler = handlerFactory.createContentHandler();
         try {
 
@@ -266,7 +282,6 @@ public class Processor {
         }
     }
 
-    @NotNull
     private EntryElement getEntryElement(final ZipOutputStream zos) {
         if (outRepresentation == SINGLE_XML) {
             return new SingleDocElement(zos);
@@ -304,7 +319,7 @@ public class Processor {
     // return factory;
     // }
 
-    private String getName(@NotNull final ZipEntry ze) {
+    private String getName(final ZipEntry ze) {
         String name = ze.getName();
         if (isClassEntry(ze)) {
             if (inRepresentation != BYTECODE && outRepresentation == BYTECODE) {
@@ -320,7 +335,7 @@ public class Processor {
         return name;
     }
 
-    private static byte[] readEntry(@NotNull final InputStream zis, @NotNull final ZipEntry ze)
+    private static byte[] readEntry(final InputStream zis, final ZipEntry ze)
             throws IOException {
         long size = ze.getSize();
         if (size > -1) {
@@ -357,7 +372,7 @@ public class Processor {
         }
     }
 
-    public static void main(@NotNull final String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         if (args.length < 2) {
             showUsage();
             return;
@@ -490,7 +505,6 @@ public class Processor {
             this.optimizeEmptyElements = optimizeEmptyElements;
         }
 
-        @NotNull
         public final ContentHandler createContentHandler() {
             return new SAXWriter(w, optimizeEmptyElements);
         }
@@ -508,7 +522,6 @@ public class Processor {
             this.os = os;
         }
 
-        @NotNull
         public final ContentHandler createContentHandler() {
             final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             return new ASMContentHandler(cw) {
@@ -609,7 +622,7 @@ public class Processor {
 
         @Override
         public final void startElement(final String ns, final String localName,
-                final String qName, @Nullable final Attributes atts) throws SAXException {
+                final String qName, final Attributes atts) throws SAXException {
             try {
                 closeElement();
 
@@ -697,7 +710,7 @@ public class Processor {
         public final void endCDATA() throws SAXException {
         }
 
-        private final void writeAttributes(@NotNull final Attributes atts)
+        private final void writeAttributes(final Attributes atts)
                 throws IOException {
             StringBuffer sb = new StringBuffer();
             int len = atts.getLength();
@@ -715,8 +728,7 @@ public class Processor {
          *            string to encode.
          * @return encoded string
          */
-        @NotNull
-        private static final String esc(@NotNull final String str) {
+        private static final String esc(final String str) {
             StringBuffer sb = new StringBuffer(str.length());
             for (int i = 0; i < str.length(); i++) {
                 char ch = str.charAt(i);
@@ -817,7 +829,7 @@ public class Processor {
 
         @Override
         public final void startElement(final String namespaceURI,
-                @NotNull final String localName, final String qName,
+                final String localName, final String qName,
                 final Attributes list) throws SAXException {
             if (subdocument) {
                 subdocumentHandler.startElement(namespaceURI, localName, qName,
@@ -836,7 +848,7 @@ public class Processor {
 
         @Override
         public final void endElement(final String namespaceURI,
-                @NotNull final String localName, final String qName) throws SAXException {
+                final String localName, final String qName) throws SAXException {
             if (subdocument) {
                 subdocumentHandler.endElement(namespaceURI, localName, qName);
                 if (localName.equals(subdocumentRoot)) {
@@ -887,7 +899,6 @@ public class Processor {
      * TODO use complete path for subdocumentRoot
      */
     private static final class OutputSlicingHandler extends DefaultHandler {
-        @NotNull
         private final String subdocumentRoot;
 
         private ContentHandlerFactory subdocumentHandlerFactory;
@@ -924,8 +935,8 @@ public class Processor {
 
         @Override
         public final void startElement(final String namespaceURI,
-                @NotNull final String localName, final String qName,
-                @NotNull final Attributes list) throws SAXException {
+                final String localName, final String qName,
+                final Attributes list) throws SAXException {
             if (subdocument) {
                 subdocumentHandler.startElement(namespaceURI, localName, qName,
                         list);
@@ -952,7 +963,7 @@ public class Processor {
 
         @Override
         public final void endElement(final String namespaceURI,
-                @NotNull final String localName, final String qName) throws SAXException {
+                final String localName, final String qName) throws SAXException {
             if (subdocument) {
                 subdocumentHandler.endElement(namespaceURI, localName, qName);
                 if (localName.equals(subdocumentRoot)) {

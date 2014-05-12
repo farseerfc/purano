@@ -29,9 +29,6 @@
  */
 package org.objectweb.asm;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * A {@link MethodVisitor} that generates methods in bytecode form. Each visit
  * method of this class appends the bytecode corresponding to the visited
@@ -46,7 +43,7 @@ class MethodWriter extends MethodVisitor {
      * Pseudo access flag used to denote constructors.
      */
     static final int ACC_CONSTRUCTOR = 0x80000;
-    
+
     /**
      * Frame has exactly the same locals as the previous stack map frame and
      * number of stack items is zero.
@@ -122,7 +119,6 @@ class MethodWriter extends MethodVisitor {
     /**
      * The class writer to which this method must be added.
      */
-    @NotNull
     final ClassWriter cw;
 
     /**
@@ -145,7 +141,6 @@ class MethodWriter extends MethodVisitor {
     /**
      * The descriptor of this method.
      */
-    @NotNull
     private final String descriptor;
 
     /**
@@ -197,6 +192,18 @@ class MethodWriter extends MethodVisitor {
     private AnnotationWriter ianns;
 
     /**
+     * The runtime visible type annotations of this method. May be <tt>null</tt>
+     * .
+     */
+    private AnnotationWriter tanns;
+
+    /**
+     * The runtime invisible type annotations of this method. May be
+     * <tt>null</tt>.
+     */
+    private AnnotationWriter itanns;
+
+    /**
      * The runtime visible parameter annotations of this method. May be
      * <tt>null</tt>.
      */
@@ -221,7 +228,6 @@ class MethodWriter extends MethodVisitor {
     /**
      * The bytecode of this method.
      */
-    @NotNull
     private ByteVector code = new ByteVector();
 
     /**
@@ -247,7 +253,6 @@ class MethodWriter extends MethodVisitor {
     /**
      * The StackMapTable attribute.
      */
-    @Nullable
     private ByteVector stackMap;
 
     /**
@@ -261,7 +266,6 @@ class MethodWriter extends MethodVisitor {
      * 
      * @see #frame
      */
-    @Nullable
     private int[] previousFrame;
 
     /**
@@ -273,7 +277,6 @@ class MethodWriter extends MethodVisitor {
      * nStack, frame[3] = nLocal. All types are encoded as integers, with the
      * same format as the one used in {@link Label}, but limited to BASE types.
      */
-    @Nullable
     private int[] frame;
 
     /**
@@ -284,13 +287,22 @@ class MethodWriter extends MethodVisitor {
     /**
      * The first element in the exception handler list.
      */
-    @Nullable
     private Handler firstHandler;
 
     /**
      * The last element in the exception handler list.
      */
     private Handler lastHandler;
+
+    /**
+     * Number of entries in the MethodParameters attribute.
+     */
+    private int methodParametersCount;
+
+    /**
+     * The MethodParameters attribute.
+     */
+    private ByteVector methodParameters;
 
     /**
      * Number of entries in the LocalVariableTable attribute.
@@ -321,6 +333,21 @@ class MethodWriter extends MethodVisitor {
      * The LineNumberTable attribute.
      */
     private ByteVector lineNumber;
+
+    /**
+     * The start offset of the last visited instruction.
+     */
+    private int lastCodeOffset;
+
+    /**
+     * The runtime visible type annotations of the code. May be <tt>null</tt>.
+     */
+    private AnnotationWriter ctanns;
+
+    /**
+     * The runtime invisible type annotations of the code. May be <tt>null</tt>.
+     */
+    private AnnotationWriter ictanns;
 
     /**
      * The non standard attributes of the method's code.
@@ -375,7 +402,6 @@ class MethodWriter extends MethodVisitor {
     /**
      * The current basic block.
      */
-    @Nullable
     private Label currentBlock;
 
     /**
@@ -423,11 +449,11 @@ class MethodWriter extends MethodVisitor {
      *            <tt>true</tt> if the stack map tables must be recomputed from
      *            scratch.
      */
-    MethodWriter(@NotNull final ClassWriter cw, final int access, @NotNull final String name,
-            @NotNull final String desc, final String signature,
-            @Nullable final String[] exceptions, final boolean computeMaxs,
+    MethodWriter(final ClassWriter cw, final int access, final String name,
+            final String desc, final String signature,
+            final String[] exceptions, final boolean computeMaxs,
             final boolean computeFrames) {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         if (cw.firstMethod == null) {
             cw.firstMethod = this;
         } else {
@@ -472,7 +498,16 @@ class MethodWriter extends MethodVisitor {
     // Implementation of the MethodVisitor abstract class
     // ------------------------------------------------------------------------
 
-    @Nullable
+    @Override
+    public void visitParameter(String name, int access) {
+        if (methodParameters == null) {
+            methodParameters = new ByteVector();
+        }
+        ++methodParametersCount;
+        methodParameters.putShort((name == null) ? 0 : cw.newUTF8(name))
+                .putShort(access);
+    }
+
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         if (!ClassReader.ANNOTATIONS) {
@@ -482,9 +517,8 @@ class MethodWriter extends MethodVisitor {
         return new AnnotationWriter(cw, false, annd, null, 0);
     }
 
-    @Nullable
     @Override
-    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
+    public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
             return null;
@@ -503,10 +537,32 @@ class MethodWriter extends MethodVisitor {
         return aw;
     }
 
-    @Nullable
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(final int typeRef,
+            final TypePath typePath, final String desc, final boolean visible) {
+        if (!ClassReader.ANNOTATIONS) {
+            return null;
+        }
+        ByteVector bv = new ByteVector();
+        // write target_type and target_info
+        AnnotationWriter.putTarget(typeRef, typePath, bv);
+        // write type, and reserve space for values count
+        bv.putShort(cw.newUTF8(desc)).putShort(0);
+        AnnotationWriter aw = new AnnotationWriter(cw, true, bv, bv,
+                bv.length - 2);
+        if (visible) {
+            aw.next = tanns;
+            tanns = aw;
+        } else {
+            aw.next = itanns;
+            itanns = aw;
+        }
+        return aw;
+    }
+
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
-            @NotNull final String desc, final boolean visible) {
+            final String desc, final boolean visible) {
         if (!ClassReader.ANNOTATIONS) {
             return null;
         }
@@ -537,7 +593,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitAttribute(@NotNull final Attribute attr) {
+    public void visitAttribute(final Attribute attr) {
         if (attr.isCodeAttribute()) {
             attr.next = cattrs;
             cattrs = attr;
@@ -656,6 +712,7 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitInsn(final int opcode) {
+        lastCodeOffset = code.length;
         // adds the instruction to the bytecode of the method
         code.putByte(opcode);
         // update currentBlock
@@ -681,6 +738,7 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitIntInsn(final int opcode, final int operand) {
+        lastCodeOffset = code.length;
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
             if (compute == FRAMES) {
@@ -705,6 +763,7 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitVarInsn(final int opcode, final int var) {
+        lastCodeOffset = code.length;
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
             if (compute == FRAMES) {
@@ -762,7 +821,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, @NotNull final String type) {
+    public void visitTypeInsn(final int opcode, final String type) {
+        lastCodeOffset = code.length;
         Item i = cw.newClassItem(type);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -783,8 +843,9 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitFieldInsn(final int opcode, @NotNull final String owner,
-            @NotNull final String name, @NotNull final String desc) {
+    public void visitFieldInsn(final int opcode, final String owner,
+            final String name, final String desc) {
+        lastCodeOffset = code.length;
         Item i = cw.newFieldItem(owner, name, desc);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -821,9 +882,9 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(final int opcode, @NotNull final String owner,
-            @NotNull final String name, @NotNull final String desc) {
-        boolean itf = opcode == Opcodes.INVOKEINTERFACE;
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
+        lastCodeOffset = code.length;
         Item i = cw.newMethodItem(owner, name, desc, itf);
         int argSize = i.intVal;
         // Label currentBlock = this.currentBlock;
@@ -861,7 +922,7 @@ class MethodWriter extends MethodVisitor {
             }
         }
         // adds the instruction to the bytecode of the method
-        if (itf) {
+        if (opcode == Opcodes.INVOKEINTERFACE) {
             if (argSize == 0) {
                 argSize = Type.getArgumentsAndReturnSizes(desc);
                 i.intVal = argSize;
@@ -873,8 +934,9 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(@NotNull final String name, @NotNull final String desc,
-            @NotNull final Handle bsm, final Object... bsmArgs) {
+    public void visitInvokeDynamicInsn(final String name, final String desc,
+            final Handle bsm, final Object... bsmArgs) {
+        lastCodeOffset = code.length;
         Item i = cw.newInvokeDynamicItem(name, desc, bsm, bsmArgs);
         int argSize = i.intVal;
         // Label currentBlock = this.currentBlock;
@@ -913,7 +975,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitJumpInsn(final int opcode, @NotNull final Label label) {
+    public void visitJumpInsn(final int opcode, final Label label) {
+        lastCodeOffset = code.length;
         Label nextInsn = null;
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -1003,7 +1066,7 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLabel(@NotNull final Label label) {
+    public void visitLabel(final Label label) {
         // resolves previous forward references to label, if any
         resize |= label.resolve(this, code.length, code.data);
         // updates currentBlock
@@ -1059,6 +1122,7 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitLdcInsn(final Object cst) {
+        lastCodeOffset = code.length;
         Item i = cw.newConstItem(cst);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -1092,6 +1156,7 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitIincInsn(final int var, final int increment) {
+        lastCodeOffset = code.length;
         if (currentBlock != null) {
             if (compute == FRAMES) {
                 currentBlock.frame.execute(Opcodes.IINC, var, null, null);
@@ -1115,7 +1180,8 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            @NotNull final Label dflt, @NotNull final Label... labels) {
+            final Label dflt, final Label... labels) {
+        lastCodeOffset = code.length;
         // adds the instruction to the bytecode of the method
         int source = code.length;
         code.putByte(Opcodes.TABLESWITCH);
@@ -1130,8 +1196,9 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLookupSwitchInsn(@NotNull final Label dflt, final int[] keys,
-            @NotNull final Label[] labels) {
+    public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
+            final Label[] labels) {
+        lastCodeOffset = code.length;
         // adds the instruction to the bytecode of the method
         int source = code.length;
         code.putByte(Opcodes.LOOKUPSWITCH);
@@ -1146,7 +1213,7 @@ class MethodWriter extends MethodVisitor {
         visitSwitchInsn(dflt, labels);
     }
 
-    private void visitSwitchInsn(@NotNull final Label dflt, @NotNull final Label[] labels) {
+    private void visitSwitchInsn(final Label dflt, final Label[] labels) {
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
             if (compute == FRAMES) {
@@ -1173,7 +1240,8 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(@NotNull final String desc, final int dims) {
+    public void visitMultiANewArrayInsn(final String desc, final int dims) {
+        lastCodeOffset = code.length;
         Item i = cw.newClassItem(desc);
         // Label currentBlock = this.currentBlock;
         if (currentBlock != null) {
@@ -1190,8 +1258,32 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
+    public AnnotationVisitor visitInsnAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        if (!ClassReader.ANNOTATIONS) {
+            return null;
+        }
+        ByteVector bv = new ByteVector();
+        // write target_type and target_info
+        typeRef = (typeRef & 0xFF0000FF) | (lastCodeOffset << 8);
+        AnnotationWriter.putTarget(typeRef, typePath, bv);
+        // write type, and reserve space for values count
+        bv.putShort(cw.newUTF8(desc)).putShort(0);
+        AnnotationWriter aw = new AnnotationWriter(cw, true, bv, bv,
+                bv.length - 2);
+        if (visible) {
+            aw.next = ctanns;
+            ctanns = aw;
+        } else {
+            aw.next = ictanns;
+            ictanns = aw;
+        }
+        return aw;
+    }
+
+    @Override
     public void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, @Nullable final String type) {
+            final Label handler, final String type) {
         ++handlerCount;
         Handler h = new Handler();
         h.start = start;
@@ -1208,8 +1300,31 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLocalVariable(@NotNull final String name, @NotNull final String desc,
-            @Nullable final String signature, @NotNull final Label start, @NotNull final Label end,
+    public AnnotationVisitor visitTryCatchAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        if (!ClassReader.ANNOTATIONS) {
+            return null;
+        }
+        ByteVector bv = new ByteVector();
+        // write target_type and target_info
+        AnnotationWriter.putTarget(typeRef, typePath, bv);
+        // write type, and reserve space for values count
+        bv.putShort(cw.newUTF8(desc)).putShort(0);
+        AnnotationWriter aw = new AnnotationWriter(cw, true, bv, bv,
+                bv.length - 2);
+        if (visible) {
+            aw.next = ctanns;
+            ctanns = aw;
+        } else {
+            aw.next = ictanns;
+            ictanns = aw;
+        }
+        return aw;
+    }
+
+    @Override
+    public void visitLocalVariable(final String name, final String desc,
+            final String signature, final Label start, final Label end,
             final int index) {
         if (signature != null) {
             if (localVarType == null) {
@@ -1240,7 +1355,42 @@ class MethodWriter extends MethodVisitor {
     }
 
     @Override
-    public void visitLineNumber(final int line, @NotNull final Label start) {
+    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef,
+            TypePath typePath, Label[] start, Label[] end, int[] index,
+            String desc, boolean visible) {
+        if (!ClassReader.ANNOTATIONS) {
+            return null;
+        }
+        ByteVector bv = new ByteVector();
+        // write target_type and target_info
+        bv.putByte(typeRef >>> 24).putShort(start.length);
+        for (int i = 0; i < start.length; ++i) {
+            bv.putShort(start[i].position)
+                    .putShort(end[i].position - start[i].position)
+                    .putShort(index[i]);
+        }
+        if (typePath == null) {
+            bv.putByte(0);
+        } else {
+            int length = typePath.b[typePath.offset] * 2 + 1;
+            bv.putByteArray(typePath.b, typePath.offset, length);
+        }
+        // write type, and reserve space for values count
+        bv.putShort(cw.newUTF8(desc)).putShort(0);
+        AnnotationWriter aw = new AnnotationWriter(cw, true, bv, bv,
+                bv.length - 2);
+        if (visible) {
+            aw.next = ctanns;
+            ctanns = aw;
+        } else {
+            aw.next = ictanns;
+            ictanns = aw;
+        }
+        return aw;
+    }
+
+    @Override
+    public void visitLineNumber(final int line, final Label start) {
         if (lineNumber == null) {
             lineNumber = new ByteVector();
         }
@@ -1251,6 +1401,14 @@ class MethodWriter extends MethodVisitor {
 
     @Override
     public void visitMaxs(final int maxStack, final int maxLocals) {
+        if (resize) {
+            // replaces the temporary jump opcodes introduced by Label.resolve.
+            if (ClassReader.RESIZE) {
+                resizeInstructions();
+            } else {
+                throw new RuntimeException("Method code too large!");
+            }
+        }
         if (ClassReader.FRAMES && compute == FRAMES) {
             // completes the control flow graph with exception handler blocks
             Handler handler = firstHandler;
@@ -1543,7 +1701,7 @@ class MethodWriter extends MethodVisitor {
      * @param f
      *            the frame that must be visited.
      */
-    private void visitFrame(@NotNull final Frame f) {
+    private void visitFrame(final Frame f) {
         int i, t;
         int nTop = 0;
         int nLocal = 0;
@@ -1872,14 +2030,6 @@ class MethodWriter extends MethodVisitor {
         if (classReaderOffset != 0) {
             return 6 + classReaderLength;
         }
-        if (resize) {
-            // replaces the temporary jump opcodes introduced by Label.resolve.
-            if (ClassReader.RESIZE) {
-                resizeInstructions();
-            } else {
-                throw new RuntimeException("Method code too large!");
-            }
-        }
         int size = 8;
         if (code.length > 0) {
             if (code.length > 65536) {
@@ -1903,6 +2053,14 @@ class MethodWriter extends MethodVisitor {
                 boolean zip = (cw.version & 0xFFFF) >= Opcodes.V1_6;
                 cw.newUTF8(zip ? "StackMapTable" : "StackMap");
                 size += 8 + stackMap.length;
+            }
+            if (ClassReader.ANNOTATIONS && ctanns != null) {
+                cw.newUTF8("RuntimeVisibleTypeAnnotations");
+                size += 8 + ctanns.getSize();
+            }
+            if (ClassReader.ANNOTATIONS && ictanns != null) {
+                cw.newUTF8("RuntimeInvisibleTypeAnnotations");
+                size += 8 + ictanns.getSize();
             }
             if (cattrs != null) {
                 size += cattrs.getSize(cw, code.data, code.length, maxStack,
@@ -1929,6 +2087,10 @@ class MethodWriter extends MethodVisitor {
             cw.newUTF8(signature);
             size += 8;
         }
+        if (methodParameters != null) {
+            cw.newUTF8("MethodParameters");
+            size += 7 + methodParameters.length;
+        }
         if (ClassReader.ANNOTATIONS && annd != null) {
             cw.newUTF8("AnnotationDefault");
             size += 6 + annd.length;
@@ -1940,6 +2102,14 @@ class MethodWriter extends MethodVisitor {
         if (ClassReader.ANNOTATIONS && ianns != null) {
             cw.newUTF8("RuntimeInvisibleAnnotations");
             size += 8 + ianns.getSize();
+        }
+        if (ClassReader.ANNOTATIONS && tanns != null) {
+            cw.newUTF8("RuntimeVisibleTypeAnnotations");
+            size += 8 + tanns.getSize();
+        }
+        if (ClassReader.ANNOTATIONS && itanns != null) {
+            cw.newUTF8("RuntimeInvisibleTypeAnnotations");
+            size += 8 + itanns.getSize();
         }
         if (ClassReader.ANNOTATIONS && panns != null) {
             cw.newUTF8("RuntimeVisibleParameterAnnotations");
@@ -1968,7 +2138,7 @@ class MethodWriter extends MethodVisitor {
      *            the byte vector into which the bytecode of this method must be
      *            copied.
      */
-    final void put(@NotNull final ByteVector out) {
+    final void put(final ByteVector out) {
         final int FACTOR = ClassWriter.TO_ACC_SYNTHETIC;
         int mask = ACC_CONSTRUCTOR | Opcodes.ACC_DEPRECATED
                 | ClassWriter.ACC_SYNTHETIC_ATTRIBUTE
@@ -1997,6 +2167,9 @@ class MethodWriter extends MethodVisitor {
         if (ClassReader.SIGNATURES && signature != null) {
             ++attributeCount;
         }
+        if (methodParameters != null) {
+            ++attributeCount;
+        }
         if (ClassReader.ANNOTATIONS && annd != null) {
             ++attributeCount;
         }
@@ -2004,6 +2177,12 @@ class MethodWriter extends MethodVisitor {
             ++attributeCount;
         }
         if (ClassReader.ANNOTATIONS && ianns != null) {
+            ++attributeCount;
+        }
+        if (ClassReader.ANNOTATIONS && tanns != null) {
+            ++attributeCount;
+        }
+        if (ClassReader.ANNOTATIONS && itanns != null) {
             ++attributeCount;
         }
         if (ClassReader.ANNOTATIONS && panns != null) {
@@ -2029,6 +2208,12 @@ class MethodWriter extends MethodVisitor {
             }
             if (stackMap != null) {
                 size += 8 + stackMap.length;
+            }
+            if (ClassReader.ANNOTATIONS && ctanns != null) {
+                size += 8 + ctanns.getSize();
+            }
+            if (ClassReader.ANNOTATIONS && ictanns != null) {
+                size += 8 + ictanns.getSize();
             }
             if (cattrs != null) {
                 size += cattrs.getSize(cw, code.data, code.length, maxStack,
@@ -2059,6 +2244,12 @@ class MethodWriter extends MethodVisitor {
             if (stackMap != null) {
                 ++attributeCount;
             }
+            if (ClassReader.ANNOTATIONS && ctanns != null) {
+                ++attributeCount;
+            }
+            if (ClassReader.ANNOTATIONS && ictanns != null) {
+                ++attributeCount;
+            }
             if (cattrs != null) {
                 attributeCount += cattrs.getCount();
             }
@@ -2083,6 +2274,14 @@ class MethodWriter extends MethodVisitor {
                 out.putShort(cw.newUTF8(zip ? "StackMapTable" : "StackMap"));
                 out.putInt(stackMap.length + 2).putShort(frameCount);
                 out.putByteArray(stackMap.data, 0, stackMap.length);
+            }
+            if (ClassReader.ANNOTATIONS && ctanns != null) {
+                out.putShort(cw.newUTF8("RuntimeVisibleTypeAnnotations"));
+                ctanns.put(out);
+            }
+            if (ClassReader.ANNOTATIONS && ictanns != null) {
+                out.putShort(cw.newUTF8("RuntimeInvisibleTypeAnnotations"));
+                ictanns.put(out);
             }
             if (cattrs != null) {
                 cattrs.put(cw, code.data, code.length, maxLocals, maxStack, out);
@@ -2109,6 +2308,12 @@ class MethodWriter extends MethodVisitor {
             out.putShort(cw.newUTF8("Signature")).putInt(2)
                     .putShort(cw.newUTF8(signature));
         }
+        if (methodParameters != null) {
+            out.putShort(cw.newUTF8("MethodParameters"));
+            out.putInt(methodParameters.length + 1).putByte(
+                    methodParametersCount);
+            out.putByteArray(methodParameters.data, 0, methodParameters.length);
+        }
         if (ClassReader.ANNOTATIONS && annd != null) {
             out.putShort(cw.newUTF8("AnnotationDefault"));
             out.putInt(annd.length);
@@ -2121,6 +2326,14 @@ class MethodWriter extends MethodVisitor {
         if (ClassReader.ANNOTATIONS && ianns != null) {
             out.putShort(cw.newUTF8("RuntimeInvisibleAnnotations"));
             ianns.put(out);
+        }
+        if (ClassReader.ANNOTATIONS && tanns != null) {
+            out.putShort(cw.newUTF8("RuntimeVisibleTypeAnnotations"));
+            tanns.put(out);
+        }
+        if (ClassReader.ANNOTATIONS && itanns != null) {
+            out.putShort(cw.newUTF8("RuntimeInvisibleTypeAnnotations"));
+            itanns.put(out);
         }
         if (ClassReader.ANNOTATIONS && panns != null) {
             out.putShort(cw.newUTF8("RuntimeVisibleParameterAnnotations"));
@@ -2473,49 +2686,50 @@ class MethodWriter extends MethodVisitor {
             }
         }
 
-        // recomputes the stack map frames
-        if (frameCount > 0) {
-            if (compute == FRAMES) {
-                frameCount = 0;
-                stackMap = null;
-                previousFrame = null;
-                frame = null;
-                Frame f = new Frame();
-                f.owner = labels;
-                Type[] args = Type.getArgumentTypes(descriptor);
-                f.initInputFrame(cw, access, args, maxLocals);
-                visitFrame(f);
-                Label l = labels;
-                while (l != null) {
-                    /*
-                     * here we need the original label position. getNewOffset
-                     * must therefore never have been called for this label.
-                     */
-                    u = l.position - 3;
-                    if ((l.status & Label.STORE) != 0 || (u >= 0 && resize[u])) {
-                        getNewOffset(allIndexes, allSizes, l);
-                        // TODO update offsets in UNINITIALIZED values
-                        visitFrame(l.frame);
-                    }
-                    l = l.successor;
-                }
-            } else {
+        // updates the stack map frame labels
+        if (compute == FRAMES) {
+            Label l = labels;
+            while (l != null) {
                 /*
-                 * Resizing an existing stack map frame table is really hard.
-                 * Not only the table must be parsed to update the offets, but
-                 * new frames may be needed for jump instructions that were
-                 * inserted by this method. And updating the offsets or
-                 * inserting frames can change the format of the following
-                 * frames, in case of packed frames. In practice the whole table
-                 * must be recomputed. For this the frames are marked as
-                 * potentially invalid. This will cause the whole class to be
-                 * reread and rewritten with the COMPUTE_FRAMES option (see the
-                 * ClassWriter.toByteArray method). This is not very efficient
-                 * but is much easier and requires much less code than any other
-                 * method I can think of.
+                 * Detects the labels that are just after an IF instruction that
+                 * has been resized with the IFNOT GOTO_W pattern. These labels
+                 * are now the target of a jump instruction (the IFNOT
+                 * instruction). Note that we need the original label position
+                 * here. getNewOffset must therefore never have been called for
+                 * this label.
                  */
-                cw.invalidFrames = true;
+                u = l.position - 3;
+                if (u >= 0 && resize[u]) {
+                    l.status |= Label.TARGET;
+                }
+                getNewOffset(allIndexes, allSizes, l);
+                l = l.successor;
             }
+            // Update the offsets in the uninitialized types
+            for (i = 0; i < cw.typeTable.length; ++i) {
+                Item item = cw.typeTable[i];
+                if (item != null && item.type == ClassWriter.TYPE_UNINIT) {
+                    item.intVal = getNewOffset(allIndexes, allSizes, 0,
+                            item.intVal);
+                }
+            }
+            // The stack map frames are not serialized yet, so we don't need
+            // to update them. They will be serialized in visitMaxs.
+        } else if (frameCount > 0) {
+            /*
+             * Resizing an existing stack map frame table is really hard. Not
+             * only the table must be parsed to update the offets, but new
+             * frames may be needed for jump instructions that were inserted by
+             * this method. And updating the offsets or inserting frames can
+             * change the format of the following frames, in case of packed
+             * frames. In practice the whole table must be recomputed. For this
+             * the frames are marked as potentially invalid. This will cause the
+             * whole class to be reread and rewritten with the COMPUTE_FRAMES
+             * option (see the ClassWriter.toByteArray method). This is not very
+             * efficient but is much easier and requires much less code than any
+             * other method I can think of.
+             */
+            cw.invalidFrames = true;
         }
         // updates the exception handler block labels
         Handler h = firstHandler;
@@ -2654,7 +2868,7 @@ class MethodWriter extends MethodVisitor {
      *            index of the first byte of the target instruction.
      * @return the future value of the given bytecode offset.
      */
-    static int getNewOffset(@NotNull final int[] indexes, final int[] sizes,
+    static int getNewOffset(final int[] indexes, final int[] sizes,
             final int begin, final int end) {
         int offset = end - begin;
         for (int i = 0; i < indexes.length; ++i) {
@@ -2689,8 +2903,8 @@ class MethodWriter extends MethodVisitor {
      * @param label
      *            the label whose offset must be updated.
      */
-    static void getNewOffset(@NotNull final int[] indexes, final int[] sizes,
-            @NotNull final Label label) {
+    static void getNewOffset(final int[] indexes, final int[] sizes,
+            final Label label) {
         if ((label.status & Label.RESIZED) == 0) {
             label.position = getNewOffset(indexes, sizes, 0, label.position);
             label.status |= Label.RESIZED;

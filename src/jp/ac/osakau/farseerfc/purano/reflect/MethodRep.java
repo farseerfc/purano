@@ -55,7 +55,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access){
-		super(Opcodes.ASM4);
+		super(Opcodes.ASM5);
 		this.insnNode = methodInsnNode;
 		this.access = access;
 		this.isStatic = (access & Opcodes.ACC_STATIC) > 0;
@@ -210,7 +210,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 					final MethodRep thisRep = this;
 
 					ClassReader cr=new ClassReader(insnNode.owner);
-					cr.accept(new ClassVisitor(Opcodes.ASM4){
+					cr.accept(new ClassVisitor(Opcodes.ASM5){
 						@Nullable
                         @Override
 						public MethodVisitor visitMethod(int access, String name,
@@ -219,7 +219,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 								return null;
 							}
 						
-							return new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
+							return new MethodNode(Opcodes.ASM5,access,name,desc,signature,exceptions){
 								@Override
 								public void visitEnd() {
 									super.visitEnd();

@@ -29,10 +29,9 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.tree.AbstractInsnNode;
-
 import java.util.Set;
+
+import org.objectweb.asm.tree.AbstractInsnNode;
 
 /**
  * A {@link Value} that is represented by its type in a two types type system.
@@ -62,7 +61,6 @@ public class SourceValue implements Value {
      * 
      * This field is a set of {@link AbstractInsnNode} objects.
      */
-    @Nullable
     public final Set<AbstractInsnNode> insns;
 
     public SourceValue(final int size) {

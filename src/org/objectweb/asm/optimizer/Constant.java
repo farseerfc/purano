@@ -29,11 +29,10 @@
  */
 package org.objectweb.asm.optimizer;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.Arrays;
+
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
-
-import java.util.Arrays;
 
 /**
  * A constant pool item.
@@ -105,7 +104,7 @@ class Constant {
     Constant() {
     }
 
-    Constant(@NotNull final Constant i) {
+    Constant(final Constant i) {
         type = i.type;
         intVal = i.intVal;
         longVal = i.longVal;
@@ -178,8 +177,8 @@ class Constant {
      * @param strVal3
      *            third part of the value of this item.
      */
-    void set(final char type, @NotNull final String strVal1, @NotNull final String strVal2,
-            @NotNull final String strVal3) {
+    void set(final char type, final String strVal1, final String strVal2,
+            final String strVal3) {
         this.type = type;
         this.strVal1 = strVal1;
         this.strVal2 = strVal2;
@@ -217,8 +216,8 @@ class Constant {
      * @param bsmArgs
      *            bootstrap method constant arguments.
      */
-    void set(@NotNull final String name, @NotNull final String desc, @NotNull final Handle bsm,
-            @NotNull final Object[] bsmArgs) {
+    void set(final String name, final String desc, final Handle bsm,
+            final Object[] bsmArgs) {
         this.type = 'y';
         this.strVal1 = name;
         this.strVal2 = desc;
@@ -232,7 +231,7 @@ class Constant {
         this.hashCode = 0x7FFFFFFF & hashCode;
     }
 
-    void write(@NotNull final ClassWriter cw) {
+    void write(final ClassWriter cw) {
         switch (type) {
         case 'I':
             cw.newConst(new Integer(intVal));

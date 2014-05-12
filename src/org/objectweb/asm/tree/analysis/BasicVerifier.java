@@ -29,15 +29,13 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.util.List;
+
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-
-import java.util.List;
 
 /**
  * An extended {@link BasicInterpreter} that checks that bytecode instructions
@@ -49,17 +47,16 @@ import java.util.List;
 public class BasicVerifier extends BasicInterpreter {
 
     public BasicVerifier() {
-        super(ASM4);
+        super(ASM5);
     }
 
     protected BasicVerifier(final int api) {
         super(api);
     }
 
-    @NotNull
     @Override
-    public BasicValue copyOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final BasicValue value) throws AnalyzerException {
+    public BasicValue copyOperation(final AbstractInsnNode insn,
+            final BasicValue value) throws AnalyzerException {
         Value expected;
         switch (insn.getOpcode()) {
         case ILOAD:
@@ -101,8 +98,8 @@ public class BasicVerifier extends BasicInterpreter {
     }
 
     @Override
-    public BasicValue unaryOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final BasicValue value) throws AnalyzerException {
+    public BasicValue unaryOperation(final AbstractInsnNode insn,
+            final BasicValue value) throws AnalyzerException {
         BasicValue expected;
         switch (insn.getOpcode()) {
         case INEG:
@@ -188,8 +185,8 @@ public class BasicVerifier extends BasicInterpreter {
     }
 
     @Override
-    public BasicValue binaryOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final BasicValue value1, @NotNull final BasicValue value2)
+    public BasicValue binaryOperation(final AbstractInsnNode insn,
+            final BasicValue value1, final BasicValue value2)
             throws AnalyzerException {
         BasicValue expected1;
         BasicValue expected2;
@@ -315,11 +312,10 @@ public class BasicVerifier extends BasicInterpreter {
         }
     }
 
-    @Nullable
     @Override
-    public BasicValue ternaryOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final BasicValue value1, final BasicValue value2,
-            @NotNull final BasicValue value3) throws AnalyzerException {
+    public BasicValue ternaryOperation(final AbstractInsnNode insn,
+            final BasicValue value1, final BasicValue value2,
+            final BasicValue value3) throws AnalyzerException {
         BasicValue expected1;
         BasicValue expected3;
         switch (insn.getOpcode()) {
@@ -376,8 +372,8 @@ public class BasicVerifier extends BasicInterpreter {
     }
 
     @Override
-    public BasicValue naryOperation(@NotNull final AbstractInsnNode insn,
-            @NotNull final List<? extends BasicValue> values) throws AnalyzerException {
+    public BasicValue naryOperation(final AbstractInsnNode insn,
+            final List<? extends BasicValue> values) throws AnalyzerException {
         int opcode = insn.getOpcode();
         if (opcode == MULTIANEWARRAY) {
             for (int i = 0; i < values.size(); ++i) {
@@ -413,7 +409,7 @@ public class BasicVerifier extends BasicInterpreter {
 
     @Override
     public void returnOperation(final AbstractInsnNode insn,
-            @NotNull final BasicValue value, final BasicValue expected)
+            final BasicValue value, final BasicValue expected)
             throws AnalyzerException {
         if (!isSubTypeOf(value, expected)) {
             throw new AnalyzerException(insn, "Incompatible return type",
@@ -421,17 +417,16 @@ public class BasicVerifier extends BasicInterpreter {
         }
     }
 
-    protected boolean isArrayValue(@NotNull final BasicValue value) {
+    protected boolean isArrayValue(final BasicValue value) {
         return value.isReference();
     }
 
-    @Nullable
     protected BasicValue getElementValue(final BasicValue objectArrayValue)
             throws AnalyzerException {
         return BasicValue.REFERENCE_VALUE;
     }
 
-    protected boolean isSubTypeOf(@NotNull final BasicValue value,
+    protected boolean isSubTypeOf(final BasicValue value,
             final BasicValue expected) {
         return value.equals(expected);
     }

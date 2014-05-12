@@ -29,12 +29,6 @@
  */
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
@@ -43,6 +37,11 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * A {@link ClassVisitor} that adds a serial version unique identifier to a
@@ -167,9 +166,14 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * @param cv
      *            a {@link ClassVisitor} to which this visitor will delegate
      *            calls.
+     * @throws IllegalStateException
+     *             If a subclass calls this constructor.
      */
     public SerialVersionUIDAdder(final ClassVisitor cv) {
-        this(Opcodes.ASM4, cv);
+        this(Opcodes.ASM5, cv);
+        if (getClass() != SerialVersionUIDAdder.class) {
+            throw new IllegalStateException();
+        }
     }
 
     /**
@@ -177,7 +181,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param cv
      *            a {@link ClassVisitor} to which this visitor will delegate
      *            calls.
@@ -190,7 +194,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
     }
 
     // ------------------------------------------------------------------------
-    // Overriden methods
+    // Overridden methods
     // ------------------------------------------------------------------------
 
     /*
@@ -206,7 +210,9 @@ public class SerialVersionUIDAdder extends ClassVisitor {
         if (computeSVUID) {
             this.name = name;
             this.access = access;
-            this.interfaces = interfaces;
+            this.interfaces = new String[interfaces.length];
+            System.arraycopy(interfaces, 0, this.interfaces, 0,
+                    interfaces.length);
         }
 
         super.visit(version, access, name, signature, superName, interfaces);
@@ -479,8 +485,8 @@ public class SerialVersionUIDAdder extends ClassVisitor {
      * @exception IOException
      *                if an error occurs
      */
-    private static void writeItems(@NotNull final Collection<Item> itemCollection,
-            @NotNull final DataOutput dos, final boolean dotted) throws IOException {
+    private static void writeItems(final Collection<Item> itemCollection,
+            final DataOutput dos, final boolean dotted) throws IOException {
         int size = itemCollection.size();
         Item[] items = itemCollection.toArray(new Item[size]);
         Arrays.sort(items);
@@ -510,7 +516,7 @@ public class SerialVersionUIDAdder extends ClassVisitor {
             this.desc = desc;
         }
 
-        public int compareTo(@NotNull final Item other) {
+        public int compareTo(final Item other) {
             int retVal = name.compareTo(other.name);
             if (retVal == 0) {
                 retVal = desc.compareTo(other.desc);

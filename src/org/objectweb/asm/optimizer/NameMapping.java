@@ -29,9 +29,6 @@
  */
 package org.objectweb.asm.optimizer;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.Type;
-
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,6 +37,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import org.objectweb.asm.Type;
+
 /**
  * A MAPPING from names to names, used to rename classes, fields and methods.
  * 
@@ -47,10 +46,8 @@ import java.util.Set;
  */
 public class NameMapping {
 
-    @NotNull
     public final Properties mapping;
 
-    @NotNull
     public final Set<Object> unused;
 
     public NameMapping(final String file) throws IOException {
@@ -67,7 +64,7 @@ public class NameMapping {
         }
     }
 
-    public String map(@NotNull final String name) {
+    public String map(final String name) {
         String s = (String) mapping.get(name);
         if (s == null) {
             int p = name.indexOf('.');
@@ -87,8 +84,7 @@ public class NameMapping {
         return s;
     }
 
-    @NotNull
-    public String fix(@NotNull final String desc) {
+    public String fix(final String desc) {
         if (desc.startsWith("(")) {
             Type[] arguments = Type.getArgumentTypes(desc);
             Type result = Type.getReturnType(desc);
@@ -102,8 +98,7 @@ public class NameMapping {
         }
     }
 
-    @NotNull
-    private Type fix(@NotNull final Type t) {
+    private Type fix(final Type t) {
         if (t.getSort() == Type.OBJECT) {
             return Type.getObjectType(map(t.getInternalName()));
         } else if (t.getSort() == Type.ARRAY) {

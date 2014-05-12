@@ -29,10 +29,9 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.MethodVisitor;
-
 import java.util.Map;
+
+import org.objectweb.asm.MethodVisitor;
 
 /**
  * A node that represents a field instruction. A field instruction is an
@@ -98,13 +97,14 @@ public class FieldInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor cv) {
-        cv.visitFieldInsn(opcode, owner, name, desc);
+    public void accept(final MethodVisitor mv) {
+        mv.visitFieldInsn(opcode, owner, name, desc);
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
-        return new FieldInsnNode(opcode, owner, name, desc);
+        return new FieldInsnNode(opcode, owner, name, desc)
+                .cloneAnnotations(this);
     }
 }

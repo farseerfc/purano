@@ -29,11 +29,10 @@
  */
 package org.objectweb.asm.xml;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 import org.xml.sax.Attributes;
 
 /**
@@ -45,18 +44,24 @@ public final class SAXFieldAdapter extends FieldVisitor {
 
     SAXAdapter sa;
 
-    public SAXFieldAdapter(@NotNull final SAXAdapter sa, final Attributes att) {
-        super(Opcodes.ASM4);
+    public SAXFieldAdapter(final SAXAdapter sa, final Attributes att) {
+        super(Opcodes.ASM5);
         this.sa = sa;
         sa.addStart("field", att);
     }
 
-    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
         return new SAXAnnotationAdapter(sa, "annotation", visible ? 1 : -1,
                 null, desc);
+    }
+
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        return new SAXAnnotationAdapter(sa, "typeAnnotation", visible ? 1 : -1,
+                null, desc, typeRef, typePath);
     }
 
     @Override

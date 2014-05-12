@@ -29,19 +29,16 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import java.util.Map;
+
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
-
-import java.util.Map;
 
 /**
  * An {@link AbstractInsnNode} that encapsulates a {@link Label}.
  */
 public class LabelNode extends AbstractInsnNode {
 
-    @Nullable
     private Label label;
 
     public LabelNode() {
@@ -58,7 +55,6 @@ public class LabelNode extends AbstractInsnNode {
         return LABEL;
     }
 
-    @Nullable
     public Label getLabel() {
         if (label == null) {
             label = new Label();
@@ -67,12 +63,12 @@ public class LabelNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor cv) {
+    public void accept(final MethodVisitor cv) {
         cv.visitLabel(getLabel());
     }
 
     @Override
-    public AbstractInsnNode clone(@NotNull final Map<LabelNode, LabelNode> labels) {
+    public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
         return labels.get(this);
     }
 

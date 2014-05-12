@@ -29,8 +29,6 @@
  */
 package org.objectweb.asm.util;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -51,7 +49,7 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
     }
 
     CheckAnnotationAdapter(final AnnotationVisitor av, final boolean named) {
-        super(Opcodes.ASM4, av);
+        super(Opcodes.ASM5, av);
         this.named = named;
     }
 
@@ -72,7 +70,7 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
         }
         if (value instanceof Type) {
             int sort = ((Type) value).getSort();
-            if (sort != Type.OBJECT && sort != Type.ARRAY) {
+            if (sort == Type.METHOD) {
                 throw new IllegalArgumentException("Invalid annotation value");
             }
         }
@@ -82,8 +80,8 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
     }
 
     @Override
-    public void visitEnum(final String name, @NotNull final String desc,
-            @Nullable final String value) {
+    public void visitEnum(final String name, final String desc,
+            final String value) {
         checkEnd();
         checkName(name);
         CheckMethodAdapter.checkDesc(desc, false);
@@ -95,10 +93,9 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
         }
     }
 
-    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String name,
-            @NotNull final String desc) {
+            final String desc) {
         checkEnd();
         checkName(name);
         CheckMethodAdapter.checkDesc(desc, false);
@@ -106,7 +103,6 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
                 : av.visitAnnotation(name, desc));
     }
 
-    @NotNull
     @Override
     public AnnotationVisitor visitArray(final String name) {
         checkEnd();
@@ -131,7 +127,7 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
         }
     }
 
-    private void checkName(@Nullable final String name) {
+    private void checkName(final String name) {
         if (named && name == null) {
             throw new IllegalArgumentException(
                     "Annotation value name must not be null");

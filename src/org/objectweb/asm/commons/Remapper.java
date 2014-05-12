@@ -30,8 +30,6 @@
 
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.signature.SignatureReader;
@@ -52,7 +50,7 @@ import org.objectweb.asm.signature.SignatureWriter;
  */
 public abstract class Remapper {
 
-    public String mapDesc(@NotNull String desc) {
+    public String mapDesc(String desc) {
         Type t = Type.getType(desc);
         switch (t.getSort()) {
         case Type.ARRAY:
@@ -70,8 +68,7 @@ public abstract class Remapper {
         return desc;
     }
 
-    @NotNull
-    private Type mapType(@NotNull Type t) {
+    private Type mapType(Type t) {
         switch (t.getSort()) {
         case Type.ARRAY:
             String s = mapDesc(t.getElementType().getDescriptor());
@@ -88,16 +85,14 @@ public abstract class Remapper {
         return t;
     }
 
-    @Nullable
-    public String mapType(@Nullable String type) {
+    public String mapType(String type) {
         if (type == null) {
             return null;
         }
         return mapType(Type.getObjectType(type)).getInternalName();
     }
 
-    @Nullable
-    public String[] mapTypes(@NotNull String[] types) {
+    public String[] mapTypes(String[] types) {
         String[] newTypes = null;
         boolean needMapping = false;
         for (int i = 0; i < types.length; i++) {
@@ -117,8 +112,7 @@ public abstract class Remapper {
         return needMapping ? newTypes : types;
     }
 
-    @NotNull
-    public String mapMethodDesc(@NotNull String desc) {
+    public String mapMethodDesc(String desc) {
         if ("()V".equals(desc)) {
             return desc;
         }
@@ -157,8 +151,7 @@ public abstract class Remapper {
      *            signature parameter of the ClassVisitor.visitField or
      *            MethodVisitor.visitLocalVariable methods
      */
-    @Nullable
-    public String mapSignature(@Nullable String signature, boolean typeSignature) {
+    public String mapSignature(String signature, boolean typeSignature) {
         if (signature == null) {
             return null;
         }
@@ -173,7 +166,6 @@ public abstract class Remapper {
         return w.toString();
     }
 
-    @NotNull
     protected SignatureVisitor createRemappingSignatureAdapter(
             SignatureVisitor v) {
         return new RemappingSignatureAdapter(v, this);

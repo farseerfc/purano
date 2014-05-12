@@ -30,9 +30,11 @@
 
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * A {@link MethodVisitor} providing a more detailed API to generate and
@@ -51,9 +53,14 @@ public class InstructionAdapter extends MethodVisitor {
      * 
      * @param mv
      *            the method visitor to which this adapter delegates calls.
+     * @throws IllegalStateException
+     *             If a subclass calls this constructor.
      */
     public InstructionAdapter(final MethodVisitor mv) {
-        this(Opcodes.ASM4, mv);
+        this(Opcodes.ASM5, mv);
+        if (getClass() != InstructionAdapter.class) {
+            throw new IllegalStateException();
+        }
     }
 
     /**
@@ -61,7 +68,7 @@ public class InstructionAdapter extends MethodVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param mv
      *            the method visitor to which this adapter delegates calls.
      */
@@ -464,7 +471,7 @@ public class InstructionAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, @NotNull final String type) {
+    public void visitTypeInsn(final int opcode, final String type) {
         Type t = Type.getObjectType(type);
         switch (opcode) {
         case Opcodes.NEW:
@@ -505,18 +512,39 @@ public class InstructionAdapter extends MethodVisitor {
         }
     }
 
+    @Deprecated
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
             final String name, final String desc) {
+        if (api >= Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc,
+                opcode == Opcodes.INVOKEINTERFACE);
+    }
+
+    @Override
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc, itf);
+    }
+
+    private void doVisitMethodInsn(int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
         switch (opcode) {
         case Opcodes.INVOKESPECIAL:
-            invokespecial(owner, name, desc);
+            invokespecial(owner, name, desc, itf);
             break;
         case Opcodes.INVOKEVIRTUAL:
-            invokevirtual(owner, name, desc);
+            invokevirtual(owner, name, desc, itf);
             break;
         case Opcodes.INVOKESTATIC:
-            invokestatic(owner, name, desc);
+            invokestatic(owner, name, desc, itf);
             break;
         case Opcodes.INVOKEINTERFACE:
             invokeinterface(owner, name, desc);
@@ -664,7 +692,7 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInsn(Opcodes.NOP);
     }
 
-    public void aconst(@Nullable final Object cst) {
+    public void aconst(final Object cst) {
         if (cst == null) {
             mv.visitInsn(Opcodes.ACONST_NULL);
         } else {
@@ -718,19 +746,19 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitLdcInsn(handle);
     }
 
-    public void load(final int var, @NotNull final Type type) {
+    public void load(final int var, final Type type) {
         mv.visitVarInsn(type.getOpcode(Opcodes.ILOAD), var);
     }
 
-    public void aload(@NotNull final Type type) {
+    public void aload(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IALOAD));
     }
 
-    public void store(final int var, @NotNull final Type type) {
+    public void store(final int var, final Type type) {
         mv.visitVarInsn(type.getOpcode(Opcodes.ISTORE), var);
     }
 
-    public void astore(@NotNull final Type type) {
+    public void astore(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IASTORE));
     }
 
@@ -770,51 +798,51 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInsn(Opcodes.SWAP);
     }
 
-    public void add(@NotNull final Type type) {
+    public void add(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IADD));
     }
 
-    public void sub(@NotNull final Type type) {
+    public void sub(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.ISUB));
     }
 
-    public void mul(@NotNull final Type type) {
+    public void mul(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IMUL));
     }
 
-    public void div(@NotNull final Type type) {
+    public void div(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IDIV));
     }
 
-    public void rem(@NotNull final Type type) {
+    public void rem(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IREM));
     }
 
-    public void neg(@NotNull final Type type) {
+    public void neg(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.INEG));
     }
 
-    public void shl(@NotNull final Type type) {
+    public void shl(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.ISHL));
     }
 
-    public void shr(@NotNull final Type type) {
+    public void shr(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.ISHR));
     }
 
-    public void ushr(@NotNull final Type type) {
+    public void ushr(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IUSHR));
     }
 
-    public void and(@NotNull final Type type) {
+    public void and(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IAND));
     }
 
-    public void or(@NotNull final Type type) {
+    public void or(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IOR));
     }
 
-    public void xor(@NotNull final Type type) {
+    public void xor(final Type type) {
         mv.visitInsn(type.getOpcode(Opcodes.IXOR));
     }
 
@@ -959,7 +987,7 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitLookupSwitchInsn(dflt, keys, labels);
     }
 
-    public void areturn(@NotNull final Type t) {
+    public void areturn(final Type t) {
         mv.visitInsn(t.getOpcode(Opcodes.IRETURN));
     }
 
@@ -983,24 +1011,78 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitFieldInsn(Opcodes.PUTFIELD, owner, name, desc);
     }
 
+    @Deprecated
     public void invokevirtual(final String owner, final String name,
             final String desc) {
+        if (api >= Opcodes.ASM5) {
+            invokevirtual(owner, name, desc, false);
+            return;
+        }
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, owner, name, desc);
     }
 
+    public void invokevirtual(final String owner, final String name,
+            final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            if (itf) {
+                throw new IllegalArgumentException(
+                        "INVOKEVIRTUAL on interfaces require ASM 5");
+            }
+            invokevirtual(owner, name, desc);
+            return;
+        }
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, owner, name, desc, itf);
+    }
+
+    @Deprecated
     public void invokespecial(final String owner, final String name,
             final String desc) {
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, owner, name, desc);
+        if (api >= Opcodes.ASM5) {
+            invokespecial(owner, name, desc, false);
+            return;
+        }
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, owner, name, desc, false);
+    }
+
+    public void invokespecial(final String owner, final String name,
+            final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            if (itf) {
+                throw new IllegalArgumentException(
+                        "INVOKESPECIAL on interfaces require ASM 5");
+            }
+            invokespecial(owner, name, desc);
+            return;
+        }
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL, owner, name, desc, itf);
+    }
+
+    @Deprecated
+    public void invokestatic(final String owner, final String name,
+            final String desc) {
+        if (api >= Opcodes.ASM5) {
+            invokestatic(owner, name, desc, false);
+            return;
+        }
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, desc, false);
     }
 
     public void invokestatic(final String owner, final String name,
-            final String desc) {
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, desc);
+            final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            if (itf) {
+                throw new IllegalArgumentException(
+                        "INVOKESTATIC on interfaces require ASM 5");
+            }
+            invokestatic(owner, name, desc);
+            return;
+        }
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, owner, name, desc, itf);
     }
 
     public void invokeinterface(final String owner, final String name,
             final String desc) {
-        mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, owner, name, desc);
+        mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, owner, name, desc, true);
     }
 
     public void invokedynamic(String name, String desc, Handle bsm,
@@ -1008,11 +1090,11 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
     }
 
-    public void anew(@NotNull final Type type) {
+    public void anew(final Type type) {
         mv.visitTypeInsn(Opcodes.NEW, type.getInternalName());
     }
 
-    public void newarray(@NotNull final Type type) {
+    public void newarray(final Type type) {
         int typ;
         switch (type.getSort()) {
         case Type.BOOLEAN:
@@ -1054,11 +1136,11 @@ public class InstructionAdapter extends MethodVisitor {
         mv.visitInsn(Opcodes.ATHROW);
     }
 
-    public void checkcast(@NotNull final Type type) {
+    public void checkcast(final Type type) {
         mv.visitTypeInsn(Opcodes.CHECKCAST, type.getInternalName());
     }
 
-    public void instanceOf(@NotNull final Type type) {
+    public void instanceOf(final Type type) {
         mv.visitTypeInsn(Opcodes.INSTANCEOF, type.getInternalName());
     }
 

@@ -29,16 +29,14 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * A node that represents a TABLESWITCH instruction.
@@ -82,7 +80,7 @@ public class TableSwitchInsnNode extends AbstractInsnNode {
      *            beginning of the handler block for the <tt>min + i</tt> key.
      */
     public TableSwitchInsnNode(final int min, final int max,
-            final LabelNode dflt, @Nullable final LabelNode... labels) {
+            final LabelNode dflt, final LabelNode... labels) {
         super(Opcodes.TABLESWITCH);
         this.min = min;
         this.max = max;
@@ -99,18 +97,18 @@ public class TableSwitchInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor mv) {
+    public void accept(final MethodVisitor mv) {
         Label[] labels = new Label[this.labels.size()];
         for (int i = 0; i < labels.length; ++i) {
             labels[i] = this.labels.get(i).getLabel();
         }
         mv.visitTableSwitchInsn(min, max, dflt.getLabel(), labels);
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
-    public AbstractInsnNode clone(@NotNull final Map<LabelNode, LabelNode> labels) {
+    public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
         return new TableSwitchInsnNode(min, max, clone(dflt, labels), clone(
-                this.labels, labels));
+                this.labels, labels)).cloneAnnotations(this);
     }
 }

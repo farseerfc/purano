@@ -29,12 +29,11 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.tree.JumpInsnNode;
-import org.objectweb.asm.tree.LabelNode;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 
 /**
  * A method subroutine (corresponds to a JSR instruction).
@@ -60,7 +59,6 @@ class Subroutine {
         callers.add(caller);
     }
 
-    @NotNull
     public Subroutine copy() {
         Subroutine result = new Subroutine();
         result.start = start;
@@ -70,7 +68,7 @@ class Subroutine {
         return result;
     }
 
-    public boolean merge(@NotNull final Subroutine subroutine) throws AnalyzerException {
+    public boolean merge(final Subroutine subroutine) throws AnalyzerException {
         boolean changes = false;
         for (int i = 0; i < access.length; ++i) {
             if (subroutine.access[i] && !access[i]) {

@@ -18,7 +18,7 @@ import java.util.List;
 
 public abstract class Effect<T extends Effect> implements Cloneable{
 	private @Getter @Setter DepSet deps;
-	private @Getter @Setter  MethodRep from;
+	private @Getter @Setter MethodRep from;
 	
 	public Effect(DepSet deps, MethodRep from){
 		this.deps = deps;

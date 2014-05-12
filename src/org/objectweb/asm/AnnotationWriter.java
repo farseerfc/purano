@@ -29,9 +29,6 @@
  */
 package org.objectweb.asm;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * An {@link AnnotationVisitor} that generates annotations in bytecode form.
  * 
@@ -84,7 +81,6 @@ final class AnnotationWriter extends AnnotationVisitor {
     /**
      * Previous annotation writer. This field is used to store annotation lists.
      */
-    @Nullable
     AnnotationWriter prev;
 
     // ------------------------------------------------------------------------
@@ -108,7 +104,7 @@ final class AnnotationWriter extends AnnotationVisitor {
      */
     AnnotationWriter(final ClassWriter cw, final boolean named,
             final ByteVector bv, final ByteVector parent, final int offset) {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         this.cw = cw;
         this.named = named;
         this.bv = bv;
@@ -121,7 +117,7 @@ final class AnnotationWriter extends AnnotationVisitor {
     // ------------------------------------------------------------------------
 
     @Override
-    public void visit(@NotNull final String name, final Object value) {
+    public void visit(final String name, final Object value) {
         ++size;
         if (named) {
             bv.putShort(cw.newUTF8(name));
@@ -194,8 +190,8 @@ final class AnnotationWriter extends AnnotationVisitor {
     }
 
     @Override
-    public void visitEnum(@NotNull final String name, @NotNull final String desc,
-            @NotNull final String value) {
+    public void visitEnum(final String name, final String desc,
+            final String value) {
         ++size;
         if (named) {
             bv.putShort(cw.newUTF8(name));
@@ -203,10 +199,9 @@ final class AnnotationWriter extends AnnotationVisitor {
         bv.put12('e', cw.newUTF8(desc)).putShort(cw.newUTF8(value));
     }
 
-    @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(@NotNull final String name,
-            @NotNull final String desc) {
+    public AnnotationVisitor visitAnnotation(final String name,
+            final String desc) {
         ++size;
         if (named) {
             bv.putShort(cw.newUTF8(name));
@@ -216,9 +211,8 @@ final class AnnotationWriter extends AnnotationVisitor {
         return new AnnotationWriter(cw, true, bv, bv, bv.length - 2);
     }
 
-    @NotNull
     @Override
-    public AnnotationVisitor visitArray(@NotNull final String name) {
+    public AnnotationVisitor visitArray(final String name) {
         ++size;
         if (named) {
             bv.putShort(cw.newUTF8(name));
@@ -263,7 +257,7 @@ final class AnnotationWriter extends AnnotationVisitor {
      * @param out
      *            where the annotations must be put.
      */
-    void put(@NotNull final ByteVector out) {
+    void put(final ByteVector out) {
         int n = 0;
         int size = 2;
         AnnotationWriter aw = this;
@@ -295,8 +289,8 @@ final class AnnotationWriter extends AnnotationVisitor {
      * @param out
      *            where the annotations must be put.
      */
-    static void put(@NotNull final AnnotationWriter[] panns, final int off,
-            @NotNull final ByteVector out) {
+    static void put(final AnnotationWriter[] panns, final int off,
+            final ByteVector out) {
         int size = 1 + 2 * (panns.length - off);
         for (int i = off; i < panns.length; ++i) {
             size += panns[i] == null ? 0 : panns[i].getSize();
@@ -319,6 +313,59 @@ final class AnnotationWriter extends AnnotationVisitor {
                 out.putByteArray(aw.bv.data, 0, aw.bv.length);
                 aw = aw.prev;
             }
+        }
+    }
+
+    /**
+     * Puts the given type reference and type path into the given bytevector.
+     * LOCAL_VARIABLE and RESOURCE_VARIABLE target types are not supported.
+     * 
+     * @param typeRef
+     *            a reference to the annotated type. See {@link TypeReference}.
+     * @param typePath
+     *            the path to the annotated type argument, wildcard bound, array
+     *            element type, or static inner type within 'typeRef'. May be
+     *            <tt>null</tt> if the annotation targets 'typeRef' as a whole.
+     * @param out
+     *            where the type reference and type path must be put.
+     */
+    static void putTarget(int typeRef, TypePath typePath, ByteVector out) {
+        switch (typeRef >>> 24) {
+        case 0x00: // CLASS_TYPE_PARAMETER
+        case 0x01: // METHOD_TYPE_PARAMETER
+        case 0x16: // METHOD_FORMAL_PARAMETER
+            out.putShort(typeRef >>> 16);
+            break;
+        case 0x13: // FIELD
+        case 0x14: // METHOD_RETURN
+        case 0x15: // METHOD_RECEIVER
+            out.putByte(typeRef >>> 24);
+            break;
+        case 0x47: // CAST
+        case 0x48: // CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT
+        case 0x49: // METHOD_INVOCATION_TYPE_ARGUMENT
+        case 0x4A: // CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT
+        case 0x4B: // METHOD_REFERENCE_TYPE_ARGUMENT
+            out.putInt(typeRef);
+            break;
+        // case 0x10: // CLASS_EXTENDS
+        // case 0x11: // CLASS_TYPE_PARAMETER_BOUND
+        // case 0x12: // METHOD_TYPE_PARAMETER_BOUND
+        // case 0x17: // THROWS
+        // case 0x42: // EXCEPTION_PARAMETER
+        // case 0x43: // INSTANCEOF
+        // case 0x44: // NEW
+        // case 0x45: // CONSTRUCTOR_REFERENCE
+        // case 0x46: // METHOD_REFERENCE
+        default:
+            out.put12(typeRef >>> 24, (typeRef & 0xFFFF00) >> 8);
+            break;
+        }
+        if (typePath == null) {
+            out.putByte(0);
+        } else {
+            int length = typePath.b[typePath.offset] * 2 + 1;
+            out.putByteArray(typePath.b, typePath.offset, length);
         }
     }
 }

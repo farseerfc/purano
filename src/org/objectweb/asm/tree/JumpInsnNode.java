@@ -29,10 +29,9 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.MethodVisitor;
-
 import java.util.Map;
+
+import org.objectweb.asm.MethodVisitor;
 
 /**
  * A node that represents a jump instruction. A jump instruction is an
@@ -85,13 +84,14 @@ public class JumpInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor mv) {
+    public void accept(final MethodVisitor mv) {
         mv.visitJumpInsn(opcode, label.getLabel());
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
-    public AbstractInsnNode clone(@NotNull final Map<LabelNode, LabelNode> labels) {
-        return new JumpInsnNode(opcode, clone(label, labels));
+    public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
+        return new JumpInsnNode(opcode, clone(label, labels))
+                .cloneAnnotations(this);
     }
 }

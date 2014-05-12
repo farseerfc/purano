@@ -29,10 +29,15 @@
  */
 package org.objectweb.asm.util;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.*;
-
 import java.io.PrintWriter;
+
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 
 /**
  * A {@link ClassVisitor} that prints the classes it visits with a
@@ -126,7 +131,7 @@ public final class TraceClassVisitor extends ClassVisitor {
      */
     public TraceClassVisitor(final ClassVisitor cv, final Printer p,
             final PrintWriter pw) {
-        super(Opcodes.ASM4, cv);
+        super(Opcodes.ASM5, cv);
         this.pw = pw;
         this.p = p;
     }
@@ -152,13 +157,22 @@ public final class TraceClassVisitor extends ClassVisitor {
         super.visitOuterClass(owner, name, desc);
     }
 
-    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
         Printer p = this.p.visitClassAnnotation(desc, visible);
         AnnotationVisitor av = cv == null ? null : cv.visitAnnotation(desc,
                 visible);
+        return new TraceAnnotationVisitor(av, p);
+    }
+
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        Printer p = this.p.visitClassTypeAnnotation(typeRef, typePath, desc,
+                visible);
+        AnnotationVisitor av = cv == null ? null : cv.visitTypeAnnotation(
+                typeRef, typePath, desc, visible);
         return new TraceAnnotationVisitor(av, p);
     }
 
@@ -175,7 +189,6 @@ public final class TraceClassVisitor extends ClassVisitor {
         super.visitInnerClass(name, outerName, innerName, access);
     }
 
-    @NotNull
     @Override
     public FieldVisitor visitField(final int access, final String name,
             final String desc, final String signature, final Object value) {
@@ -185,7 +198,6 @@ public final class TraceClassVisitor extends ClassVisitor {
         return new TraceFieldVisitor(fv, p);
     }
 
-    @NotNull
     @Override
     public MethodVisitor visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions) {

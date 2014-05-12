@@ -29,13 +29,11 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Opcodes;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * A node that represents an annotationn.
@@ -69,9 +67,14 @@ public class AnnotationNode extends AnnotationVisitor {
      * 
      * @param desc
      *            the class descriptor of the annotation class.
+     * @throws IllegalStateException
+     *             If a subclass calls this constructor.
      */
     public AnnotationNode(final String desc) {
-        this(Opcodes.ASM4, desc);
+        this(Opcodes.ASM5, desc);
+        if (getClass() != AnnotationNode.class) {
+            throw new IllegalStateException();
+        }
     }
 
     /**
@@ -79,7 +82,7 @@ public class AnnotationNode extends AnnotationVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param desc
      *            the class descriptor of the annotation class.
      */
@@ -95,7 +98,7 @@ public class AnnotationNode extends AnnotationVisitor {
      *            where the visited values must be stored.
      */
     AnnotationNode(final List<Object> values) {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         this.values = values;
     }
 
@@ -126,7 +129,6 @@ public class AnnotationNode extends AnnotationVisitor {
         values.add(new String[] { desc, value });
     }
 
-    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String name,
             final String desc) {
@@ -141,7 +143,6 @@ public class AnnotationNode extends AnnotationVisitor {
         return annotation;
     }
 
-    @NotNull
     @Override
     public AnnotationVisitor visitArray(final String name) {
         if (values == null) {
@@ -170,7 +171,8 @@ public class AnnotationNode extends AnnotationVisitor {
      * versions of the ASM API than the given version.
      * 
      * @param api
-     *            an ASM API version. Must be one of {@link Opcodes#ASM4}.
+     *            an ASM API version. Must be one of {@link Opcodes#ASM4} or
+     *            {@link Opcodes#ASM5}.
      */
     public void check(final int api) {
         // nothing to do
@@ -182,7 +184,7 @@ public class AnnotationNode extends AnnotationVisitor {
      * @param av
      *            an annotation visitor. Maybe <tt>null</tt>.
      */
-    public void accept(@Nullable final AnnotationVisitor av) {
+    public void accept(final AnnotationVisitor av) {
         if (av != null) {
             if (values != null) {
                 for (int i = 0; i < values.size(); i += 2) {
@@ -205,7 +207,7 @@ public class AnnotationNode extends AnnotationVisitor {
      * @param value
      *            the actual value.
      */
-    static void accept(@Nullable final AnnotationVisitor av, final String name,
+    static void accept(final AnnotationVisitor av, final String name,
             final Object value) {
         if (av != null) {
             if (value instanceof String[]) {

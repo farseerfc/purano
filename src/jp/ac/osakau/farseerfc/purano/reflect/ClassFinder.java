@@ -113,7 +113,7 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws MalformedURLException, FileNotFoundException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "jp.ac.osakau.farseerfc.purano.test"};
+                "jp.ac.osakau.farseerfc.purano"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
@@ -127,7 +127,7 @@ public class ClassFinder {
 
 //        ClassFinderDumpper dumpper = new DumyDumpper(); //new StreamDumpper(System.out, cf);
 //        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
-        File output = new File("/tmp/output");
+        File output = new File("output.log");
         PrintStream ps = new PrintStream(new FileOutputStream(output));
         ClassFinderDumpper dumpper = new StreamDumpper(ps,cf);
         dumpper.dump();

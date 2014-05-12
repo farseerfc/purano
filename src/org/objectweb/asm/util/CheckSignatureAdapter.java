@@ -29,8 +29,6 @@
  */
 package org.objectweb.asm.util;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.signature.SignatureVisitor;
 
@@ -115,7 +113,7 @@ public class CheckSignatureAdapter extends SignatureVisitor {
      *            <tt>null</tt>.
      */
     public CheckSignatureAdapter(final int type, final SignatureVisitor sv) {
-        this(Opcodes.ASM4, type, sv);
+        this(Opcodes.ASM5, type, sv);
     }
 
     /**
@@ -123,7 +121,7 @@ public class CheckSignatureAdapter extends SignatureVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param type
      *            the type of signature to be checked. See
      *            {@link #CLASS_SIGNATURE}, {@link #METHOD_SIGNATURE} and
@@ -155,7 +153,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
         }
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitClassBound() {
         if (state != FORMAL) {
@@ -166,7 +163,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
         return new CheckSignatureAdapter(TYPE_SIGNATURE, v);
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitInterfaceBound() {
         if (state != FORMAL && state != BOUND) {
@@ -178,7 +174,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
 
     // class signatures
 
-    @NotNull
     @Override
     public SignatureVisitor visitSuperclass() {
         if (type != CLASS_SIGNATURE || (state & (EMPTY | FORMAL | BOUND)) == 0) {
@@ -189,7 +184,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
         return new CheckSignatureAdapter(TYPE_SIGNATURE, v);
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitInterface() {
         if (state != SUPER) {
@@ -201,7 +195,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
 
     // method signatures
 
-    @NotNull
     @Override
     public SignatureVisitor visitParameterType() {
         if (type != METHOD_SIGNATURE
@@ -213,7 +206,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
         return new CheckSignatureAdapter(TYPE_SIGNATURE, v);
     }
 
-    @Nullable
     @Override
     public SignatureVisitor visitReturnType() {
         if (type != METHOD_SIGNATURE
@@ -227,7 +219,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
         return cv;
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitExceptionType() {
         if (state != RETURN) {
@@ -271,7 +262,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
         }
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitArrayType() {
         if (type != TYPE_SIGNATURE || state != EMPTY) {
@@ -315,7 +305,6 @@ public class CheckSignatureAdapter extends SignatureVisitor {
         }
     }
 
-    @NotNull
     @Override
     public SignatureVisitor visitTypeArgument(final char wildcard) {
         if (state != CLASS_TYPE) {

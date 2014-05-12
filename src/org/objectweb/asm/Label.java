@@ -29,9 +29,6 @@
  */
 package org.objectweb.asm;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * A label represents a position in the bytecode of a method. Labels are used
  * for jump, goto, and switch instructions, and for try catch blocks. A label
@@ -246,7 +243,6 @@ public class Label {
      * 
      * @see MethodWriter#visitMaxs
      */
-    @Nullable
     Label next;
 
     // ------------------------------------------------------------------------
@@ -300,7 +296,7 @@ public class Label {
      * @throws IllegalArgumentException
      *             if this label has not been created by the given code writer.
      */
-    void put(final MethodWriter owner, @NotNull final ByteVector out, final int source,
+    void put(final MethodWriter owner, final ByteVector out, final int source,
             final boolean wideOffset) {
         if ((status & RESOLVED) == 0) {
             if (wideOffset) {
@@ -423,7 +419,6 @@ public class Label {
      * 
      * @return the first label of the series to which this label belongs.
      */
-    @NotNull
     Label getFirst() {
         return !ClassReader.FRAMES || frame == null ? this : frame.owner;
     }
@@ -455,7 +450,7 @@ public class Label {
      * @return true if this basic block and the given one belong to a common
      *         subroutine.
      */
-    boolean inSameSubroutine(@NotNull final Label block) {
+    boolean inSameSubroutine(final Label block) {
         if ((status & VISITED) == 0 || (block.status & VISITED) == 0) {
             return false;
         }
@@ -498,7 +493,7 @@ public class Label {
      * @param nbSubroutines
      *            the total number of subroutines in the method.
      */
-    void visitSubroutine(@Nullable final Label JSR, final long id, final int nbSubroutines) {
+    void visitSubroutine(final Label JSR, final long id, final int nbSubroutines) {
         // user managed stack of labels, to avoid using a recursive method
         // (recursivity can lead to stack overflow with very large methods)
         Label stack = this;
@@ -558,7 +553,6 @@ public class Label {
      * 
      * @return a string representation of this label.
      */
-    @NotNull
     @Override
     public String toString() {
         return "L" + System.identityHashCode(this);

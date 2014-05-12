@@ -29,10 +29,9 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.MethodVisitor;
-
 import java.util.Map;
+
+import org.objectweb.asm.MethodVisitor;
 
 /**
  * A node that represents a zero operand instruction.
@@ -77,13 +76,13 @@ public class InsnNode extends AbstractInsnNode {
      *            a method visitor.
      */
     @Override
-    public void accept(@NotNull final MethodVisitor mv) {
+    public void accept(final MethodVisitor mv) {
         mv.visitInsn(opcode);
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
-        return new InsnNode(opcode);
+        return new InsnNode(opcode).cloneAnnotations(this);
     }
 }

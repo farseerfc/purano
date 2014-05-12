@@ -30,14 +30,13 @@
 
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
-
-import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * A {@link MethodVisitor} adapter to sort the exception handlers. The handlers
@@ -58,7 +57,7 @@ public class TryCatchBlockSorter extends MethodNode {
     public TryCatchBlockSorter(final MethodVisitor mv, final int access,
             final String name, final String desc, final String signature,
             final String[] exceptions) {
-        this(Opcodes.ASM4, mv, access, name, desc, signature, exceptions);
+        this(Opcodes.ASM5, mv, access, name, desc, signature, exceptions);
     }
 
     protected TryCatchBlockSorter(final int api, final MethodVisitor mv,
@@ -73,19 +72,23 @@ public class TryCatchBlockSorter extends MethodNode {
         // Compares TryCatchBlockNodes by the length of their "try" block.
         Comparator<TryCatchBlockNode> comp = new Comparator<TryCatchBlockNode>() {
 
-            public int compare(@NotNull TryCatchBlockNode t1, @NotNull TryCatchBlockNode t2) {
+            public int compare(TryCatchBlockNode t1, TryCatchBlockNode t2) {
                 int len1 = blockLength(t1);
                 int len2 = blockLength(t2);
                 return len1 - len2;
             }
 
-            private int blockLength(@NotNull TryCatchBlockNode block) {
+            private int blockLength(TryCatchBlockNode block) {
                 int startidx = instructions.indexOf(block.start);
                 int endidx = instructions.indexOf(block.end);
                 return endidx - startidx;
             }
         };
         Collections.sort(tryCatchBlocks, comp);
+        // Updates the 'target' of each try catch block annotation.
+        for (int i = 0; i < tryCatchBlocks.size(); ++i) {
+            tryCatchBlocks.get(i).updateIndex(i);
+        }
         if (mv != null) {
             accept(mv);
         }

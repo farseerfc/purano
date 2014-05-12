@@ -29,8 +29,6 @@
  */
 package org.objectweb.asm;
 
-import org.jetbrains.annotations.NotNull;
-
 /**
  * A constant pool item. Constant pool items can be created with the 'newXXX'
  * methods in the {@link ClassWriter} class.
@@ -132,7 +130,7 @@ final class Item {
      * @param i
      *            the item that must be copied into the item to be constructed.
      */
-    Item(final int index, @NotNull final Item i) {
+    Item(final int index, final Item i) {
         this.index = index;
         type = i.type;
         intVal = i.intVal;
@@ -203,8 +201,8 @@ final class Item {
      * @param strVal3
      *            third part of the value of this item.
      */
-    void set(final int type, @NotNull final String strVal1, @NotNull final String strVal2,
-            @NotNull final String strVal3) {
+    void set(final int type, final String strVal1, final String strVal2,
+            final String strVal3) {
         this.type = type;
         this.strVal1 = strVal1;
         this.strVal2 = strVal2;
@@ -277,7 +275,7 @@ final class Item {
      * @return <tt>true</tt> if the given item if equal to this one,
      *         <tt>false</tt> otherwise.
      */
-    boolean isEqualTo(@NotNull final Item i) {
+    boolean isEqualTo(final Item i) {
         switch (type) {
         case ClassWriter.UTF8:
         case ClassWriter.STR:

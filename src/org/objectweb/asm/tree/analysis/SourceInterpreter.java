@@ -29,15 +29,17 @@
  */
 package org.objectweb.asm.tree.analysis;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.*;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 
 /**
  * An {@link Interpreter} for {@link SourceValue} values.
@@ -48,25 +50,23 @@ public class SourceInterpreter extends Interpreter<SourceValue> implements
         Opcodes {
 
     public SourceInterpreter() {
-        super(ASM4);
+        super(ASM5);
     }
 
     protected SourceInterpreter(final int api) {
         super(api);
     }
 
-    @Nullable
     @Override
-    public SourceValue newValue(@Nullable final Type type) {
+    public SourceValue newValue(final Type type) {
         if (type == Type.VOID_TYPE) {
             return null;
         }
         return new SourceValue(type == null ? 1 : type.getSize());
     }
 
-    @NotNull
     @Override
-    public SourceValue newOperation(@NotNull final AbstractInsnNode insn) {
+    public SourceValue newOperation(final AbstractInsnNode insn) {
         int size;
         switch (insn.getOpcode()) {
         case LCONST_0:
@@ -88,16 +88,14 @@ public class SourceInterpreter extends Interpreter<SourceValue> implements
         return new SourceValue(size, insn);
     }
 
-    @NotNull
     @Override
     public SourceValue copyOperation(final AbstractInsnNode insn,
-            @NotNull final SourceValue value) {
+            final SourceValue value) {
         return new SourceValue(value.getSize(), insn);
     }
 
-    @NotNull
     @Override
-    public SourceValue unaryOperation(@NotNull final AbstractInsnNode insn,
+    public SourceValue unaryOperation(final AbstractInsnNode insn,
             final SourceValue value) {
         int size;
         switch (insn.getOpcode()) {
@@ -120,9 +118,8 @@ public class SourceInterpreter extends Interpreter<SourceValue> implements
         return new SourceValue(size, insn);
     }
 
-    @NotNull
     @Override
-    public SourceValue binaryOperation(@NotNull final AbstractInsnNode insn,
+    public SourceValue binaryOperation(final AbstractInsnNode insn,
             final SourceValue value1, final SourceValue value2) {
         int size;
         switch (insn.getOpcode()) {
@@ -152,7 +149,6 @@ public class SourceInterpreter extends Interpreter<SourceValue> implements
         return new SourceValue(size, insn);
     }
 
-    @NotNull
     @Override
     public SourceValue ternaryOperation(final AbstractInsnNode insn,
             final SourceValue value1, final SourceValue value2,
@@ -160,9 +156,8 @@ public class SourceInterpreter extends Interpreter<SourceValue> implements
         return new SourceValue(1, insn);
     }
 
-    @NotNull
     @Override
-    public SourceValue naryOperation(@NotNull final AbstractInsnNode insn,
+    public SourceValue naryOperation(final AbstractInsnNode insn,
             final List<? extends SourceValue> values) {
         int size;
         int opcode = insn.getOpcode();
@@ -181,9 +176,8 @@ public class SourceInterpreter extends Interpreter<SourceValue> implements
             final SourceValue value, final SourceValue expected) {
     }
 
-    @Nullable
     @Override
-    public SourceValue merge(@NotNull final SourceValue d, @NotNull final SourceValue w) {
+    public SourceValue merge(final SourceValue d, final SourceValue w) {
         if (d.insns instanceof SmallSet && w.insns instanceof SmallSet) {
             Set<AbstractInsnNode> s = ((SmallSet<AbstractInsnNode>) d.insns)
                     .union((SmallSet<AbstractInsnNode>) w.insns);

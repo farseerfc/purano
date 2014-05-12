@@ -29,9 +29,12 @@
  */
 package org.objectweb.asm.optimizer;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 
 /**
  * An {@link MethodVisitor} that collects the {@link Constant}s of the methods
@@ -45,20 +48,27 @@ public class MethodConstantsCollector extends MethodVisitor {
 
     public MethodConstantsCollector(final MethodVisitor mv,
             final ConstantPool cp) {
-        super(Opcodes.ASM4, mv);
+        super(Opcodes.ASM5, mv);
         this.cp = cp;
     }
 
-    @NotNull
+    @Override
+    public void visitParameter(String name, int access) {
+        cp.newUTF8("MethodParameters");
+        if (name != null) {
+            cp.newUTF8(name);
+        }
+        mv.visitParameter(name, access);
+    }
+
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         cp.newUTF8("AnnotationDefault");
         return new AnnotationConstantsCollector(mv.visitAnnotationDefault(), cp);
     }
 
-    @NotNull
     @Override
-    public AnnotationVisitor visitAnnotation(@NotNull final String desc,
+    public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
         cp.newUTF8(desc);
         if (visible) {
@@ -70,10 +80,22 @@ public class MethodConstantsCollector extends MethodVisitor {
                 visible), cp);
     }
 
-    @NotNull
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        cp.newUTF8(desc);
+        if (visible) {
+            cp.newUTF8("RuntimeVisibleTypeAnnotations");
+        } else {
+            cp.newUTF8("RuntimeInvisibleTypeAnnotations");
+        }
+        return new AnnotationConstantsCollector(mv.visitAnnotation(desc,
+                visible), cp);
+    }
+
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
-            @NotNull final String desc, final boolean visible) {
+            final String desc, final boolean visible) {
         cp.newUTF8(desc);
         if (visible) {
             cp.newUTF8("RuntimeVisibleParameterAnnotations");
@@ -85,28 +107,27 @@ public class MethodConstantsCollector extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, @NotNull final String type) {
+    public void visitTypeInsn(final int opcode, final String type) {
         cp.newClass(type);
         mv.visitTypeInsn(opcode, type);
     }
 
     @Override
-    public void visitFieldInsn(final int opcode, @NotNull final String owner,
-            @NotNull final String name, @NotNull final String desc) {
+    public void visitFieldInsn(final int opcode, final String owner,
+            final String name, final String desc) {
         cp.newField(owner, name, desc);
         mv.visitFieldInsn(opcode, owner, name, desc);
     }
 
     @Override
-    public void visitMethodInsn(final int opcode, @NotNull final String owner,
-            @NotNull final String name, @NotNull final String desc) {
-        boolean itf = opcode == Opcodes.INVOKEINTERFACE;
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
         cp.newMethod(owner, name, desc, itf);
-        mv.visitMethodInsn(opcode, owner, name, desc);
+        mv.visitMethodInsn(opcode, owner, name, desc, itf);
     }
 
     @Override
-    public void visitInvokeDynamicInsn(@NotNull String name, @NotNull String desc, @NotNull Handle bsm,
+    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
             Object... bsmArgs) {
         cp.newInvokeDynamic(name, desc, bsm, bsmArgs);
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -119,14 +140,27 @@ public class MethodConstantsCollector extends MethodVisitor {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(@NotNull final String desc, final int dims) {
+    public void visitMultiANewArrayInsn(final String desc, final int dims) {
         cp.newClass(desc);
         mv.visitMultiANewArrayInsn(desc, dims);
     }
 
     @Override
+    public AnnotationVisitor visitInsnAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        cp.newUTF8(desc);
+        if (visible) {
+            cp.newUTF8("RuntimeVisibleTypeAnnotations");
+        } else {
+            cp.newUTF8("RuntimeInvisibleTypeAnnotations");
+        }
+        return new AnnotationConstantsCollector(mv.visitInsnAnnotation(typeRef,
+                typePath, desc, visible), cp);
+    }
+
+    @Override
     public void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, @Nullable final String type) {
+            final Label handler, final String type) {
         if (type != null) {
             cp.newClass(type);
         }
@@ -134,8 +168,21 @@ public class MethodConstantsCollector extends MethodVisitor {
     }
 
     @Override
-    public void visitLocalVariable(@NotNull final String name, @NotNull final String desc,
-            @Nullable final String signature, final Label start, final Label end,
+    public AnnotationVisitor visitTryCatchAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        cp.newUTF8(desc);
+        if (visible) {
+            cp.newUTF8("RuntimeVisibleTypeAnnotations");
+        } else {
+            cp.newUTF8("RuntimeInvisibleTypeAnnotations");
+        }
+        return new AnnotationConstantsCollector(mv.visitTryCatchAnnotation(
+                typeRef, typePath, desc, visible), cp);
+    }
+
+    @Override
+    public void visitLocalVariable(final String name, final String desc,
+            final String signature, final Label start, final Label end,
             final int index) {
         if (signature != null) {
             cp.newUTF8("LocalVariableTypeTable");
@@ -146,6 +193,21 @@ public class MethodConstantsCollector extends MethodVisitor {
         cp.newUTF8(name);
         cp.newUTF8(desc);
         mv.visitLocalVariable(name, desc, signature, start, end, index);
+    }
+
+    @Override
+    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef,
+            TypePath typePath, Label[] start, Label[] end, int[] index,
+            String desc, boolean visible) {
+        cp.newUTF8(desc);
+        if (visible) {
+            cp.newUTF8("RuntimeVisibleTypeAnnotations");
+        } else {
+            cp.newUTF8("RuntimeInvisibleTypeAnnotations");
+        }
+        return new AnnotationConstantsCollector(
+                mv.visitLocalVariableAnnotation(typeRef, typePath, start, end,
+                        index, desc, visible), cp);
     }
 
     @Override

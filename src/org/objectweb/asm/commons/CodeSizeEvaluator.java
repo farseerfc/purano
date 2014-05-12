@@ -29,7 +29,6 @@
  */
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -47,7 +46,7 @@ public class CodeSizeEvaluator extends MethodVisitor implements Opcodes {
     private int maxSize;
 
     public CodeSizeEvaluator(final MethodVisitor mv) {
-        this(Opcodes.ASM4, mv);
+        this(Opcodes.ASM5, mv);
     }
 
     protected CodeSizeEvaluator(final int api, final MethodVisitor mv) {
@@ -121,9 +120,30 @@ public class CodeSizeEvaluator extends MethodVisitor implements Opcodes {
         }
     }
 
+    @Deprecated
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
             final String name, final String desc) {
+        if (api >= Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc,
+                opcode == Opcodes.INVOKEINTERFACE);
+    }
+
+    @Override
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc, itf);
+    }
+
+    private void doVisitMethodInsn(int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
         if (opcode == INVOKEINTERFACE) {
             minSize += 5;
             maxSize += 5;
@@ -132,7 +152,7 @@ public class CodeSizeEvaluator extends MethodVisitor implements Opcodes {
             maxSize += 3;
         }
         if (mv != null) {
-            mv.visitMethodInsn(opcode, owner, name, desc);
+            mv.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 
@@ -189,7 +209,7 @@ public class CodeSizeEvaluator extends MethodVisitor implements Opcodes {
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, @NotNull final Label... labels) {
+            final Label dflt, final Label... labels) {
         minSize += 13 + labels.length * 4;
         maxSize += 16 + labels.length * 4;
         if (mv != null) {
@@ -198,7 +218,7 @@ public class CodeSizeEvaluator extends MethodVisitor implements Opcodes {
     }
 
     @Override
-    public void visitLookupSwitchInsn(final Label dflt, @NotNull final int[] keys,
+    public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
             final Label[] labels) {
         minSize += 9 + keys.length * 8;
         maxSize += 12 + keys.length * 8;

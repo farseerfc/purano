@@ -29,9 +29,12 @@
  */
 package org.objectweb.asm.xml;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
 
@@ -78,7 +81,7 @@ public final class SAXClassAdapter extends ClassVisitor {
      *            {@link ContentHandler#endDocument() endDocument()} events.
      */
     public SAXClassAdapter(final ContentHandler h, boolean singleDocument) {
-        super(Opcodes.ASM4);
+        super(Opcodes.ASM5);
         this.sa = new SAXAdapter(h);
         this.singleDocument = singleDocument;
         if (!singleDocument) {
@@ -87,7 +90,7 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visitSource(@Nullable final String source, @Nullable final String debug) {
+    public void visitSource(final String source, final String debug) {
         AttributesImpl att = new AttributesImpl();
         if (source != null) {
             att.addAttribute("", "file", "file", "", encode(source));
@@ -100,8 +103,8 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visitOuterClass(final String owner, @Nullable final String name,
-            @Nullable final String desc) {
+    public void visitOuterClass(final String owner, final String name,
+            final String desc) {
         AttributesImpl att = new AttributesImpl();
         att.addAttribute("", "owner", "owner", "", owner);
         if (name != null) {
@@ -114,7 +117,6 @@ public final class SAXClassAdapter extends ClassVisitor {
         sa.addElement("outerclass", att);
     }
 
-    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -123,9 +125,16 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public void visit(final int version, final int access, @Nullable final String name,
-            @Nullable final String signature, @Nullable final String superName,
-            @Nullable final String[] interfaces) {
+    public AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        return new SAXAnnotationAdapter(sa, "typeAnnotation", visible ? 1 : -1,
+                null, desc, typeRef, typePath);
+    }
+
+    @Override
+    public void visit(final int version, final int access, final String name,
+            final String signature, final String superName,
+            final String[] interfaces) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access | ACCESS_CLASS, sb);
 
@@ -158,10 +167,9 @@ public final class SAXClassAdapter extends ClassVisitor {
         sa.addEnd("interfaces");
     }
 
-    @NotNull
     @Override
     public FieldVisitor visitField(final int access, final String name,
-            final String desc, @Nullable final String signature, @Nullable final Object value) {
+            final String desc, final String signature, final Object value) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access | ACCESS_FIELD, sb);
 
@@ -180,10 +188,9 @@ public final class SAXClassAdapter extends ClassVisitor {
         return new SAXFieldAdapter(sa, att);
     }
 
-    @NotNull
     @Override
     public MethodVisitor visitMethod(final int access, final String name,
-            final String desc, @Nullable final String signature, @Nullable final String[] exceptions) {
+            final String desc, final String signature, final String[] exceptions) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access, sb);
 
@@ -210,8 +217,8 @@ public final class SAXClassAdapter extends ClassVisitor {
     }
 
     @Override
-    public final void visitInnerClass(@Nullable final String name,
-            @Nullable final String outerName, @Nullable final String innerName, final int access) {
+    public final void visitInnerClass(final String name,
+            final String outerName, final String innerName, final int access) {
         StringBuffer sb = new StringBuffer();
         appendAccess(access | ACCESS_INNER, sb);
 
@@ -237,8 +244,7 @@ public final class SAXClassAdapter extends ClassVisitor {
         }
     }
 
-    @NotNull
-    static final String encode(@NotNull final String s) {
+    static final String encode(final String s) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -261,7 +267,7 @@ public final class SAXClassAdapter extends ClassVisitor {
         return sb.toString();
     }
 
-    static void appendAccess(final int access, @NotNull final StringBuffer sb) {
+    static void appendAccess(final int access, final StringBuffer sb) {
         if ((access & Opcodes.ACC_PUBLIC) != 0) {
             sb.append("public ");
         }
@@ -321,6 +327,9 @@ public final class SAXClassAdapter extends ClassVisitor {
         }
         if ((access & Opcodes.ACC_DEPRECATED) != 0) {
             sb.append("deprecated ");
+        }
+        if ((access & Opcodes.ACC_MANDATED) != 0) {
+            sb.append("mandated ");
         }
     }
 }

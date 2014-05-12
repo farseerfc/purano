@@ -29,11 +29,10 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.Map;
+
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-
-import java.util.Map;
 
 /**
  * A node that represents a MULTIANEWARRAY instruction.
@@ -72,14 +71,14 @@ public class MultiANewArrayInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor mv) {
+    public void accept(final MethodVisitor mv) {
         mv.visitMultiANewArrayInsn(desc, dims);
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
-        return new MultiANewArrayInsnNode(desc, dims);
+        return new MultiANewArrayInsnNode(desc, dims).cloneAnnotations(this);
     }
 
 }

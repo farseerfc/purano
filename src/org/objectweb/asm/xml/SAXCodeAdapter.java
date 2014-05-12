@@ -29,14 +29,18 @@
  */
 package org.objectweb.asm.xml;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
-import org.objectweb.asm.util.Printer;
-import org.xml.sax.helpers.AttributesImpl;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.TypePath;
+import org.objectweb.asm.util.Printer;
+import org.xml.sax.helpers.AttributesImpl;
 
 /**
  * A {@link MethodVisitor} that generates SAX 2.0 events from the visited
@@ -54,7 +58,8 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     SAXAdapter sa;
 
-    @NotNull
+    int access;
+
     private final Map<Label, String> labelNames;
 
     /**
@@ -63,18 +68,30 @@ public final class SAXCodeAdapter extends MethodVisitor {
      * @param sa
      *            content handler that will be used to send SAX 2.0 events.
      */
-    public SAXCodeAdapter(@NotNull final SAXAdapter sa, final int access) {
-        super(Opcodes.ASM4);
+    public SAXCodeAdapter(final SAXAdapter sa, final int access) {
+        super(Opcodes.ASM5);
         this.sa = sa;
+        this.access = access;
         this.labelNames = new HashMap<Label, String>();
+    }
 
-        if ((access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_INTERFACE | Opcodes.ACC_NATIVE)) == 0) {
-            sa.addStart("code", new AttributesImpl());
+    @Override
+    public void visitParameter(String name, int access) {
+        AttributesImpl attrs = new AttributesImpl();
+        if (name != null) {
+            attrs.addAttribute("", "name", "name", "", name);
         }
+        StringBuffer sb = new StringBuffer();
+        SAXClassAdapter.appendAccess(access, sb);
+        attrs.addAttribute("", "access", "access", "", sb.toString());
+        sa.addElement("parameter", attrs);
     }
 
     @Override
     public final void visitCode() {
+        if ((access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_INTERFACE | Opcodes.ACC_NATIVE)) == 0) {
+            sa.addStart("code", new AttributesImpl());
+        }
     }
 
     @Override
@@ -174,17 +191,18 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public final void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+            final String name, final String desc, final boolean itf) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "owner", "owner", "", owner);
         attrs.addAttribute("", "name", "name", "", name);
         attrs.addAttribute("", "desc", "desc", "", desc);
+        attrs.addAttribute("", "itf", "itf", "", itf ? "true" : "false");
         sa.addElement(Printer.OPCODES[opcode], attrs);
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, String desc, @NotNull Handle bsm,
-            @NotNull Object... bsmArgs) {
+    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
+            Object... bsmArgs) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "name", "name", "", name);
         attrs.addAttribute("", "desc", "desc", "", desc);
@@ -212,12 +230,11 @@ public final class SAXCodeAdapter extends MethodVisitor {
     }
 
     @Override
-    public final void visitLdcInsn(@NotNull final Object cst) {
+    public final void visitLdcInsn(final Object cst) {
         sa.addElement(Printer.OPCODES[Opcodes.LDC], getConstantAttribute(cst));
     }
 
-    @NotNull
-    private static AttributesImpl getConstantAttribute(@NotNull final Object cst) {
+    private static AttributesImpl getConstantAttribute(final Object cst) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "cst", "cst", "",
                 SAXClassAdapter.encode(cst.toString()));
@@ -236,7 +253,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public final void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, @NotNull final Label... labels) {
+            final Label dflt, final Label... labels) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "min", "min", "", Integer.toString(min));
         attrs.addAttribute("", "max", "max", "", Integer.toString(max));
@@ -253,7 +270,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public final void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            @NotNull final Label[] labels) {
+            final Label[] labels) {
         AttributesImpl att = new AttributesImpl();
         att.addAttribute("", "dflt", "dflt", "", getLabel(dflt));
         String o = Printer.OPCODES[Opcodes.LOOKUPSWITCH];
@@ -277,7 +294,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public final void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, @Nullable final String type) {
+            final Label handler, final String type) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "start", "start", "", getLabel(start));
         attrs.addAttribute("", "end", "end", "", getLabel(end));
@@ -302,7 +319,7 @@ public final class SAXCodeAdapter extends MethodVisitor {
 
     @Override
     public void visitLocalVariable(final String name, final String desc,
-            @Nullable final String signature, final Label start, final Label end,
+            final String signature, final Label start, final Label end,
             final int index) {
         AttributesImpl attrs = new AttributesImpl();
         attrs.addAttribute("", "name", "name", "", name);
@@ -325,13 +342,11 @@ public final class SAXCodeAdapter extends MethodVisitor {
         sa.addElement("LineNumber", attrs);
     }
 
-    @Nullable
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
         return new SAXAnnotationAdapter(sa, "annotationDefault", 0, null, null);
     }
 
-    @Nullable
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -339,12 +354,48 @@ public final class SAXCodeAdapter extends MethodVisitor {
                 null, desc);
     }
 
-    @NotNull
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        return new SAXAnnotationAdapter(sa, "typeAnnotation", visible ? 1 : -1,
+                null, desc, typeRef, typePath);
+    }
+
     @Override
     public AnnotationVisitor visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible) {
         return new SAXAnnotationAdapter(sa, "parameterAnnotation", visible ? 1
                 : -1, parameter, desc);
+    }
+
+    @Override
+    public AnnotationVisitor visitInsnAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        return new SAXAnnotationAdapter(sa, "insnAnnotation", visible ? 1 : -1,
+                null, desc, typeRef, typePath);
+    }
+
+    @Override
+    public AnnotationVisitor visitTryCatchAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        return new SAXAnnotationAdapter(sa, "tryCatchAnnotation", visible ? 1
+                : -1, null, desc, typeRef, typePath);
+    }
+
+    @Override
+    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef,
+            TypePath typePath, Label[] start, Label[] end, int[] index,
+            String desc, boolean visible) {
+        String[] s = new String[start.length];
+        String[] e = new String[end.length];
+        for (int i = 0; i < s.length; ++i) {
+            s[i] = getLabel(start[i]);
+        }
+        for (int i = 0; i < e.length; ++i) {
+            e[i] = getLabel(end[i]);
+        }
+        return new SAXAnnotationAdapter(sa, "localVariableAnnotation",
+                visible ? 1 : -1, null, desc, typeRef, typePath, s, e, index);
     }
 
     @Override

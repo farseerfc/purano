@@ -29,9 +29,6 @@
  */
 package org.objectweb.asm;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * A non standard class, field, method or code attribute.
  * 
@@ -53,7 +50,6 @@ public class Attribute {
     /**
      * The next attribute in this attribute list. May be <tt>null</tt>.
      */
-    @Nullable
     Attribute next;
 
     /**
@@ -91,7 +87,6 @@ public class Attribute {
      * @return the labels corresponding to this attribute, or <tt>null</tt> if
      *         this attribute is not a code attribute that contains labels.
      */
-    @Nullable
     protected Label[] getLabels() {
         return null;
     }
@@ -127,8 +122,7 @@ public class Attribute {
      * @return a <i>new</i> {@link Attribute} object corresponding to the given
      *         bytes.
      */
-    @NotNull
-    protected Attribute read(@NotNull final ClassReader cr, final int off,
+    protected Attribute read(final ClassReader cr, final int off,
             final int len, final char[] buf, final int codeOff,
             final Label[] labels) {
         Attribute attr = new Attribute(type);
@@ -162,7 +156,6 @@ public class Attribute {
      *            is not a code attribute.
      * @return the byte array form of this attribute.
      */
-    @NotNull
     protected ByteVector write(final ClassWriter cw, final byte[] code,
             final int len, final int maxStack, final int maxLocals) {
         ByteVector v = new ByteVector();
@@ -211,7 +204,7 @@ public class Attribute {
      * @return the size of all the attributes in this attribute list. This size
      *         includes the size of the attribute headers.
      */
-    final int getSize(@NotNull final ClassWriter cw, final byte[] code, final int len,
+    final int getSize(final ClassWriter cw, final byte[] code, final int len,
             final int maxStack, final int maxLocals) {
         Attribute attr = this;
         int size = 0;
@@ -249,8 +242,8 @@ public class Attribute {
      * @param out
      *            where the attributes must be written.
      */
-    final void put(@NotNull final ClassWriter cw, final byte[] code, final int len,
-            final int maxStack, final int maxLocals, @NotNull final ByteVector out) {
+    final void put(final ClassWriter cw, final byte[] code, final int len,
+            final int maxStack, final int maxLocals, final ByteVector out) {
         Attribute attr = this;
         while (attr != null) {
             ByteVector b = attr.write(cw, code, len, maxStack, maxLocals);

@@ -29,15 +29,15 @@
  */
 package org.objectweb.asm.util;
 
-import org.jetbrains.annotations.NotNull;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import org.objectweb.asm.TypePath;
 
 /**
  * An abstract converter from visit events to text.
@@ -49,7 +49,6 @@ public abstract class Printer {
     /**
      * The names of the Java Virtual Machine opcodes.
      */
-    @NotNull
     public static final String[] OPCODES;
 
     /**
@@ -57,14 +56,12 @@ public abstract class Printer {
      * {@link org.objectweb.asm.MethodVisitor#visitIntInsn} method when
      * <code>opcode</code> is <code>NEWARRAY</code>.
      */
-    @NotNull
     public static final String[] TYPES;
 
     /**
      * The names of the <code>tag</code> field values for
      * {@link org.objectweb.asm.Handle}.
      */
-    @NotNull
     public static final String[] HANDLE_TAG;
 
     static {
@@ -120,14 +117,13 @@ public abstract class Printer {
 
     /**
      * The ASM API version implemented by this class. The value of this field
-     * must be one of {@link Opcodes#ASM4}.
+     * must be one of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      */
     protected final int api;
 
     /**
      * A buffer that can be used to create strings.
      */
-    @NotNull
     protected final StringBuffer buf;
 
     /**
@@ -142,7 +138,6 @@ public abstract class Printer {
      * string list that can contain other string lists, which can themselves
      * contain other string lists, and so on.
      */
-    @NotNull
     public final List<Object> text;
 
     /**
@@ -177,9 +172,17 @@ public abstract class Printer {
      * Class annotation. See
      * {@link org.objectweb.asm.ClassVisitor#visitAnnotation}.
      */
-    @NotNull
     public abstract Printer visitClassAnnotation(final String desc,
             final boolean visible);
+
+    /**
+     * Class type annotation. See
+     * {@link org.objectweb.asm.ClassVisitor#visitTypeAnnotation}.
+     */
+    public Printer visitClassTypeAnnotation(final int typeRef,
+            final TypePath typePath, final String desc, final boolean visible) {
+        throw new RuntimeException("Must be overriden");
+    }
 
     /**
      * Class attribute. See
@@ -197,14 +200,12 @@ public abstract class Printer {
     /**
      * Class field. See {@link org.objectweb.asm.ClassVisitor#visitField}.
      */
-    @NotNull
     public abstract Printer visitField(final int access, final String name,
             final String desc, final String signature, final Object value);
 
     /**
      * Class method. See {@link org.objectweb.asm.ClassVisitor#visitMethod}.
      */
-    @NotNull
     public abstract Printer visitMethod(final int access, final String name,
             final String desc, final String signature, final String[] exceptions);
 
@@ -233,14 +234,12 @@ public abstract class Printer {
      * Nested annotation value. See
      * {@link org.objectweb.asm.AnnotationVisitor#visitAnnotation}.
      */
-    @NotNull
     public abstract Printer visitAnnotation(final String name, final String desc);
 
     /**
      * Annotation array value. See
      * {@link org.objectweb.asm.AnnotationVisitor#visitArray}.
      */
-    @NotNull
     public abstract Printer visitArray(final String name);
 
     /**
@@ -256,9 +255,17 @@ public abstract class Printer {
      * Field annotation. See
      * {@link org.objectweb.asm.FieldVisitor#visitAnnotation}.
      */
-    @NotNull
     public abstract Printer visitFieldAnnotation(final String desc,
             final boolean visible);
+
+    /**
+     * Field type annotation. See
+     * {@link org.objectweb.asm.FieldVisitor#visitTypeAnnotation}.
+     */
+    public Printer visitFieldTypeAnnotation(final int typeRef,
+            final TypePath typePath, final String desc, final boolean visible) {
+        throw new RuntimeException("Must be overriden");
+    }
 
     /**
      * Field attribute. See
@@ -276,25 +283,39 @@ public abstract class Printer {
     // ------------------------------------------------------------------------
 
     /**
+     * Method parameter. See
+     * {@link org.objectweb.asm.MethodVisitor#visitParameter(String, int)}.
+     */
+    public void visitParameter(String name, int access) {
+        throw new RuntimeException("Must be overriden");
+    }
+
+    /**
      * Method default annotation. See
      * {@link org.objectweb.asm.MethodVisitor#visitAnnotationDefault}.
      */
-    @NotNull
     public abstract Printer visitAnnotationDefault();
 
     /**
      * Method annotation. See
      * {@link org.objectweb.asm.MethodVisitor#visitAnnotation}.
      */
-    @NotNull
     public abstract Printer visitMethodAnnotation(final String desc,
             final boolean visible);
+
+    /**
+     * Method type annotation. See
+     * {@link org.objectweb.asm.MethodVisitor#visitTypeAnnotation}.
+     */
+    public Printer visitMethodTypeAnnotation(final int typeRef,
+            final TypePath typePath, final String desc, final boolean visible) {
+        throw new RuntimeException("Must be overriden");
+    }
 
     /**
      * Method parameter annotation. See
      * {@link org.objectweb.asm.MethodVisitor#visitParameterAnnotation}.
      */
-    @NotNull
     public abstract Printer visitParameterAnnotation(final int parameter,
             final String desc, final boolean visible);
 
@@ -351,8 +372,33 @@ public abstract class Printer {
      * Method instruction. See
      * {@link org.objectweb.asm.MethodVisitor#visitMethodInsn}.
      */
-    public abstract void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc);
+    @Deprecated
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc) {
+        if (api >= Opcodes.ASM5) {
+            boolean itf = opcode == Opcodes.INVOKEINTERFACE;
+            visitMethodInsn(opcode, owner, name, desc, itf);
+            return;
+        }
+        throw new RuntimeException("Must be overriden");
+    }
+
+    /**
+     * Method instruction. See
+     * {@link org.objectweb.asm.MethodVisitor#visitMethodInsn}.
+     */
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            if (itf != (opcode == Opcodes.INVOKEINTERFACE)) {
+                throw new IllegalArgumentException(
+                        "INVOKESPECIAL/STATIC on interfaces require ASM 5");
+            }
+            visitMethodInsn(opcode, owner, name, desc);
+            return;
+        }
+        throw new RuntimeException("Must be overriden");
+    }
 
     /**
      * Method instruction. See
@@ -406,11 +452,29 @@ public abstract class Printer {
             final int dims);
 
     /**
+     * Instruction type annotation. See
+     * {@link org.objectweb.asm.MethodVisitor#visitInsnAnnotation}.
+     */
+    public Printer visitInsnAnnotation(final int typeRef,
+            final TypePath typePath, final String desc, final boolean visible) {
+        throw new RuntimeException("Must be overriden");
+    }
+
+    /**
      * Method exception handler. See
      * {@link org.objectweb.asm.MethodVisitor#visitTryCatchBlock}.
      */
     public abstract void visitTryCatchBlock(final Label start, final Label end,
             final Label handler, final String type);
+
+    /**
+     * Try catch block type annotation. See
+     * {@link org.objectweb.asm.MethodVisitor#visitTryCatchAnnotation}.
+     */
+    public Printer visitTryCatchAnnotation(final int typeRef,
+            final TypePath typePath, final String desc, final boolean visible) {
+        throw new RuntimeException("Must be overriden");
+    }
 
     /**
      * Method debug info. See
@@ -419,6 +483,16 @@ public abstract class Printer {
     public abstract void visitLocalVariable(final String name,
             final String desc, final String signature, final Label start,
             final Label end, final int index);
+
+    /**
+     * Local variable type annotation. See
+     * {@link org.objectweb.asm.MethodVisitor#visitTryCatchAnnotation}.
+     */
+    public Printer visitLocalVariableAnnotation(final int typeRef,
+            final TypePath typePath, final Label[] start, final Label[] end,
+            final int[] index, final String desc, final boolean visible) {
+        throw new RuntimeException("Must be overriden");
+    }
 
     /**
      * Method debug info. See
@@ -442,7 +516,6 @@ public abstract class Printer {
      * 
      * @return the text constructed by this visitor.
      */
-    @NotNull
     public List<Object> getText() {
         return text;
     }
@@ -453,7 +526,7 @@ public abstract class Printer {
      * @param pw
      *            the print writer to be used.
      */
-    public void print(@NotNull final PrintWriter pw) {
+    public void print(final PrintWriter pw) {
         printList(pw, text);
     }
 
@@ -465,7 +538,7 @@ public abstract class Printer {
      * @param s
      *            the string to be added.
      */
-    public static void appendString(@NotNull final StringBuffer buf, @NotNull final String s) {
+    public static void appendString(final StringBuffer buf, final String s) {
         buf.append('\"');
         for (int i = 0; i < s.length(); ++i) {
             char c = s.charAt(i);
@@ -503,7 +576,7 @@ public abstract class Printer {
      *            a string tree, i.e., a string list that can contain other
      *            string lists, and so on recursively.
      */
-    static void printList(@NotNull final PrintWriter pw, @NotNull final List<?> l) {
+    static void printList(final PrintWriter pw, final List<?> l) {
         for (int i = 0; i < l.size(); ++i) {
             Object o = l.get(i);
             if (o instanceof List) {

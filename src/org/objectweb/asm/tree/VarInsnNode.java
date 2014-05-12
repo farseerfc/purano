@@ -29,10 +29,9 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.MethodVisitor;
-
 import java.util.Map;
+
+import org.objectweb.asm.MethodVisitor;
 
 /**
  * A node that represents a local variable instruction. A local variable
@@ -83,13 +82,13 @@ public class VarInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor mv) {
+    public void accept(final MethodVisitor mv) {
         mv.visitVarInsn(opcode, var);
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
-        return new VarInsnNode(opcode, var);
+        return new VarInsnNode(opcode, var).cloneAnnotations(this);
     }
 }

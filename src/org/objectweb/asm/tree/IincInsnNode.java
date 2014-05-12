@@ -29,11 +29,10 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.Map;
+
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-
-import java.util.Map;
 
 /**
  * A node that represents an IINC instruction.
@@ -72,13 +71,13 @@ public class IincInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor mv) {
+    public void accept(final MethodVisitor mv) {
         mv.visitIincInsn(var, incr);
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
-        return new IincInsnNode(var, incr);
+        return new IincInsnNode(var, incr).cloneAnnotations(this);
     }
 }

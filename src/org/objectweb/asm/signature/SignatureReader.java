@@ -29,8 +29,6 @@
  */
 package org.objectweb.asm.signature;
 
-import org.jetbrains.annotations.NotNull;
-
 /**
  * A type signature parser to make a signature visitor visit an existing
  * signature.
@@ -71,7 +69,7 @@ public class SignatureReader {
      * @param v
      *            the visitor that must visit this signature.
      */
-    public void accept(@NotNull final SignatureVisitor v) {
+    public void accept(final SignatureVisitor v) {
         String signature = this.signature;
         int len = signature.length();
         int pos;
@@ -128,7 +126,7 @@ public class SignatureReader {
      * @param v
      *            the visitor that must visit this signature.
      */
-    public void acceptType(@NotNull final SignatureVisitor v) {
+    public void acceptType(final SignatureVisitor v) {
         parseType(this.signature, 0, v);
     }
 
@@ -143,8 +141,8 @@ public class SignatureReader {
      *            the visitor that must visit this signature.
      * @return the index of the first character after the parsed signature.
      */
-    private static int parseType(@NotNull final String signature, int pos,
-            @NotNull final SignatureVisitor v) {
+    private static int parseType(final String signature, int pos,
+            final SignatureVisitor v) {
         char c;
         int start, end;
         boolean visited, inner;

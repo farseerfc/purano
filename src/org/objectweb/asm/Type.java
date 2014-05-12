@@ -29,9 +29,6 @@
  */
 package org.objectweb.asm;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
@@ -216,8 +213,7 @@ public class Type {
      *            a field or method type descriptor.
      * @return the Java type corresponding to the given type descriptor.
      */
-    @NotNull
-    public static Type getType(@NotNull final String typeDescriptor) {
+    public static Type getType(final String typeDescriptor) {
         return getType(typeDescriptor.toCharArray(), 0);
     }
 
@@ -228,8 +224,7 @@ public class Type {
      *            an internal name.
      * @return the Java type corresponding to the given internal name.
      */
-    @NotNull
-    public static Type getObjectType(@NotNull final String internalName) {
+    public static Type getObjectType(final String internalName) {
         char[] buf = internalName.toCharArray();
         return new Type(buf[0] == '[' ? ARRAY : OBJECT, buf, 0, buf.length);
     }
@@ -242,8 +237,7 @@ public class Type {
      *            a method descriptor.
      * @return the Java type corresponding to the given method descriptor.
      */
-    @NotNull
-    public static Type getMethodType(@NotNull final String methodDescriptor) {
+    public static Type getMethodType(final String methodDescriptor) {
         return getType(methodDescriptor.toCharArray(), 0);
     }
 
@@ -258,8 +252,7 @@ public class Type {
      * @return the Java type corresponding to the given argument and return
      *         types.
      */
-    @NotNull
-    public static Type getMethodType(@NotNull final Type returnType,
+    public static Type getMethodType(final Type returnType,
             final Type... argumentTypes) {
         return getType(getMethodDescriptor(returnType, argumentTypes));
     }
@@ -271,8 +264,7 @@ public class Type {
      *            a class.
      * @return the Java type corresponding to the given class.
      */
-    @NotNull
-    public static Type getType(@NotNull final Class<?> c) {
+    public static Type getType(final Class<?> c) {
         if (c.isPrimitive()) {
             if (c == Integer.TYPE) {
                 return INT_TYPE;
@@ -305,8 +297,7 @@ public class Type {
      *            a {@link Constructor Constructor} object.
      * @return the Java method type corresponding to the given constructor.
      */
-    @NotNull
-    public static Type getType(@NotNull final Constructor<?> c) {
+    public static Type getType(final Constructor<?> c) {
         return getType(getConstructorDescriptor(c));
     }
 
@@ -317,8 +308,7 @@ public class Type {
      *            a {@link Method Method} object.
      * @return the Java method type corresponding to the given method.
      */
-    @NotNull
-    public static Type getType(@NotNull final Method m) {
+    public static Type getType(final Method m) {
         return getType(getMethodDescriptor(m));
     }
 
@@ -331,8 +321,7 @@ public class Type {
      * @return the Java types corresponding to the argument types of the given
      *         method descriptor.
      */
-    @NotNull
-    public static Type[] getArgumentTypes(@NotNull final String methodDescriptor) {
+    public static Type[] getArgumentTypes(final String methodDescriptor) {
         char[] buf = methodDescriptor.toCharArray();
         int off = 1;
         int size = 0;
@@ -368,8 +357,7 @@ public class Type {
      * @return the Java types corresponding to the argument types of the given
      *         method.
      */
-    @NotNull
-    public static Type[] getArgumentTypes(@NotNull final Method method) {
+    public static Type[] getArgumentTypes(final Method method) {
         Class<?>[] classes = method.getParameterTypes();
         Type[] types = new Type[classes.length];
         for (int i = classes.length - 1; i >= 0; --i) {
@@ -387,8 +375,7 @@ public class Type {
      * @return the Java type corresponding to the return type of the given
      *         method descriptor.
      */
-    @NotNull
-    public static Type getReturnType(@NotNull final String methodDescriptor) {
+    public static Type getReturnType(final String methodDescriptor) {
         char[] buf = methodDescriptor.toCharArray();
         return getType(buf, methodDescriptor.indexOf(')') + 1);
     }
@@ -402,8 +389,7 @@ public class Type {
      * @return the Java type corresponding to the return type of the given
      *         method.
      */
-    @NotNull
-    public static Type getReturnType(@NotNull final Method method) {
+    public static Type getReturnType(final Method method) {
         return getType(method.getReturnType());
     }
 
@@ -415,10 +401,10 @@ public class Type {
      * @return the size of the arguments of the method (plus one for the
      *         implicit this argument), argSize, and the size of its return
      *         value, retSize, packed into a single int i =
-     *         <tt>(argSize << 2) | retSize</tt> (argSize is therefore equal to
-     *         <tt>i >> 2</tt>, and retSize to <tt>i & 0x03</tt>).
+     *         <tt>(argSize &lt;&lt; 2) | retSize</tt> (argSize is therefore equal to
+     *         <tt>i &gt;&gt; 2</tt>, and retSize to <tt>i &amp; 0x03</tt>).
      */
-    public static int getArgumentsAndReturnSizes(@NotNull final String desc) {
+    public static int getArgumentsAndReturnSizes(final String desc) {
         int n = 1;
         int c = 1;
         while (true) {
@@ -457,8 +443,7 @@ public class Type {
      *            the offset of this descriptor in the previous buffer.
      * @return the Java type corresponding to the given type descriptor.
      */
-    @NotNull
-    private static Type getType(@NotNull final char[] buf, final int off) {
+    private static Type getType(final char[] buf, final int off) {
         int len;
         switch (buf[off]) {
         case 'V':
@@ -540,7 +525,6 @@ public class Type {
      * 
      * @return Returns the type of the elements of this array type.
      */
-    @NotNull
     public Type getElementType() {
         return getType(buf, off + getDimensions());
     }
@@ -551,7 +535,6 @@ public class Type {
      * 
      * @return the binary name of the class corresponding to this type.
      */
-    @Nullable
     public String getClassName() {
         switch (sort) {
         case VOID:
@@ -593,7 +576,6 @@ public class Type {
      * 
      * @return the internal name of the class corresponding to this object type.
      */
-    @NotNull
     public String getInternalName() {
         return new String(buf, off, len);
     }
@@ -604,7 +586,6 @@ public class Type {
      * 
      * @return the argument types of methods of this type.
      */
-    @NotNull
     public Type[] getArgumentTypes() {
         return getArgumentTypes(getDescriptor());
     }
@@ -615,7 +596,6 @@ public class Type {
      * 
      * @return the return type of methods of this type.
      */
-    @NotNull
     public Type getReturnType() {
         return getReturnType(getDescriptor());
     }
@@ -626,9 +606,10 @@ public class Type {
      * 
      * @return the size of the arguments (plus one for the implicit this
      *         argument), argSize, and the size of the return value, retSize,
-     *         packed into a single int i = <tt>(argSize << 2) | retSize</tt>
-     *         (argSize is therefore equal to <tt>i >> 2</tt>, and retSize to
-     *         <tt>i & 0x03</tt>).
+     *         packed into a single
+     *         int i = <tt>(argSize &lt;&lt; 2) | retSize</tt>
+     *         (argSize is therefore equal to <tt>i &gt;&gt; 2</tt>,
+     *         and retSize to <tt>i &amp; 0x03</tt>).
      */
     public int getArgumentsAndReturnSizes() {
         return getArgumentsAndReturnSizes(getDescriptor());
@@ -643,7 +624,6 @@ public class Type {
      * 
      * @return the descriptor corresponding to this Java type.
      */
-    @NotNull
     public String getDescriptor() {
         StringBuffer buf = new StringBuffer();
         getDescriptor(buf);
@@ -661,9 +641,8 @@ public class Type {
      * @return the descriptor corresponding to the given argument and return
      *         types.
      */
-    @NotNull
-    public static String getMethodDescriptor(@NotNull final Type returnType,
-            @NotNull final Type... argumentTypes) {
+    public static String getMethodDescriptor(final Type returnType,
+            final Type... argumentTypes) {
         StringBuffer buf = new StringBuffer();
         buf.append('(');
         for (int i = 0; i < argumentTypes.length; ++i) {
@@ -681,7 +660,7 @@ public class Type {
      * @param buf
      *            the string buffer to which the descriptor must be appended.
      */
-    private void getDescriptor(@NotNull final StringBuffer buf) {
+    private void getDescriptor(final StringBuffer buf) {
         if (this.buf == null) {
             // descriptor is in byte 3 of 'off' for primitive types (buf ==
             // null)
@@ -709,7 +688,7 @@ public class Type {
      *            an object or array class.
      * @return the internal name of the given class.
      */
-    public static String getInternalName(@NotNull final Class<?> c) {
+    public static String getInternalName(final Class<?> c) {
         return c.getName().replace('.', '/');
     }
 
@@ -720,7 +699,6 @@ public class Type {
      *            an object class, a primitive class or an array class.
      * @return the descriptor corresponding to the given class.
      */
-    @NotNull
     public static String getDescriptor(final Class<?> c) {
         StringBuffer buf = new StringBuffer();
         getDescriptor(buf, c);
@@ -734,8 +712,7 @@ public class Type {
      *            a {@link Constructor Constructor} object.
      * @return the descriptor of the given constructor.
      */
-    @NotNull
-    public static String getConstructorDescriptor(@NotNull final Constructor<?> c) {
+    public static String getConstructorDescriptor(final Constructor<?> c) {
         Class<?>[] parameters = c.getParameterTypes();
         StringBuffer buf = new StringBuffer();
         buf.append('(');
@@ -752,8 +729,7 @@ public class Type {
      *            a {@link Method Method} object.
      * @return the descriptor of the given method.
      */
-    @NotNull
-    public static String getMethodDescriptor(@NotNull final Method m) {
+    public static String getMethodDescriptor(final Method m) {
         Class<?>[] parameters = m.getParameterTypes();
         StringBuffer buf = new StringBuffer();
         buf.append('(');
@@ -773,7 +749,7 @@ public class Type {
      * @param c
      *            the class whose descriptor must be computed.
      */
-    private static void getDescriptor(@NotNull final StringBuffer buf, final Class<?> c) {
+    private static void getDescriptor(final StringBuffer buf, final Class<?> c) {
         Class<?> d = c;
         while (true) {
             if (d.isPrimitive()) {
@@ -913,7 +889,6 @@ public class Type {
      * 
      * @return the descriptor of this type.
      */
-    @NotNull
     @Override
     public String toString() {
         return getDescriptor();

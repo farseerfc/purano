@@ -29,7 +29,6 @@
  */
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -43,7 +42,6 @@ public class StaticInitMerger extends ClassVisitor {
 
     private String name;
 
-    @Nullable
     private MethodVisitor clinit;
 
     private final String prefix;
@@ -51,7 +49,7 @@ public class StaticInitMerger extends ClassVisitor {
     private int counter;
 
     public StaticInitMerger(final String prefix, final ClassVisitor cv) {
-        this(Opcodes.ASM4, prefix, cv);
+        this(Opcodes.ASM5, prefix, cv);
     }
 
     protected StaticInitMerger(final int api, final String prefix,
@@ -80,7 +78,8 @@ public class StaticInitMerger extends ClassVisitor {
             if (clinit == null) {
                 clinit = cv.visitMethod(a, name, desc, null, null);
             }
-            clinit.visitMethodInsn(Opcodes.INVOKESTATIC, this.name, n, desc);
+            clinit.visitMethodInsn(Opcodes.INVOKESTATIC, this.name, n, desc,
+                    false);
         } else {
             mv = cv.visitMethod(access, name, desc, signature, exceptions);
         }

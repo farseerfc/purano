@@ -29,11 +29,15 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.*;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 
 /**
  * A node that represents a field.
@@ -89,6 +93,24 @@ public class FieldNode extends FieldVisitor {
     public List<AnnotationNode> invisibleAnnotations;
 
     /**
+     * The runtime visible type annotations of this field. This list is a list
+     * of {@link TypeAnnotationNode} objects. May be <tt>null</tt>.
+     * 
+     * @associates org.objectweb.asm.tree.TypeAnnotationNode
+     * @label visible
+     */
+    public List<TypeAnnotationNode> visibleTypeAnnotations;
+
+    /**
+     * The runtime invisible type annotations of this field. This list is a list
+     * of {@link TypeAnnotationNode} objects. May be <tt>null</tt>.
+     * 
+     * @associates org.objectweb.asm.tree.TypeAnnotationNode
+     * @label invisible
+     */
+    public List<TypeAnnotationNode> invisibleTypeAnnotations;
+
+    /**
      * The non standard attributes of this field. This list is a list of
      * {@link Attribute} objects. May be <tt>null</tt>.
      * 
@@ -117,20 +139,24 @@ public class FieldNode extends FieldVisitor {
      *            <tt>null</tt> if the field does not have an initial value,
      *            must be an {@link Integer}, a {@link Float}, a {@link Long}, a
      *            {@link Double} or a {@link String}.
+     * @throws IllegalStateException
+     *             If a subclass calls this constructor.
      */
     public FieldNode(final int access, final String name, final String desc,
             final String signature, final Object value) {
-        this(Opcodes.ASM4, access, name, desc, signature, value);
+        this(Opcodes.ASM5, access, name, desc, signature, value);
+        if (getClass() != FieldNode.class) {
+            throw new IllegalStateException();
+        }
     }
 
     /**
      * Constructs a new {@link FieldNode}. <i>Subclasses must not use this
-     * constructor</i>. Instead, they must use the
-     * {@link #FieldNode(int, int, String, String, String, Object)} version.
+     * constructor</i>.
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param access
      *            the field's access flags (see
      *            {@link org.objectweb.asm.Opcodes}). This parameter also
@@ -162,7 +188,6 @@ public class FieldNode extends FieldVisitor {
     // Implementation of the FieldVisitor abstract class
     // ------------------------------------------------------------------------
 
-    @NotNull
     @Override
     public AnnotationVisitor visitAnnotation(final String desc,
             final boolean visible) {
@@ -177,6 +202,24 @@ public class FieldNode extends FieldVisitor {
                 invisibleAnnotations = new ArrayList<AnnotationNode>(1);
             }
             invisibleAnnotations.add(an);
+        }
+        return an;
+    }
+
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef,
+            TypePath typePath, String desc, boolean visible) {
+        TypeAnnotationNode an = new TypeAnnotationNode(typeRef, typePath, desc);
+        if (visible) {
+            if (visibleTypeAnnotations == null) {
+                visibleTypeAnnotations = new ArrayList<TypeAnnotationNode>(1);
+            }
+            visibleTypeAnnotations.add(an);
+        } else {
+            if (invisibleTypeAnnotations == null) {
+                invisibleTypeAnnotations = new ArrayList<TypeAnnotationNode>(1);
+            }
+            invisibleTypeAnnotations.add(an);
         }
         return an;
     }
@@ -204,10 +247,20 @@ public class FieldNode extends FieldVisitor {
      * API than the given version.
      * 
      * @param api
-     *            an ASM API version. Must be one of {@link Opcodes#ASM4}.
+     *            an ASM API version. Must be one of {@link Opcodes#ASM4} or
+     *            {@link Opcodes#ASM5}.
      */
     public void check(final int api) {
-        // nothing to do
+        if (api == Opcodes.ASM4) {
+            if (visibleTypeAnnotations != null
+                    && visibleTypeAnnotations.size() > 0) {
+                throw new RuntimeException();
+            }
+            if (invisibleTypeAnnotations != null
+                    && invisibleTypeAnnotations.size() > 0) {
+                throw new RuntimeException();
+            }
+        }
     }
 
     /**
@@ -216,7 +269,7 @@ public class FieldNode extends FieldVisitor {
      * @param cv
      *            a class visitor.
      */
-    public void accept(@NotNull final ClassVisitor cv) {
+    public void accept(final ClassVisitor cv) {
         FieldVisitor fv = cv.visitField(access, name, desc, signature, value);
         if (fv == null) {
             return;
@@ -231,6 +284,19 @@ public class FieldNode extends FieldVisitor {
         for (i = 0; i < n; ++i) {
             AnnotationNode an = invisibleAnnotations.get(i);
             an.accept(fv.visitAnnotation(an.desc, false));
+        }
+        n = visibleTypeAnnotations == null ? 0 : visibleTypeAnnotations.size();
+        for (i = 0; i < n; ++i) {
+            TypeAnnotationNode an = visibleTypeAnnotations.get(i);
+            an.accept(fv.visitTypeAnnotation(an.typeRef, an.typePath, an.desc,
+                    true));
+        }
+        n = invisibleTypeAnnotations == null ? 0 : invisibleTypeAnnotations
+                .size();
+        for (i = 0; i < n; ++i) {
+            TypeAnnotationNode an = invisibleTypeAnnotations.get(i);
+            an.accept(fv.visitTypeAnnotation(an.typeRef, an.typePath, an.desc,
+                    false));
         }
         n = attrs == null ? 0 : attrs.size();
         for (i = 0; i < n; ++i) {

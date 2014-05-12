@@ -29,12 +29,11 @@
  */
 package org.objectweb.asm.optimizer;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.HashMap;
+
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-
-import java.util.HashMap;
 
 /**
  * A constant pool.
@@ -93,7 +92,7 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    public Constant newUTF8(@NotNull final String value) {
+    public Constant newUTF8(final String value) {
         key1.set('s', value, null, null);
         Constant result = get(key1);
         if (result == null) {
@@ -103,7 +102,7 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    private Constant newString(@NotNull final String value) {
+    private Constant newString(final String value) {
         key2.set('S', value, null, null);
         Constant result = get(key2);
         if (result == null) {
@@ -114,7 +113,7 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    public Constant newClass(@NotNull final String value) {
+    public Constant newClass(final String value) {
         key2.set('C', value, null, null);
         Constant result = get(key2);
         if (result == null) {
@@ -125,7 +124,7 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    public Constant newMethodType(@NotNull final String methodDescriptor) {
+    public Constant newMethodType(final String methodDescriptor) {
         key2.set('t', methodDescriptor, null, null);
         Constant result = get(key2);
         if (result == null) {
@@ -136,8 +135,8 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    public Constant newHandle(final int tag, @NotNull final String owner,
-            @NotNull final String name, @NotNull final String desc) {
+    public Constant newHandle(final int tag, final String owner,
+            final String name, final String desc) {
         key4.set((char) ('h' - 1 + tag), owner, name, desc);
         Constant result = get(key4);
         if (result == null) {
@@ -185,8 +184,8 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         }
     }
 
-    public Constant newField(@NotNull final String owner, @NotNull final String name,
-            @NotNull final String desc) {
+    public Constant newField(final String owner, final String name,
+            final String desc) {
         key3.set('G', owner, name, desc);
         Constant result = get(key3);
         if (result == null) {
@@ -198,8 +197,8 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    public Constant newMethod(@NotNull final String owner, @NotNull final String name,
-            @NotNull final String desc, final boolean itf) {
+    public Constant newMethod(final String owner, final String name,
+            final String desc, final boolean itf) {
         key3.set(itf ? 'N' : 'M', owner, name, desc);
         Constant result = get(key3);
         if (result == null) {
@@ -211,8 +210,8 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    public Constant newInvokeDynamic(@NotNull String name, @NotNull String desc, @NotNull Handle bsm,
-            @NotNull Object... bsmArgs) {
+    public Constant newInvokeDynamic(String name, String desc, Handle bsm,
+            Object... bsmArgs) {
         key5.set(name, desc, bsm, bsmArgs);
         Constant result = get(key5);
         if (result == null) {
@@ -228,7 +227,7 @@ public class ConstantPool extends HashMap<Constant, Constant> {
         return result;
     }
 
-    public Constant newNameType(@NotNull final String name, @NotNull final String desc) {
+    public Constant newNameType(final String name, final String desc) {
         key2.set('T', name, desc, null);
         Constant result = get(key2);
         if (result == null) {

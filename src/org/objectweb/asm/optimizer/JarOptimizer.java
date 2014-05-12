@@ -29,16 +29,29 @@
  */
 package org.objectweb.asm.optimizer;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
-
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * A Jar file optimizer.
@@ -79,7 +92,7 @@ public class JarOptimizer {
         optimize(new File(args[argIndex]));
     }
 
-    static void optimize(@NotNull final File f) throws IOException {
+    static void optimize(final File f) throws IOException {
         if (nodebug && f.getName().contains("debug")) {
             return;
         }
@@ -98,6 +111,7 @@ public class JarOptimizer {
             while (e.hasMoreElements()) {
                 ZipEntry ze = e.nextElement();
                 if (ze.isDirectory()) {
+                    out.putNextEntry(ze);
                     continue;
                 }
                 out.putNextEntry(ze);
@@ -132,7 +146,7 @@ public class JarOptimizer {
         String owner;
 
         public ClassDump() {
-            super(Opcodes.ASM4);
+            super(Opcodes.ASM5);
         }
 
         @Override
@@ -145,7 +159,6 @@ public class JarOptimizer {
             }
         }
 
-        @Nullable
         @Override
         public FieldVisitor visitField(final int access, final String name,
                 final String desc, final String signature, final Object value) {
@@ -155,7 +168,6 @@ public class JarOptimizer {
             return null;
         }
 
-        @Nullable
         @Override
         public MethodVisitor visitMethod(final int access, final String name,
                 final String desc, final String signature,
@@ -174,7 +186,7 @@ public class JarOptimizer {
         String method;
 
         public ClassVerifier() {
-            super(Opcodes.ASM4);
+            super(Opcodes.ASM5);
         }
 
         @Override
@@ -184,28 +196,28 @@ public class JarOptimizer {
             owner = name;
         }
 
-        @NotNull
         @Override
         public MethodVisitor visitMethod(final int access, final String name,
                 final String desc, final String signature,
                 final String[] exceptions) {
             method = name + desc;
-            return new MethodVisitor(Opcodes.ASM4) {
+            return new MethodVisitor(Opcodes.ASM5) {
                 @Override
                 public void visitFieldInsn(final int opcode,
-                        @NotNull final String owner, final String name, final String desc) {
+                        final String owner, final String name, final String desc) {
                     check(owner, name);
                 }
 
                 @Override
                 public void visitMethodInsn(final int opcode,
-                        @NotNull final String owner, final String name, final String desc) {
+                        final String owner, final String name,
+                        final String desc, final boolean itf) {
                     check(owner, name + desc);
                 }
             };
         }
 
-        void check(@NotNull String owner, String member) {
+        void check(String owner, String member) {
             if (owner.startsWith("java/")) {
                 String o = owner;
                 while (o != null) {

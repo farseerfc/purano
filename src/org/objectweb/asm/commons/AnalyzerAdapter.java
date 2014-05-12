@@ -29,14 +29,16 @@
  */
 package org.objectweb.asm.commons;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.objectweb.asm.Handle;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * A {@link MethodVisitor} that keeps track of stack map frame changes between
@@ -71,7 +73,6 @@ public class AnalyzerAdapter extends MethodVisitor {
      * this uninitialized value). This field is <tt>null</tt> for unreachable
      * instructions.
      */
-    @Nullable
     public List<Object> locals;
 
     /**
@@ -86,14 +87,12 @@ public class AnalyzerAdapter extends MethodVisitor {
      * this uninitialized value). This field is <tt>null</tt> for unreachable
      * instructions.
      */
-    @Nullable
     public List<Object> stack;
 
     /**
      * The labels that designate the next instruction to be visited. May be
      * <tt>null</tt>.
      */
-    @Nullable
     private List<Label> labels;
 
     /**
@@ -137,10 +136,15 @@ public class AnalyzerAdapter extends MethodVisitor {
      * @param mv
      *            the method visitor to which this adapter delegates calls. May
      *            be <tt>null</tt>.
+     * @throws IllegalStateException
+     *             If a subclass calls this constructor.
      */
     public AnalyzerAdapter(final String owner, final int access,
-            final String name, @NotNull final String desc, final MethodVisitor mv) {
-        this(Opcodes.ASM4, owner, access, name, desc, mv);
+            final String name, final String desc, final MethodVisitor mv) {
+        this(Opcodes.ASM5, owner, access, name, desc, mv);
+        if (getClass() != AnalyzerAdapter.class) {
+            throw new IllegalStateException();
+        }
     }
 
     /**
@@ -148,7 +152,7 @@ public class AnalyzerAdapter extends MethodVisitor {
      * 
      * @param api
      *            the ASM API version implemented by this visitor. Must be one
-     *            of {@link Opcodes#ASM4}.
+     *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param owner
      *            the owner's class name.
      * @param access
@@ -162,7 +166,7 @@ public class AnalyzerAdapter extends MethodVisitor {
      *            be <tt>null</tt>.
      */
     protected AnalyzerAdapter(final int api, final String owner,
-            final int access, final String name, @NotNull final String desc,
+            final int access, final String name, final String desc,
             final MethodVisitor mv) {
         super(api, mv);
         this.owner = owner;
@@ -207,6 +211,7 @@ public class AnalyzerAdapter extends MethodVisitor {
                 locals.add(types[i].getInternalName());
             }
         }
+        maxLocals = locals.size();
     }
 
     @Override
@@ -234,7 +239,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     private static void visitFrameTypes(final int n, final Object[] types,
-            @NotNull final List<Object> result) {
+            final List<Object> result) {
         for (int i = 0; i < n; ++i) {
             Object type = types[i];
             result.add(type);
@@ -274,7 +279,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitTypeInsn(final int opcode, @NotNull final String type) {
+    public void visitTypeInsn(final int opcode, final String type) {
         if (opcode == Opcodes.NEW) {
             if (labels == null) {
                 Label l = new Label();
@@ -296,18 +301,39 @@ public class AnalyzerAdapter extends MethodVisitor {
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner,
-            final String name, @NotNull final String desc) {
+            final String name, final String desc) {
         if (mv != null) {
             mv.visitFieldInsn(opcode, owner, name, desc);
         }
         execute(opcode, 0, desc);
     }
 
+    @Deprecated
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-            @NotNull final String name, @NotNull final String desc) {
+            final String name, final String desc) {
+        if (api >= Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc,
+                opcode == Opcodes.INVOKEINTERFACE);
+    }
+
+    @Override
+    public void visitMethodInsn(final int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
+        if (api < Opcodes.ASM5) {
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            return;
+        }
+        doVisitMethodInsn(opcode, owner, name, desc, itf);
+    }
+
+    private void doVisitMethodInsn(int opcode, final String owner,
+            final String name, final String desc, final boolean itf) {
         if (mv != null) {
-            mv.visitMethodInsn(opcode, owner, name, desc);
+            mv.visitMethodInsn(opcode, owner, name, desc, itf);
         }
         if (this.locals == null) {
             labels = null;
@@ -340,7 +366,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitInvokeDynamicInsn(String name, @NotNull String desc, Handle bsm,
+    public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
             Object... bsmArgs) {
         if (mv != null) {
             mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -446,7 +472,7 @@ public class AnalyzerAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitMultiANewArrayInsn(@NotNull final String desc, final int dims) {
+    public void visitMultiANewArrayInsn(final String desc, final int dims) {
         if (mv != null) {
             mv.visitMultiANewArrayInsn(desc, dims);
         }
@@ -465,12 +491,12 @@ public class AnalyzerAdapter extends MethodVisitor {
     // ------------------------------------------------------------------------
 
     private Object get(final int local) {
-        maxLocals = Math.max(maxLocals, local);
+        maxLocals = Math.max(maxLocals, local + 1);
         return local < locals.size() ? locals.get(local) : Opcodes.TOP;
     }
 
     private void set(final int local, final Object type) {
-        maxLocals = Math.max(maxLocals, local);
+        maxLocals = Math.max(maxLocals, local + 1);
         while (local >= locals.size()) {
             locals.add(Opcodes.TOP);
         }
@@ -482,7 +508,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         maxStack = Math.max(maxStack, stack.size());
     }
 
-    private void pushDesc(@NotNull final String desc) {
+    private void pushDesc(final String desc) {
         int index = desc.charAt(0) == '(' ? desc.indexOf(')') + 1 : 0;
         switch (desc.charAt(index)) {
         case 'V':
@@ -534,7 +560,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         }
     }
 
-    private void pop(@NotNull final String desc) {
+    private void pop(final String desc) {
         char c = desc.charAt(0);
         if (c == '(') {
             int n = 0;
@@ -550,7 +576,7 @@ public class AnalyzerAdapter extends MethodVisitor {
         }
     }
 
-    private void execute(final int opcode, final int iarg, @NotNull final String sarg) {
+    private void execute(final int opcode, final int iarg, final String sarg) {
         if (this.locals == null) {
             labels = null;
             return;

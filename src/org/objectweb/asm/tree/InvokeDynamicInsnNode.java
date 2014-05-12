@@ -29,12 +29,11 @@
  */
 package org.objectweb.asm.tree;
 
-import org.jetbrains.annotations.NotNull;
+import java.util.Map;
+
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-
-import java.util.Map;
 
 /**
  * A node that represents an invokedynamic instruction.
@@ -90,13 +89,14 @@ public class InvokeDynamicInsnNode extends AbstractInsnNode {
     }
 
     @Override
-    public void accept(@NotNull final MethodVisitor mv) {
+    public void accept(final MethodVisitor mv) {
         mv.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
+        acceptAnnotations(mv);
     }
 
-    @NotNull
     @Override
     public AbstractInsnNode clone(final Map<LabelNode, LabelNode> labels) {
-        return new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs);
+        return new InvokeDynamicInsnNode(name, desc, bsm, bsmArgs)
+                .cloneAnnotations(this);
     }
 }
