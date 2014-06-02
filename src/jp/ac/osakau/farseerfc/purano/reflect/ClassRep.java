@@ -2,7 +2,7 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import jp.ac.osakau.farseerfc.purano.util.Escape;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -82,11 +82,11 @@ public class ClassRep extends ClassVisitor {
 //	}
 
 	@NotNull
-    public List<String> dump(@NotNull Types table){
+    public List<String> dump(@NotNull Types table, Escaper esc){
 		List<String> result = new ArrayList<>();
-		result.add(Escape.className( table.fullClassName(name)));
+		result.add(esc.className( table.fullClassName(name)));
 		for(MethodRep m:methodMap.values()){
-			result.addAll(m.dump(classFinder, table));
+			result.addAll(m.dump(classFinder, table, esc));
 		}
 		return result;
 	}

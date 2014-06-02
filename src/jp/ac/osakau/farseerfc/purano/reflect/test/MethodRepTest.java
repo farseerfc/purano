@@ -1,6 +1,7 @@
 package jp.ac.osakau.farseerfc.purano.reflect.test;
 
 import com.google.common.base.Joiner;
+
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.effect.FieldEffect;
@@ -9,7 +10,9 @@ import jp.ac.osakau.farseerfc.purano.reflect.ClassRep;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.test.TargetA;
 import jp.ac.osakau.farseerfc.purano.test.TargetC;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
+
 import org.junit.Test;
 import org.objectweb.asm.tree.MethodInsnNode;
 
@@ -111,8 +114,8 @@ public class MethodRepTest {
 		DepEffect dea = ma.getDynamicEffects();
 		assertTrue(dea.isSubset(dec));
 		
-		System.out.println(dea.dump(ma, new Types(), ""));
-		System.out.println(dec.dump(mc, new Types(), ""));
+		System.out.println(dea.dump(ma, new Types(), "", Escaper.getDummy()));
+		System.out.println(dec.dump(mc, new Types(), "", Escaper.getDummy()));
 		
 		FieldEffect tfe1 = new FieldEffect("A", "B", "C", new DepSet(), null);
 		FieldEffect tfe2 = new FieldEffect("A", "B", "C", new DepSet(), null);
@@ -120,8 +123,8 @@ public class MethodRepTest {
 		assertEquals(tfe1, tfe2);
 		assertFalse(tfe1.equals(tfe3));
 			
-		System.out.println(Joiner.on("\n").join( ma.dump(cl, new Types())));
-		System.out.println(Joiner.on("\n").join( mc.dump(cl, new Types())));
+		System.out.println(Joiner.on("\n").join( ma.dump(cl, new Types(), Escaper.getDummy())));
+		System.out.println(Joiner.on("\n").join( mc.dump(cl, new Types(), Escaper.getDummy())));
 	}
 	
 	@Test

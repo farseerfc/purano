@@ -8,7 +8,7 @@ import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.effect.NativeEffect;
-import jp.ac.osakau.farseerfc.purano.util.Escape;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
@@ -136,11 +136,11 @@ public class MethodRep extends MethodVisitor implements Purity {
     }
 	
 	@NotNull
-    public List<String> dump(@NotNull ClassFinder classFinder, @NotNull Types table){
+    public List<String> dump(@NotNull ClassFinder classFinder, @NotNull Types table, Escaper esc){
 		List<String> result = new ArrayList<>();
 		if(getMethodNode() != null){
 			
-			result.add("    "+Escape.methodName(toString(table)));
+			result.add("    "+esc.methodName(toString(table)));
 			for(MethodRep rep : overrided.values()){
 				result.add(String.format("        # %s", rep.toString(table)));
 			}
@@ -163,8 +163,8 @@ public class MethodRep extends MethodVisitor implements Purity {
                     }
                 }
 
-                result.add("            "+Escape.purity(dumpPurity()));
-                result.add(dynamicEffects.dump(this, table,"            "));
+                result.add("            "+esc.purity(dumpPurity()));
+                result.add(dynamicEffects.dump(this, table,"            ", esc));
             }
 
 		}

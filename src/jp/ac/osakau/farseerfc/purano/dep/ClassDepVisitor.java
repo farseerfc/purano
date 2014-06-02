@@ -3,8 +3,11 @@ package jp.ac.osakau.farseerfc.purano.dep;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,12 +33,15 @@ public class ClassDepVisitor extends ClassVisitor{
     private @NotNull final PrintWriter out;
 	private final StringWriter sw = new StringWriter();
 	private final PrintWriter writer = new PrintWriter(sw);
+	private final Escaper esc ;
 	
 	private String className ;
 	
-	public ClassDepVisitor() {
+	public ClassDepVisitor(Escaper esc) {
 		super(Opcodes.ASM4);
 		out = new PrintWriter(System.out);
+		this.esc = esc;
+		
 	}
 
     private void printf(String format, Object ... args){
@@ -125,7 +131,7 @@ public class ClassDepVisitor extends ClassVisitor{
 				} catch (AnalyzerException e) {
 					e.printStackTrace();
 				}
-				printf("%s\n",effect.dump(rep,typeNameTable,"    "));
+				printf("%s\n",effect.dump(rep,typeNameTable,"    ", esc));
 				printf("}\n");
 			}
 		},new Textifier(Opcodes.ASM4){
@@ -145,7 +151,7 @@ public class ClassDepVisitor extends ClassVisitor{
 
 
 	public static void main(String[] args) throws IOException {
-		ClassDepVisitor tt = new ClassDepVisitor();
+		ClassDepVisitor tt = new ClassDepVisitor(Escaper.getDummy());
 		ClassReader cr = new ClassReader("javafx.util.Duration");//readAllBytes("target/TryTree.class"));
 		//TraceClassVisitor tcv = new TraceClassVisitor(tt,new Textifier(), new PrintWriter(System.err));
 		cr.accept(tt, 0);

@@ -1,7 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Joiner;
+
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import java.io.PrintStream;
@@ -9,19 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
+ * StreamDumpper
  * User: farseerfc
- * Date: 9/16/13
- * Time: 5:54 PM
- * To change this template use File | Settings | File Templates.
  */
 public class StreamDumpper implements ClassFinderDumpper {
     private final PrintStream out;
     private final ClassFinder cf;
+    private final Escaper esc;
 
-    public StreamDumpper(PrintStream out, ClassFinder cf) {
+    public StreamDumpper(PrintStream out, ClassFinder cf, Escaper esc) {
         this.out = out;
         this.cf = cf;
+        this.esc = esc;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class StreamDumpper implements ClassFinderDumpper {
                 continue;
             }
             ClassRep cls = cf.classMap.get(clsName);
-            out.println(Joiner.on("\n").join(cls.dump(table)));
+            out.println(Joiner.on("\n").join(cls.dump(table, esc)));
         }
         out.print(table.dumpImports());
         out.println(Joiner.on("\n").join(sb));

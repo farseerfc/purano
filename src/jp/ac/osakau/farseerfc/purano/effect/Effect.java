@@ -5,7 +5,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
-import jp.ac.osakau.farseerfc.purano.util.Escape;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -43,7 +43,7 @@ public abstract class Effect<T extends Effect> implements Cloneable{
 		return cl;
 	}
 	
-	public String dump(MethodRep rep, @NotNull Types table, String prefix){
+	public String dump(MethodRep rep, @NotNull Types table, String prefix, final Escaper esc){
 		String className = getClass().getSimpleName();
 		className = className.substring(0,className.length() - 6 );
         ArrayList<String> result = new ArrayList<>(Lists.transform(dumpEffect(rep, table),
@@ -51,11 +51,11 @@ public abstract class Effect<T extends Effect> implements Cloneable{
             @Nullable
             @Override
             public String apply(@Nullable String s) {
-                return Escape.effect(s);
+                return esc.effect(s);
             }
         }));
 		if(from != null){
-            String fromStr = Escape.from("from = \""+
+            String fromStr = esc.from("from = \""+
                 table.dumpMethodDesc(from.getInsnNode().desc,
                     String.format("%s#%s",
                         table.fullClassName(from.getInsnNode().owner),
@@ -64,7 +64,7 @@ public abstract class Effect<T extends Effect> implements Cloneable{
 		}
 		return String.format("%s@%s(%s)",
 				prefix,
-				Escape.annotation(className),
+				esc.annotation(className),
                 Joiner.on(", ").join(result));
 	}
 	

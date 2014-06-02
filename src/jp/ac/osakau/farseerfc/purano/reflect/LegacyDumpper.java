@@ -1,7 +1,9 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Joiner;
+
 import jp.ac.osakau.farseerfc.purano.ano.Purity;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import java.util.ArrayList;
@@ -16,9 +18,11 @@ import java.util.List;
  */
 public class LegacyDumpper implements ClassFinderDumpper {
     private final ClassFinder cf;
+    private final Escaper esc;
 
     public LegacyDumpper(ClassFinder cf) {
         this.cf = cf;
+        this.esc = Escaper.getTerm();
     }
 
     @Override
@@ -95,7 +99,7 @@ public class LegacyDumpper implements ClassFinderDumpper {
                 continue;
             }
             ClassRep cls = cf.classMap.get(clsName);
-            System.out.println(Joiner.on("\n").join(cls.dump(table)));
+            System.out.println(Joiner.on("\n").join(cls.dump(table, esc)));
             for(MethodRep mtd: cls.getAllMethods()){
                 method++;
                 int p=mtd.purity();

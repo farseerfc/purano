@@ -3,7 +3,7 @@ package jp.ac.osakau.farseerfc.purano.dep;
 import com.google.common.base.Joiner;
 import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
-import jp.ac.osakau.farseerfc.purano.util.Escape;
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -86,46 +86,46 @@ public class DepEffect {
 		}
 	}
 	
-	public String dump(@NotNull MethodRep rep, @NotNull Types table, String prefix){
+	public String dump(@NotNull MethodRep rep, @NotNull Types table, String prefix, Escaper esc){
 
 		List<String> deps= new ArrayList<>();
 
         if(!returnDep.getDeps().isEmpty()){
 		    deps.add(String.format("%s@%s(%s)",prefix,
-				Escape.annotation("Depend"),
-				Escape.effect(Joiner.on(", ").join(returnDep.getDeps().dumpDeps(rep, table)))));
+				esc.annotation("Depend"),
+				esc.effect(Joiner.on(", ").join(returnDep.getDeps().dumpDeps(rep, table)))));
         }
         if(!returnDep.getLvalue().isEmpty()){
             deps.add(String.format("%s@%s(%s)",prefix,
-                    Escape.annotation("Expose"),
-                    Escape.effect(Joiner.on(", ").join(returnDep.getLvalue().dumpDeps(rep, table)))));
+                    esc.annotation("Expose"),
+                    esc.effect(Joiner.on(", ").join(returnDep.getLvalue().dumpDeps(rep, table)))));
         }
 		
 		for(ArgumentEffect effect: argumentEffects){
-			deps.add(effect.dump(rep, table, prefix));
+			deps.add(effect.dump(rep, table, prefix, esc));
 		}
 		
 		for(FieldEffect effect: thisField.values()){
-			deps.add(effect.dump(rep, table, prefix));
+			deps.add(effect.dump(rep, table, prefix, esc));
 		}
 		
 		
 		for(OtherFieldEffect effect: otherField.values()){
-			deps.add(effect.dump(rep, table, prefix));
+			deps.add(effect.dump(rep, table, prefix, esc));
 		}
 		
 		
 		for(StaticEffect effect: staticField.values()){
-			deps.add(effect.dump(rep, table, prefix));
+			deps.add(effect.dump(rep, table, prefix, esc));
 		}
 		
 		for(CallEffect effect: callEffects){
-			deps.add(effect.dump(rep, table, prefix));
+			deps.add(effect.dump(rep, table, prefix, esc));
 		}
 		
 		
 		for(Effect effect: otherEffects){
-			deps.add(effect.dump(rep, table, prefix));
+			deps.add(effect.dump(rep, table, prefix, esc));
 		}
 		
 		return Joiner.on("\n").join(deps);

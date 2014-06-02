@@ -175,6 +175,21 @@ public class Types {
 		return sb.toString();
 	}
 	
+	@NotNull
+    public String dumpImportsHtml() {
+		if(!shorten){
+			return "";
+		}
+		
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("package ");
+		sb.append(packageName);
+		sb.append(";<br/><br/>import ");
+		sb.append(Joiner.on(";<br/>import ").join(getImports()));
+		sb.append(";<br/><br/>");
+		return sb.toString();
+	}
 	
 	public static String binaryName2NormalName(@NotNull String binaryName){
 		return binaryName.replace('/', '.');
