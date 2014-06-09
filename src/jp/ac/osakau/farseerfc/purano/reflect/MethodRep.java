@@ -2,11 +2,13 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+
 import jp.ac.osakau.farseerfc.purano.ano.Purity;
 import jp.ac.osakau.farseerfc.purano.ano.StaticField;
 import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
+import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.effect.NativeEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
@@ -14,6 +16,7 @@ import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +55,8 @@ public class MethodRep extends MethodVisitor implements Purity {
 	private @Getter int access;
 
     private @Getter @Setter boolean needResolve;
+    
+    private @Getter final DepSet cacheSemantic;
 
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access){
@@ -77,6 +82,8 @@ public class MethodRep extends MethodVisitor implements Purity {
         argPos = ArrayUtils.toPrimitive(argPosMap.toArray(new Integer [argPosMap.size()]));
 
         needResolve = true;
+        
+        cacheSemantic = new DepSet();
 	}
 
 	@NotNull

@@ -24,8 +24,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	
 	private final DepEffect effect;
 	private final MethodRep method;
-
+	private final DepSet cacheSemantic;
 	
+		
     @Nullable
     private final ClassFinder classFinder;
 
@@ -35,6 +36,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		this.effect = effect;
 		this.method = method;
 		this.classFinder = null;
+		this.cacheSemantic = method.getCacheSemantic();
 	}
 	
 	public DepInterpreter(DepEffect effect, MethodRep method, ClassFinder classFinder) {
@@ -42,6 +44,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		this.effect = effect;
 		this.method = method;
 		this.classFinder = classFinder;
+		this.cacheSemantic = method.getCacheSemantic();
 	}
     
     private String opcode2string(int opcode){
@@ -93,6 +96,35 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
     }
 
+    public DepValue newValue( @Nullable final Type type, boolean constant) {
+        if (type == null) {
+            return new DepValue((Type) null, constant);
+        }
+        switch (type.getSort()) {
+        case Type.VOID:
+            return null;
+        case Type.BOOLEAN:
+        case Type.CHAR:
+        case Type.BYTE:
+        case Type.SHORT:
+        case Type.INT:
+            return new DepValue(Type.INT_TYPE, constant);
+        case Type.FLOAT:
+            return new DepValue(Type.FLOAT_TYPE, constant);
+        case Type.LONG:
+            return new DepValue(Type.LONG_TYPE, constant);
+        case Type.DOUBLE:
+            return new DepValue(Type.DOUBLE_TYPE, constant);
+        case Type.ARRAY:
+        case Type.OBJECT:
+            return new DepValue(Type.getObjectType("java/lang/Object"), constant);
+        default:
+        	System.err.println("Unknown type :"+type);
+            throw new Error("Internal error");
+        }
+    }
+
+        
 	
     @Override
 	public DepValue newOperation( @NotNull final AbstractInsnNode insn)
@@ -107,46 +139,46 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		case ICONST_3:
 		case ICONST_4:
 		case ICONST_5:
-			return new DepValue(Type.INT_TYPE);
+			return new DepValue(Type.INT_TYPE, true);
 		case LCONST_0:
 		case LCONST_1:
-			return new DepValue(Type.LONG_TYPE);
+			return new DepValue(Type.LONG_TYPE, true);
 		case FCONST_0:
 		case FCONST_1:
 		case FCONST_2:
-			return new DepValue(Type.FLOAT_TYPE);
+			return new DepValue(Type.FLOAT_TYPE, true);
 		case DCONST_0:
 		case DCONST_1:
-			return new DepValue(Type.DOUBLE_TYPE);
+			return new DepValue(Type.DOUBLE_TYPE, true);
 		case BIPUSH:
 		case SIPUSH:
 			return new DepValue(Type.INT_TYPE);
 		case LDC:
 			Object cst = ((LdcInsnNode) insn).cst;
 			if (cst instanceof Integer) {
-				return new DepValue(Type.INT_TYPE);
+				return new DepValue(Type.INT_TYPE, true);
 			} else if (cst instanceof Float) {
-				return new DepValue(Type.FLOAT_TYPE);
+				return new DepValue(Type.FLOAT_TYPE, true);
 			} else if (cst instanceof Long) {
-				return new DepValue(Type.LONG_TYPE);
+				return new DepValue(Type.LONG_TYPE, true);
 			} else if (cst instanceof Double) {
-				return new DepValue(Type.DOUBLE_TYPE);
+				return new DepValue(Type.DOUBLE_TYPE, true);
 			} else if (cst instanceof String) {
-				return newValue(Type.getObjectType("java/lang/String"));
+				return newValue(Type.getObjectType("java/lang/String"), true);
 			} else if (cst instanceof Type) {
 				int sort = ((Type) cst).getSort();
 				if (sort == Type.OBJECT || sort == Type.ARRAY) {
-					return newValue(Type.getObjectType("java/lang/Class"));
+					return newValue(Type.getObjectType("java/lang/Class"), true);
 				} else if (sort == Type.METHOD) {
 					return newValue(Type
-							.getObjectType("java/lang/invoke/MethodType"));
+							.getObjectType("java/lang/invoke/MethodType"), true);
 				} else {
 					throw new IllegalArgumentException("Illegal LDC constant "
 							+ cst);
 				}
 			} else if (cst instanceof Handle) {
 				return newValue(Type
-						.getObjectType("java/lang/invoke/MethodHandle"));
+						.getObjectType("java/lang/invoke/MethodHandle"), true);
 			} else {
 				throw new IllegalArgumentException("Illegal LDC constant "
 						+ cst);
@@ -239,24 +271,30 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case I2B:
         case I2C:
         case I2S:
-            return new DepValue(Type.INT_TYPE,value.getDeps());
+            return new DepValue(Type.INT_TYPE,value.getDeps(), value.isConstant());
         case FNEG:
         case I2F:
         case L2F:
         case D2F:
-            return new DepValue(Type.FLOAT_TYPE,value.getDeps());
+            return new DepValue(Type.FLOAT_TYPE,value.getDeps(), value.isConstant());
         case LNEG:
         case I2L:
         case F2L:
         case D2L:
-            return new DepValue(Type.LONG_TYPE,value.getDeps());
+            return new DepValue(Type.LONG_TYPE,value.getDeps(), value.isConstant());
         case DNEG:
         case I2D:
         case L2D:
         case F2D:
-            return new DepValue(Type.DOUBLE_TYPE,value.getDeps());
+            return new DepValue(Type.DOUBLE_TYPE,value.getDeps(), value.isConstant());
         case IFEQ:
         case IFNE:
+    		cacheSemantic.getFields().addAll(value.getDeps().getFields());
+//        	
+//        	if(!method.getDesc().getReturnType().equals("void")){
+//                effect.getReturnDep().getDeps().merge(value.getDeps());
+//            }
+        	return null;
         case IFLT:
         case IFGE:
         case IFGT:
@@ -369,6 +407,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             throws AnalyzerException {
     	DepSet deps = new DepSet(value1.getDeps());
     	deps.merge(value2.getDeps());
+    	boolean constant = value1.isConstant() || value2.isConstant();
         switch (insn.getOpcode()) {
         case LCMP:
         case FCMPL:
@@ -390,14 +429,14 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case IAND:
         case IOR:
         case IXOR:
-        	return new DepValue(Type.INT_TYPE, deps);
+        	return new DepValue(Type.INT_TYPE, deps, constant);
         case FALOAD:
         case FADD:
         case FSUB:
         case FMUL:
         case FDIV:
         case FREM:
-        	return new DepValue(Type.FLOAT_TYPE, deps);
+        	return new DepValue(Type.FLOAT_TYPE, deps, constant);
         case LALOAD:
         case LADD:
         case LSUB:
@@ -410,14 +449,14 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case LAND:
         case LOR:
         case LXOR:
-        	return new DepValue(Type.LONG_TYPE, deps);
+        	return new DepValue(Type.LONG_TYPE, deps, constant);
         case DALOAD:
         case DADD:
         case DSUB:
         case DMUL:
         case DDIV:
         case DREM:
-        	return new DepValue(Type.DOUBLE_TYPE, deps);
+        	return new DepValue(Type.DOUBLE_TYPE, deps, constant);
         case AALOAD:
 //        	if(value1.getType().getInternalName().startsWith("[")){
 //        		return new DepValue(Type.getObjectType(value1.getType().getInternalName().substring(1)), deps);
@@ -426,13 +465,26 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //        	}
         	return new DepValue(Type.getObjectType("java/lang/Object;"),deps,value1.getLvalue());
         case IF_ICMPEQ:
+        case IF_ACMPEQ:
         case IF_ICMPNE:
+        case IF_ACMPNE:
+        	if(!method.getDesc().getReturnType().equals("void")){
+                effect.getReturnDep().getDeps().merge(value1.getDeps());
+                effect.getReturnDep().getDeps().merge(value2.getDeps());
+            }
+        	if(value2.isConstant() || value1.isConstant()){
+        		if(value1.isConstant()){
+        			cacheSemantic.getFields().addAll(value2.getDeps().getFields());
+        		}
+        		if(value2.isConstant()){
+        			cacheSemantic.getFields().addAll(value1.getDeps().getFields());
+        		}
+        	}
+        	return null;
         case IF_ICMPLT:
         case IF_ICMPGE:
         case IF_ICMPGT:
         case IF_ICMPLE:
-        case IF_ACMPEQ:
-        case IF_ACMPNE:
             if(!method.getDesc().getReturnType().equals("void")){
                 effect.getReturnDep().getDeps().merge(value1.getDeps());
                 effect.getReturnDep().getDeps().merge(value2.getDeps());
@@ -443,6 +495,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             FieldInsnNode fin = (FieldInsnNode) insn;
             if (!method.isStatic() && value1.getLvalue().isThis()) {
                 // this.name == v2
+            	for (FieldDep fd :cacheSemantic.getFields()){
+            		if(fd.getName().equals(fin.name)){
+            			// this.cacheField = v2
+            			return null;
+            		}
+            	}
                 DepValue dv = new DepValue(value2.getType(), value2.getDeps());
                 dv.getLvalue().merge(value1.getLvalue());
                 dv.getLvalue().getFields().add(new FieldDep(fin.desc, fin.owner, fin.name));

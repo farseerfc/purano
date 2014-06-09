@@ -15,6 +15,7 @@ import org.reflections.scanners.SubTypesScanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.util.*;
@@ -113,10 +114,10 @@ public class ClassFinder {
 	}
 
 
-	public static void main(@NotNull String [] argv) throws MalformedURLException, FileNotFoundException {
+	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "jp.ac.osakau.farseerfc.purano.test"};
+                "jp.ac.osakau.farseerfc.purano.test", "java.lang.String"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};

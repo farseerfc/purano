@@ -3,7 +3,9 @@ package jp.ac.osakau.farseerfc.purano.util;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+
 import jp.ac.osakau.farseerfc.purano.reflect.ArrayStub;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -12,9 +14,11 @@ import org.objectweb.asm.Type;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import lombok.Getter;
+
 public class Types {
 	private final Map<String, String> fullClassNames = new HashMap<>();
-	@Nullable
+	@Nullable @Getter
     private String packageName = null;
 	private static final Map<Character, String> desc2type = new HashMap<>();
 	private final boolean shorten;
@@ -153,7 +157,7 @@ public class Types {
 	}
 
 	@NotNull
-    private Collection<String> getImports() {
+	public Collection<String> getImports() {
 		List<String> result = new ArrayList<>(fullClassNames.values());
 		Collections.sort(result);
 		return result;

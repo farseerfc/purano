@@ -17,29 +17,62 @@ public class DepValue implements Value {
     private @NotNull @Getter @Setter DepSet deps;
     private final @Getter DepSet lvalue;
 	private final @Getter Type type;
+	private final @Getter boolean constant;
 	
 	public DepValue(Type type) {
 		this.type = type;
 		this.deps = new DepSet();
         this.lvalue = new DepSet();
+        this.constant = false;
+	}
+	
+	public DepValue(Type type, boolean constant) {
+		this.type = type;
+		this.deps = new DepSet();
+        this.lvalue = new DepSet();
+        this.constant = constant;
 	}
 	
 	public DepValue(Type type,DepSet deps) {
 		this.type = type;
 		this.deps = new DepSet(deps);
         this.lvalue = new DepSet();
+        this.constant = false;
+	}
+	
+	public DepValue(Type type,DepSet deps, boolean constant) {
+		this.type = type;
+		this.deps = new DepSet(deps);
+        this.lvalue = new DepSet();
+        this.constant = constant;
 	}
 
     DepValue(Type type,DepSet deps,DepSet lvalue) {
         this.type = type;
         this.deps = new DepSet(deps);
         this.lvalue = lvalue;
+        this.constant = false;
     }
-
+    
+    DepValue(Type type,DepSet deps,DepSet lvalue, boolean constant) {
+        this.type = type;
+        this.deps = new DepSet(deps);
+        this.lvalue = lvalue;
+        this.constant = constant;
+    }
+    
     public DepValue(@NotNull DepValue value) {
         this.type = value.type;
         this.deps = new DepSet(value.deps);
         this.lvalue = new DepSet(value.lvalue);
+        this.constant = value.constant;
+    }
+    
+    public DepValue(@NotNull DepValue value, boolean constant) {
+        this.type = value.type;
+        this.deps = new DepSet(value.deps);
+        this.lvalue = new DepSet(value.lvalue);
+        this.constant = constant;
     }
 
     public int getSize() {
