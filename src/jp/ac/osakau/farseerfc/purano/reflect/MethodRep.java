@@ -45,7 +45,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 	private final @Getter boolean isAbstract;
 	private final @Getter boolean isInit;
     private final int [] argPos;
-	
+    	
 	private @Getter int modifiedTimeStamp;
 	private @Getter int resolveTimeStamp;
 	private final @Getter DepEffect staticEffects = new DepEffect();

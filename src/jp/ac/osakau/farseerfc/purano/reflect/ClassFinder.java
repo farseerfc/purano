@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jp.ac.osakau.farseerfc.purano.util.Escaper;
+import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +31,9 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 100;
+    private static final int MAX_LOAD_PASS = 5;
+    
+    private final boolean examChangedSignatures = true;
 
 	public ClassFinder(@NotNull List<String> prefix){
         findTargetClasses(prefix);
@@ -56,14 +60,17 @@ public class ClassFinder {
                 loadedClassesTrace.add(allCreps.size());
 			}
             changedMethod = 0;
-//            Set<MethodRep> changedSignatures = new HashSet<>();
+            
+            Set<MethodRep> changedSignatures = new HashSet<>();
 			for (ClassRep crep : allCreps ) {
 				for (MethodRep mrep : crep.getAllMethods()) {
 					if (mrep.isNeedResolve(this)) {
 						if (mrep.resolve(++timestamp, this)) {
 							changed = true;
                             changedMethod ++;
-//                            changedSignatures.add(mrep);
+                            if(examChangedSignatures){
+                            	changedSignatures.add(mrep);
+                            }
 						}
 					}
 				}
@@ -72,20 +79,22 @@ public class ClassFinder {
             log.info(String.format("Pass: %d Classes: %s Changed Method: %d [%s]",
                     pass++,allCreps.size(),changedMethod,
                     Joiner.on(", ").join(changedMethodsTrace)));
-//            final int maxdump=4;
-//            if(changedMethod>maxdump){
-//                MethodRep [] top = new MethodRep [maxdump];
-//                int i=0;
-//                for(MethodRep mid : changedSignatures){
-//                    if(i>=maxdump)break;
-//                    top[i++]=mid;
-//                }
-//                System.out.println(Joiner.on(", ").join(top));
-//            }else{
-//                for(MethodRep m:changedSignatures){
-//                    System.out.println(Joiner.on("\n").join(m.dump(this, new Types())));
-//                }
-//            }
+            if(examChangedSignatures){
+	            final int maxdump=4;
+	            if(changedMethod>maxdump){
+	                MethodRep [] top = new MethodRep [maxdump];
+	                int i=0;
+	                for(MethodRep mid : changedSignatures){
+	                    if(i>=maxdump)break;
+		                    top[i++]=mid;
+	                }
+	            	log.info(Joiner.on(", ").join(top));
+	            }else{
+	                for(MethodRep m:changedSignatures){
+	                	log.info(Joiner.on("\n").join(m.dump(this, new Types(), Escaper.getDummy())));
+	                }
+		        }
+            }
 		} while (changed);
 
         log.info("Loaded Classes: " + Joiner.on(", ").join(loadedClassesTrace));
@@ -119,7 +128,8 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "jp.ac.osakau.farseerfc.purano.test"};
+                "jp.ac.osakau.farseerfc.purano.test",
+                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
