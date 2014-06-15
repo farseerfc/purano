@@ -26,6 +26,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	private final MethodRep method;
 	private final DepSet cacheSemantic;
 	
+	private final boolean findCacheSemantic = true;
+	
 		
     @Nullable
     private final ClassFinder classFinder;
@@ -495,11 +497,13 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             FieldInsnNode fin = (FieldInsnNode) insn;
             if (!method.isStatic() && value1.getLvalue().isThis()) {
                 // this.name == v2
-            	for (FieldDep fd :cacheSemantic.getFields()){
-            		if(fd.getName().equals(fin.name)){
-            			// this.cacheField = v2
-            			return null;
-            		}
+            	if(findCacheSemantic){
+	            	for (FieldDep fd :cacheSemantic.getFields()){
+	            		if(fd.getName().equals(fin.name)){
+	            			// this.cacheField = v2
+	            			return null;
+	            		}
+	            	}
             	}
                 DepValue dv = new DepValue(value2.getType(), value2.getDeps());
                 dv.getLvalue().merge(value1.getLvalue());

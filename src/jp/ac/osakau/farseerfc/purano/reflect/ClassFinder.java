@@ -27,7 +27,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 2;
+    private static final int MAX_LOAD_PASS = 100;
 
 	public ClassFinder(@NotNull List<String> prefix){
         findTargetClasses(prefix);
@@ -117,7 +117,7 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "jp.ac.osakau.farseerfc.purano.test", "java.lang.String"};
+                "jp.ac.osakau.farseerfc.purano.test"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};

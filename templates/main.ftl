@@ -19,6 +19,9 @@
 .calls{
 	margin-left: 20px;
 }
+.clazz{
+	margin-left: 20px;
+}
 </style>
 </head>
 <body>
