@@ -1,20 +1,22 @@
 package jp.ac.osakau.farseerfc.purano.effect;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 public abstract class Effect<T extends Effect> implements Cloneable{
 	private @Getter @Setter DepSet deps;

@@ -198,7 +198,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 	
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-		calls.add(new MethodInsnNode(opcode,owner,name,desc));
+		calls.add(new MethodInsnNode(opcode,owner,name,desc, opcode == Opcodes.INVOKEINTERFACE));
 	}
 	
 	public boolean resolve(int newTimeStamp, @NotNull final ClassFinder cf){

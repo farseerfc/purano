@@ -1,14 +1,13 @@
 package jp.ac.osakau.farseerfc.purano.effect;
 
+import java.util.List;
+
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
-import lombok.EqualsAndHashCode;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Type;
-
-import java.util.List;
 
 public class ThrowEffect extends Effect<ThrowEffect> implements Cloneable{
 

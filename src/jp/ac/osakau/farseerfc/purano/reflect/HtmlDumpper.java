@@ -9,18 +9,10 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.util.Textifier;
-import org.objectweb.asm.util.TraceClassVisitor;
-import org.objectweb.asm.util.TraceMethodVisitor;
 
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
@@ -31,6 +23,12 @@ import jp.ac.osakau.farseerfc.purano.effect.OtherFieldEffect;
 import jp.ac.osakau.farseerfc.purano.effect.StaticEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
+
+import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.util.Textifier;
+import org.objectweb.asm.util.TraceMethodVisitor;
 
 import com.google.common.base.Joiner;
 

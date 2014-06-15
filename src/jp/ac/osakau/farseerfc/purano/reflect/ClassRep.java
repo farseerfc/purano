@@ -2,10 +2,13 @@ package jp.ac.osakau.farseerfc.purano.reflect;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
+import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -21,7 +24,7 @@ public class ClassRep extends ClassVisitor {
 
 	private final Map<String, MethodRep> methodMap = new HashMap<>();
 
-
+	private final DepSet cacheFields = new DepSet();
 
 	@NotNull
     private final @Getter String name;
@@ -30,6 +33,8 @@ public class ClassRep extends ClassVisitor {
 
 	private final @Getter List<ClassRep> supers = new ArrayList<>();
 //	private final @Getter Class<? extends Object> reflect;
+	
+	private @Getter boolean accInterface=false;
 
 	public ClassRep(@NotNull String className, ClassFinder cf){
 		super(Opcodes.ASM5);
@@ -105,7 +110,7 @@ public class ClassRep extends ClassVisitor {
 		}
 
 		// Build method rep
-		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc), access);
+		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc, accInterface), access);
 		methodMap.put(rep.getId(),rep);
 		for(ClassRep s : supers){
 			s.override(rep.getId(),rep);
@@ -134,6 +139,8 @@ public class ClassRep extends ClassVisitor {
 		if(!this.name.equals(Object.class.getName()) && superName != null){
 			this.supers.add(classFinder.loadClass(Types.binaryName2NormalName(superName)));
 		}
+		
+		this.accInterface = (access & Opcodes.ACC_INTERFACE) > 0;
 
 		this.supers.addAll(Lists.transform(Arrays.asList(interfaces), new Function<String,ClassRep>(){
 			@Override @javax.annotation.Nullable

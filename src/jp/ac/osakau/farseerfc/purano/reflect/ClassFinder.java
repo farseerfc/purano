@@ -1,10 +1,18 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
-import com.google.common.base.Joiner;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import jp.ac.osakau.farseerfc.purano.ano.Purity;
-import jp.ac.osakau.farseerfc.purano.util.Escaper;
-import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,13 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.MalformedURLException;
-import java.util.*;
+import com.google.common.base.Joiner;
 
 @Slf4j
 public class ClassFinder {

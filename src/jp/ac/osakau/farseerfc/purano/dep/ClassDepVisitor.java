@@ -37,6 +37,8 @@ public class ClassDepVisitor extends ClassVisitor{
 	
 	private String className ;
 	
+	private boolean accInterface;
+	
 	public ClassDepVisitor(Escaper esc) {
 		super(Opcodes.ASM4);
 		out = new PrintWriter(System.out);
@@ -60,6 +62,8 @@ public class ClassDepVisitor extends ClassVisitor{
                 return inter == null ? null : typeNameTable.fullClassName(inter);
             }});
 
+		accInterface = (access & Opcodes.ACC_INTERFACE)>0;
+		
 		printf("%s class %s extends %s %s%s {\n",
 			Types.access2string(access),
 			typeNameTable.fullClassName(name),
@@ -108,7 +112,7 @@ public class ClassDepVisitor extends ClassVisitor{
 				signature==null?"":" /*"+signature+"*/ ",
 				(exceptions == null || exceptions.length == 0) ? "" : 
 					"throws "+ Joiner.on(", ").join(exceptions));
-		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc), access);
+		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc, accInterface), access);
 		return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
 			@Override public void visitLocalVariable(
 					String name, String desc, String signature, 
