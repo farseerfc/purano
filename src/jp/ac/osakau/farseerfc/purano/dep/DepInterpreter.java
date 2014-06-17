@@ -1,11 +1,13 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
 import com.google.common.base.Joiner;
+
 import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.extern.slf4j.Slf4j;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Handle;
@@ -17,7 +19,9 @@ import org.objectweb.asm.tree.analysis.Interpreter;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Slf4j
@@ -131,7 +135,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			throws AnalyzerException {
 		switch (insn.getOpcode()) {
 		case ACONST_NULL:
-			return newValue(Type.getObjectType("null"));
+			return newValue(Type.getObjectType("null"), true);
 		case ICONST_M1:
 		case ICONST_0:
 		case ICONST_1:
@@ -152,7 +156,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 			return new DepValue(Type.DOUBLE_TYPE, true);
 		case BIPUSH:
 		case SIPUSH:
-			return new DepValue(Type.INT_TYPE);
+			return new DepValue(Type.INT_TYPE, true);
 		case LDC:
 			Object cst = ((LdcInsnNode) insn).cst;
 			if (cst instanceof Integer) {
@@ -289,11 +293,14 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             return new DepValue(Type.DOUBLE_TYPE,value.getDeps(), value.isConstant());
         case IFEQ:
         case IFNE:
-    		method.getCacheSemantic().getFields().addAll(value.getDeps().getFields());
-//        	
-//        	if(!method.getDesc().getReturnType().equals("void")){
-//                effect.getReturnDep().getDeps().merge(value.getDeps());
-//            }
+        	if(!method.getDesc().getReturnType().equals("void")){
+	        	for(FieldDep fd: value.getDeps().getFields()){
+	        		if(findCacheSemantic && method.checkCacheSematic(fd)) continue;
+	        		effect.getReturnDep().getDeps().getFields().add(fd);
+	        	}
+	        	effect.getReturnDep().getDeps().getLocals().addAll(value.getDeps().getLocals());
+	        	effect.getReturnDep().getDeps().getStatics().addAll(value.getDeps().getStatics());
+        	}
         	return null;
         case IFLT:
         case IFGE:
@@ -309,6 +316,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case LRETURN:
         case FRETURN:
         case DRETURN:
+        	effect.getReturnDep().getDeps().merge(value.getDeps());
+        	return null;
         case ARETURN:{
         	effect.getReturnDep().getDeps().merge(value.getDeps());
             effect.getReturnDep().getLvalue().merge(value.getLvalue());
@@ -393,7 +402,14 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         	return null;
         case IFNULL:
         case IFNONNULL:
-        	method.getCacheSemantic().getFields().addAll(value.getDeps().getFields());
+        	if(findCacheSemantic){
+        		Set<FieldDep> fds = new HashSet<>(value.getDeps().getFields());
+        		for(FieldDep fd: fds){
+        			if(method.checkCacheSematic(fd)){
+        				value.getDeps().getFields().remove(fd);
+        			}
+        		}
+        	}
         	return null;
         default:
         	System.err.println("Unknown copyOperation "+opcode2string(insn.getOpcode()));
@@ -471,16 +487,23 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case IF_ICMPNE:
         case IF_ACMPNE:
         	if(!method.getDesc().getReturnType().equals("void")){
-                effect.getReturnDep().getDeps().merge(value1.getDeps());
-                effect.getReturnDep().getDeps().merge(value2.getDeps());
-            }
-        	if(value2.isConstant() || value1.isConstant()){
-        		if(value1.isConstant()){
-        			method.getCacheSemantic().getFields().addAll(value2.getDeps().getFields());
-        		}
-        		if(value2.isConstant()){
-        			method.getCacheSemantic().getFields().addAll(value1.getDeps().getFields());
-        		}
+	        	if(value2.isConstant() || value1.isConstant()){
+	        		if(value1.isConstant()){
+	        			for(FieldDep fd: value2.getDeps().getFields()){
+	    	        		if(findCacheSemantic && method.checkCacheSematic(fd)) {
+	    	        			deps.getFields().remove(fd);
+	    	        		}
+	    	        	}
+	        		}
+	        		if(value2.isConstant()){
+	        			for(FieldDep fd: value1.getDeps().getFields()){
+	    	        		if(findCacheSemantic && method.checkCacheSematic(fd)) {
+	    	        			deps.getFields().remove(fd);
+	    	        		}
+	    	        	}
+	        		}
+	        	}
+        		effect.getReturnDep().getDeps().merge(deps);
         	}
         	return null;
         case IF_ICMPLT:
@@ -498,11 +521,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             if (!method.isStatic() && value1.getLvalue().isThis()) {
                 // this.name == v2
             	if(findCacheSemantic){
-	            	for (FieldDep fd :method.getCacheSemantic().getFields()){
-	            		if(fd.getName().equals(fin.name)){
-	            			// this.cacheField = v2
-	            			return null;
-	            		}
+            		if(value2.isConstant()){
+            			return null;
+            		}
+	            	FieldDep fd = new FieldDep(fin.desc, fin.owner, fin.name);
+	            	if(method.addCacheSemantic(fd)){
+	            		return null;
 	            	}
             	}
                 DepValue dv = new DepValue(value2.getType(), value2.getDeps());

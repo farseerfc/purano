@@ -31,7 +31,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 2;
+    private static final int MAX_LOAD_PASS = 100;
     
     private final boolean examChangedSignatures = true;
 
@@ -129,12 +129,12 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "java.lang.String"};
+//        		"jp.ac.osakau.farseerfc.purano.test","java.lang.String", "java.util.HashMap"};
 //                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
-//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
+        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
 //        "jp.ac.osakau.farseerfc.purano","java.lang"};
 		if(argv.length > 1){
 			targetPackage=argv;
@@ -142,11 +142,11 @@ public class ClassFinder {
 		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
 		cf.resolveMethods();
 
-//        ClassFinderDumpper dumpper = new DumyDumpper(); //new StreamDumpper(System.out, cf);
+//        ClassFinderDumpper dumpper = new DumyDumpper();
+//      ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getTerm());
 //        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
         File output = new File("/tmp/output.html");
         PrintStream ps = new PrintStream(new FileOutputStream(output));
-//        ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getTerm());
         ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
         dumpper.dump();
 

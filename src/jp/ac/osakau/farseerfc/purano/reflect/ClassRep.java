@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
+import jp.ac.osakau.farseerfc.purano.dep.FieldDep;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
@@ -18,13 +19,13 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ClassRep extends ClassVisitor {
 
 	private final Map<String, MethodRep> methodMap = new HashMap<>();
 
-	private final @Getter DepSet cacheFields = new DepSet();
 
 	@NotNull
     private final @Getter String name;
@@ -35,6 +36,9 @@ public class ClassRep extends ClassVisitor {
 //	private final @Getter Class<? extends Object> reflect;
 	
 	private @Getter boolean accInterface=false;
+	private final @Getter Map<FieldDep,Set<MethodRep>> fieldWrite= new HashMap<>();
+//	private final @Getter DepSet cacheFields = new DepSet();
+	
 
 	public ClassRep(@NotNull String className, ClassFinder cf){
 		super(Opcodes.ASM5);
@@ -54,6 +58,13 @@ public class ClassRep extends ClassVisitor {
 			Types.notFound(className,e);
 		}
 
+	}
+	
+	public Set<FieldDep> getCacheFields(){
+		return fieldWrite.entrySet().stream()
+				.filter( entry -> entry.getValue().size() == 1)
+				.map(entry -> entry.getKey())
+				.collect(Collectors.toSet());
 	}
 
 	public MethodRep getMethodVirtual(String methodId){
@@ -110,7 +121,7 @@ public class ClassRep extends ClassVisitor {
 		}
 
 		// Build method rep
-		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc, accInterface), access, this.cacheFields);
+		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc, accInterface), access, this);
 		methodMap.put(rep.getId(),rep);
 		for(ClassRep s : supers){
 			s.override(rep.getId(),rep);

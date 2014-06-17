@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import jp.ac.osakau.farseerfc.purano.ano.Purity;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
 import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
@@ -45,6 +46,8 @@ public class HtmlDumpper implements ClassFinderDumpper {
     private final Escaper esc;
     private final Configuration cfg;
     private final Types table;
+    
+    private static final boolean includeNonTargetEH = true;
 
     public HtmlDumpper(PrintStream out, ClassFinder cf) throws IOException {
         this.out = out;
@@ -59,6 +62,149 @@ public class HtmlDumpper implements ClassFinderDumpper {
         cfg.setIncompatibleImprovements(new Version(2, 3, 20));
         
         this.table = new Types();
+    }
+    
+
+    public List<String> dumpStatics(){
+    	List<String> result = new ArrayList<>();
+        int method = 0, unknown = 0, stateless = 0, stateful = 0, modifier =0 ;
+        int hmethod = 0, hunknown = 0, hstateless = 0, hstateful = 0, hmodifier =0, esln = 0 , esfn=0, en = 0 ;
+        int emethod = 0, eunknown = 0, estateless = 0, estateful = 0, emodifier =0, hsln = 0 , hsfn=0, hn = 0 ;
+        int fieldM = 0, staticM = 0, argM = 0, nativeE = 0;
+        int classes = 0;
+
+        List<String> sb = new ArrayList<>();
+
+        for(String clsName : cf.classMap.keySet()){
+            boolean isTarget = cf.classTargets.contains(clsName);
+            for(String p:cf.prefix){
+                if(clsName.startsWith(p)){
+                    isTarget = true;
+                }
+            }
+
+            if (!includeNonTargetEH && !isTarget) {
+                continue;
+            }
+            for(MethodRep mtd: cf.classMap.get(clsName).getAllMethods()){
+                int p=mtd.purity();
+                if(mtd.getInsnNode().name.equals("equals") && mtd.getInsnNode().desc.equals("(Ljava/lang/Object;)Z")){
+                    emethod++;
+                    if(p == Purity.Unknown){
+                        eunknown ++;
+                    }
+                    if(p == Purity.Stateless){
+                        estateless ++;
+                        sb.add("Equals Stateless:" + mtd.toString(new Types()));
+                    }else if(p == Purity.Stateful){
+                        estateful ++;
+                        sb.add("Equals Stateful:" + mtd.toString(new Types()));
+                    }else{
+                        emodifier ++;
+                        sb.add("Equals Motifier:" + mtd.toString(new Types()));
+                        if(p==(Purity.Stateless | Purity.Native)){
+                            esln ++ ;
+                        }else if (p==(Purity.Stateless | Purity.Native)){
+                            esfn ++ ;
+                        }
+
+                        if((p | Purity.Native)>0){
+                            en++;
+                        }
+                    }
+                }
+                if(mtd.getInsnNode().name.equals("hashCode")&& mtd.getInsnNode().desc.equals("()I")){
+                    hmethod++;
+                    if(p == Purity.Unknown){
+                        hunknown ++;
+                    }
+                    if(p == Purity.Stateless){
+                        hstateless ++;
+                        sb.add("hashCode Stateless:" + mtd.toString(new Types()));
+                    }else if(p == Purity.Stateful){
+                        hstateful ++;
+                        sb.add("hashCode Stateful:" + mtd.toString(new Types()));
+                    }else{
+                        hmodifier ++;
+                        sb.add("hashCode Modifier:" + mtd.toString(new Types()));
+                        if(p==(Purity.Stateless | Purity.Native)){
+                            hsln ++ ;
+                        }else if (p==(Purity.Stateless | Purity.Native)){
+                            hsfn ++ ;
+                        }
+                        if((p | Purity.Native)>0){
+                            hn++;
+                        }
+                    }
+                }
+            }
+            
+            if (includeNonTargetEH && !isTarget) {
+                continue;
+            }
+            
+            ClassRep cls = cf.classMap.get(clsName);
+            for(MethodRep mtd: cls.getAllMethods()){
+                method++;
+                int p=mtd.purity();
+                if(p == Purity.Unknown){
+                    unknown ++;
+                }
+                if(p == Purity.Stateless){
+                    stateless ++;
+                }else if(p == Purity.Stateful){
+                    stateful ++;
+                }else{
+                    modifier ++;
+                }
+                if((p & Purity.ArgumentModifier)>0){
+                    argM ++;
+                }
+                if((p & Purity.FieldModifier)>0){
+                    fieldM ++;
+                }
+                if((p & Purity.StaticModifier)>0){
+                    staticM ++;
+                }
+                if((p & Purity.Native)>0){
+                    nativeE ++;
+                }
+
+            }
+            classes ++;
+        }
+
+        result.add("class " + classes);
+        result.add("method "+method);
+        result.add("unknown "+unknown);
+        result.add("stateless "+stateless);
+        result.add("stateful "+stateful);
+        result.add("modifier "+modifier);
+
+        result.add("fieldM "+fieldM);
+        result.add("staticM "+staticM);
+        result.add("argM "+argM);
+        result.add("nativeE "+nativeE);
+
+        result.add("emethod "+emethod);
+        result.add("eunknown "+eunknown);
+        result.add("estateless "+estateless);
+        result.add("estateful "+estateful);
+        result.add("emodifier "+emodifier);
+        result.add("esln "+esln);
+        result.add("esfn "+esfn);
+        result.add("en "+en);
+
+        result.add("hmethod "+hmethod);
+        result.add("hunknown "+hunknown);
+        result.add("hstateless "+hstateless);
+        result.add("hstateful "+hstateful);
+        result.add("hmodifier "+hmodifier);
+        result.add("hsln "+hsln);
+        result.add("hsfn "+hsfn);
+        result.add("hn "+hn);
+        
+        return result;
     }
 
     @Override
@@ -78,6 +224,8 @@ public class HtmlDumpper implements ClassFinderDumpper {
         result.put("imports", new ArrayList<>(table.getImports()));
         result.put("package", Arrays.asList(table.getPackageName()==null ? "" : table.getPackageName()));
         
+        result.put("stat", dumpStatics());
+      
 		try {
 			Template tmpl = cfg.getTemplate("main.ftl");
 			tmpl.process(result, new OutputStreamWriter(out));
@@ -95,11 +243,21 @@ public class HtmlDumpper implements ClassFinderDumpper {
     			.map(method -> dumpMethod(method))
     			.collect(Collectors.toList()));
     	
-    	result.put("cache", Joiner.on(",").join(
-    			cls.getCacheFields().getFields().stream()
-    			.map(fd -> fd.dump(table))
-    			.collect(Collectors.toList())));
-    	
+//    	result.put("cache", Joiner.on(",").join(
+//    			cls.getCacheFields().stream()
+//    			.map(fd -> fd.dump(table))
+//    			.collect(Collectors.toList())));
+    	result.put("caches", cls.getFieldWrite().entrySet().stream()
+    			.map(entry -> entry.getKey().dump(table) + ": " +
+    					Joiner.on("<br/>").join(entry.getValue().stream()
+    							.map(e -> table.dumpMethodDesc(e.getInsnNode().desc, e.getInsnNode().name))
+    							.collect(Collectors.toList())))
+    			.collect(Collectors.toList()));
+
+//    	result.put("caches", cls.getFieldWrite().entrySet().stream()
+//    			.map(entry -> entry.getKey().dump(table) + ": " +
+//    					entry.getValue().size())
+//    			.collect(Collectors.toList()));
     	try {
 			Template tmpl = cfg.getTemplate("class.ftl");
 			ByteArrayOutputStream out = new ByteArrayOutputStream();

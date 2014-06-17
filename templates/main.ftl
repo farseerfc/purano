@@ -40,5 +40,10 @@ package ${p} ;
 		${class}
 	</div>
 </#list>
+<#list stat as s>
+	<div class="clazz">
+		${s}
+	</div>
+</#list>
 </body>
 </html>

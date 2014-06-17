@@ -9,6 +9,7 @@ import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.dep.DepSet;
+import jp.ac.osakau.farseerfc.purano.dep.FieldDep;
 import jp.ac.osakau.farseerfc.purano.effect.NativeEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
@@ -56,10 +57,11 @@ public class MethodRep extends MethodVisitor implements Purity {
 
     private @Getter @Setter boolean needResolve;
     
-    private @Getter final DepSet cacheSemantic;
-
+    private final @Getter ClassRep classRep;
+    
+    private final @Getter Set<FieldDep> cacheSemantic= new HashSet<>();
 	
-	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, DepSet cacheFields){
+	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);
 		this.insnNode = methodInsnNode;
 		this.access = access;
@@ -83,7 +85,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 
         needResolve = true;
         
-        cacheSemantic = cacheFields;
+        classRep = cr;
 	}
 
 	@NotNull
@@ -92,6 +94,49 @@ public class MethodRep extends MethodVisitor implements Purity {
 	}
 
 
+	public boolean addCacheSemantic(FieldDep fd){
+		if(isInit){
+			return false;
+		}
+		if(classRep.getFieldWrite().containsKey(fd)){
+			if(classRep.getFieldWrite().get(fd).contains(this)){
+				if(classRep.getFieldWrite().get(fd).size() == 1){
+					return cacheSemantic.contains(fd);
+				}
+				return false;
+			}else{
+				for(MethodRep mr:classRep.getFieldWrite().get(fd)){
+					if(this != mr){
+						mr.needResolve = true;
+					}
+				}
+				classRep.getFieldWrite().get(fd).add(this);
+				return false;
+			}
+		}else{
+			Set<MethodRep> item = new HashSet<>();
+			item.add(this);
+			classRep.getFieldWrite().put(fd, item);
+			return cacheSemantic.contains(fd);
+		}
+	}
+	
+	public boolean checkCacheSematic(FieldDep fd){
+		if(isInit){
+			return false;
+		}
+		if(!cacheSemantic.contains(fd)){
+			cacheSemantic.add(fd);
+			this.needResolve = true;
+		}
+		if(classRep.getFieldWrite().containsKey(fd)){
+			if(classRep.getFieldWrite().get(fd).size() <= 1){
+				return classRep.getFieldWrite().get(fd).contains(this);
+			}
+		}
+		return false;
+	}
+	
 	@NotNull
     public static String getId(@NotNull MethodInsnNode insnNode){
 		return insnNode.name+insnNode.desc;
@@ -270,9 +315,9 @@ public class MethodRep extends MethodVisitor implements Purity {
 				this.modifiedTimeStamp = newTimeStamp;
 				this.resolveTimeStamp = newTimeStamp;
 
-                for(MethodRep methodRep:called){
-                    methodRep.setNeedResolve(true);
-                }
+//                for(MethodRep methodRep:called){
+//                    methodRep.setNeedResolve(true);
+//                }
                 for(MethodRep methodRep:overrides){
                     methodRep.setNeedResolve(true);
                 }

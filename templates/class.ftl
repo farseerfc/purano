@@ -1,6 +1,9 @@
-<h2>${name}</h2>
+<h2>class ${name}</h2>
 <div class="caches">
-	cache fields: ${cache}
+	fields: 
+	<#list caches as cache>
+		<p>${cache}</p>
+	</#list> 
 </div>
 <div class="members">
 	<#list methods as m>
