@@ -31,7 +31,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 100;
+    private static final int MAX_LOAD_PASS = 3;
     
     private final boolean examChangedSignatures = true;
 
@@ -129,12 +129,13 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
+        		"mit.jolden"};
 //        		"jp.ac.osakau.farseerfc.purano.test","java.lang.String", "java.util.HashMap"};
 //                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
-        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
+//        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
 //        "jp.ac.osakau.farseerfc.purano","java.lang"};
 		if(argv.length > 1){
 			targetPackage=argv;
