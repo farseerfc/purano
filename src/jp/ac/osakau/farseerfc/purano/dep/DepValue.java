@@ -19,11 +19,14 @@ public class DepValue implements Value {
 	private final @Getter Type type;
 	private final @Getter boolean constant;
 	
+	private final @Getter DepSet constants;
+	
 	public DepValue(Type type) {
 		this.type = type;
 		this.deps = new DepSet();
         this.lvalue = new DepSet();
         this.constant = false;
+        this.constants = new DepSet();
 	}
 	
 	public DepValue(Type type, boolean constant) {
@@ -31,6 +34,7 @@ public class DepValue implements Value {
 		this.deps = new DepSet();
         this.lvalue = new DepSet();
         this.constant = constant;
+        this.constants = new DepSet();
 	}
 	
 	public DepValue(Type type,DepSet deps) {
@@ -38,6 +42,7 @@ public class DepValue implements Value {
 		this.deps = new DepSet(deps);
         this.lvalue = new DepSet();
         this.constant = false;
+        this.constants = new DepSet();
 	}
 	
 	public DepValue(Type type,DepSet deps, boolean constant) {
@@ -45,6 +50,7 @@ public class DepValue implements Value {
 		this.deps = new DepSet(deps);
         this.lvalue = new DepSet();
         this.constant = constant;
+        this.constants = new DepSet();
 	}
 
     DepValue(Type type,DepSet deps,DepSet lvalue) {
@@ -52,6 +58,7 @@ public class DepValue implements Value {
         this.deps = new DepSet(deps);
         this.lvalue = lvalue;
         this.constant = false;
+        this.constants = new DepSet();
     }
     
     DepValue(Type type,DepSet deps,DepSet lvalue, boolean constant) {
@@ -59,6 +66,7 @@ public class DepValue implements Value {
         this.deps = new DepSet(deps);
         this.lvalue = lvalue;
         this.constant = constant;
+        this.constants = new DepSet();
     }
     
     public DepValue(@NotNull DepValue value) {
@@ -66,6 +74,7 @@ public class DepValue implements Value {
         this.deps = new DepSet(value.deps);
         this.lvalue = new DepSet(value.lvalue);
         this.constant = value.constant;
+        this.constants = new DepSet(value.constants);
     }
     
     public DepValue(@NotNull DepValue value, boolean constant) {
@@ -73,6 +82,7 @@ public class DepValue implements Value {
         this.deps = new DepSet(value.deps);
         this.lvalue = new DepSet(value.lvalue);
         this.constant = constant;
+        this.constants = new DepSet(value.constants);
     }
 
     public int getSize() {

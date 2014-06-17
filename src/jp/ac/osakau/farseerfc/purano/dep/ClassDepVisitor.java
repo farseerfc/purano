@@ -112,7 +112,7 @@ public class ClassDepVisitor extends ClassVisitor{
 				signature==null?"":" /*"+signature+"*/ ",
 				(exceptions == null || exceptions.length == 0) ? "" : 
 					"throws "+ Joiner.on(", ").join(exceptions));
-		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc, accInterface), access);
+		final MethodRep rep = new MethodRep(new MethodInsnNode(0, className, name, desc, accInterface), access, new DepSet());
 		return new TraceMethodVisitor(new MethodNode(Opcodes.ASM4,access,name,desc,signature,exceptions){
 			@Override public void visitLocalVariable(
 					String name, String desc, String signature, 

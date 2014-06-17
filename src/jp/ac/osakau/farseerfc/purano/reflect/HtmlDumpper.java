@@ -76,7 +76,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
         }
         
         result.put("imports", new ArrayList<>(table.getImports()));
-        result.put("package", Arrays.asList(table.getPackageName()));
+        result.put("package", Arrays.asList(table.getPackageName()==null ? "" : table.getPackageName()));
         
 		try {
 			Template tmpl = cfg.getTemplate("main.ftl");
@@ -94,6 +94,11 @@ public class HtmlDumpper implements ClassFinderDumpper {
     	result.put("methods", cls.getAllMethods().stream()
     			.map(method -> dumpMethod(method))
     			.collect(Collectors.toList()));
+    	
+    	result.put("cache", Joiner.on(",").join(
+    			cls.getCacheFields().getFields().stream()
+    			.map(fd -> fd.dump(table))
+    			.collect(Collectors.toList())));
     	
     	try {
 			Template tmpl = cfg.getTemplate("class.ftl");
@@ -146,7 +151,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
 
 			result.put("asm", dumpMethodAsm(method));
 			
-			result.put("cache", method.getCacheSemantic().dumpDeps(method, table));
+			
             
 		}else{
 			return "";

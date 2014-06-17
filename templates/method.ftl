@@ -36,11 +36,5 @@
 	<pre><code>${asm}</code></pre>
 	</div>
 	
-	<div class="caches">
-		<#list cache as c>
-		<div class="cache">
-		cache fields: ${c}
-		</div>
-	</#list>
-	</div>
+	
 </div>

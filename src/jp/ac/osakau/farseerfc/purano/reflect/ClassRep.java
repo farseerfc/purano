@@ -24,7 +24,7 @@ public class ClassRep extends ClassVisitor {
 
 	private final Map<String, MethodRep> methodMap = new HashMap<>();
 
-	private final DepSet cacheFields = new DepSet();
+	private final @Getter DepSet cacheFields = new DepSet();
 
 	@NotNull
     private final @Getter String name;
@@ -110,7 +110,7 @@ public class ClassRep extends ClassVisitor {
 		}
 
 		// Build method rep
-		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc, accInterface), access);
+		MethodRep rep = new MethodRep(new MethodInsnNode(0, this.name, name, desc, accInterface), access, this.cacheFields);
 		methodMap.put(rep.getId(),rep);
 		for(ClassRep s : supers){
 			s.override(rep.getId(),rep);

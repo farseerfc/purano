@@ -31,7 +31,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 5;
+    private static final int MAX_LOAD_PASS = 2;
     
     private final boolean examChangedSignatures = true;
 
@@ -106,6 +106,7 @@ public class ClassFinder {
 		for(String prefix:prefixes){
 			Reflections reflections = new Reflections( prefix ,new SubTypesScanner(false));
 	        classTargets.addAll( reflections.getStore().getSubTypesOf(Object.class.getName()));
+	        classTargets.add(prefix);
 		}
 		for(String cls : classTargets){
 			loadClass(cls);
@@ -128,8 +129,8 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-                "jp.ac.osakau.farseerfc.purano.test",
-                "java.time.format.DateTimeFormatterBuilder"};
+                "java.lang.String"};
+//                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};

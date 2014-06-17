@@ -59,7 +59,7 @@ public class MethodRep extends MethodVisitor implements Purity {
     private @Getter final DepSet cacheSemantic;
 
 	
-	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access){
+	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, DepSet cacheFields){
 		super(Opcodes.ASM5);
 		this.insnNode = methodInsnNode;
 		this.access = access;
@@ -83,7 +83,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 
         needResolve = true;
         
-        cacheSemantic = new DepSet();
+        cacheSemantic = cacheFields;
 	}
 
 	@NotNull
@@ -293,38 +293,38 @@ public class MethodRep extends MethodVisitor implements Purity {
         return needResolve;
     }
 
-	public boolean isNeedResolveOld(@NotNull final ClassFinder cf){
-		if(modifiedTimeStamp == 0){
-			return true;
-		}
-		for(MethodRep rep:overrided.values()){
-			if(rep.getModifiedTimeStamp() == 0){
-				return true;
-			}
-			if(resolveTimeStamp <= rep.getModifiedTimeStamp()){
-				return true;
-			}
-		}
-		for(MethodInsnNode insn: calls){
-			ClassRep crep = cf.loadClass(Types.binaryName2NormalName(insn.owner));
-
-			MethodRep mrep = crep.getMethodVirtual(new MethodRep(insn,0).getId());
-
-			if(mrep == null){
-				log.error("Cannot find method {} in class {} opcode {} ",new MethodRep(insn,0).getId(),crep.getName(), insn.getOpcode());
-				Types.notFound("Cannot find method ", null);
-				return false;
-			}
-
-			if(mrep.getModifiedTimeStamp() == 0){
-				return true;
-			}
-			if(resolveTimeStamp <= mrep.getResolveTimeStamp()){
-				return true;
-			}
-		}
-		return false;
-	}
+//	public boolean isNeedResolveOld(@NotNull final ClassFinder cf){
+//		if(modifiedTimeStamp == 0){
+//			return true;
+//		}
+//		for(MethodRep rep:overrided.values()){
+//			if(rep.getModifiedTimeStamp() == 0){
+//				return true;
+//			}
+//			if(resolveTimeStamp <= rep.getModifiedTimeStamp()){
+//				return true;
+//			}
+//		}
+//		for(MethodInsnNode insn: calls){
+//			ClassRep crep = cf.loadClass(Types.binaryName2NormalName(insn.owner));
+//
+//			MethodRep mrep = crep.getMethodVirtual(new MethodRep(insn,0).getId());
+//
+//			if(mrep == null){
+//				log.error("Cannot find method {} in class {} opcode {} ",new MethodRep(insn,0).getId(),crep.getName(), insn.getOpcode());
+//				Types.notFound("Cannot find method ", null);
+//				return false;
+//			}
+//
+//			if(mrep.getModifiedTimeStamp() == 0){
+//				return true;
+//			}
+//			if(resolveTimeStamp <= mrep.getResolveTimeStamp()){
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
     public void override(@NotNull MethodRep overrider) {
         if (!getId().equals(overrider.getId())) {
