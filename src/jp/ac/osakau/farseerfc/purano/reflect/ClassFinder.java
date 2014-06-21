@@ -31,9 +31,10 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 3;
+    private static final int MAX_LOAD_PASS = 100;
     
     private final boolean examChangedSignatures = true;
+    private final boolean breakForloop = true;
 
 	public ClassFinder(@NotNull List<String> prefix){
         findTargetClasses(prefix);
@@ -80,7 +81,7 @@ public class ClassFinder {
                     pass++,allCreps.size(),changedMethod,
                     Joiner.on(", ").join(changedMethodsTrace)));
             if(examChangedSignatures){
-	            final int maxdump=4;
+	            final int maxdump=2;
 	            if(changedMethod>maxdump){
 	                MethodRep [] top = new MethodRep [maxdump];
 	                int i=0;
@@ -92,6 +93,9 @@ public class ClassFinder {
 	            }else{
 	                for(MethodRep m:changedSignatures){
 	                	log.info(Joiner.on("\n").join(m.dump(this, new Types(), Escaper.getDummy())));
+	                }
+	                if(breakForloop){
+	                	break;
 	                }
 		        }
             }

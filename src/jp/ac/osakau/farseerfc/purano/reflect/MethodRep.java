@@ -315,9 +315,9 @@ public class MethodRep extends MethodVisitor implements Purity {
 				this.modifiedTimeStamp = newTimeStamp;
 				this.resolveTimeStamp = newTimeStamp;
 
-//                for(MethodRep methodRep:called){
-//                    methodRep.setNeedResolve(true);
-//                }
+                for(MethodRep methodRep:called){
+                    methodRep.setNeedResolve(true);
+                }
                 for(MethodRep methodRep:overrides){
                     methodRep.setNeedResolve(true);
                 }

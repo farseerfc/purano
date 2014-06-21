@@ -88,6 +88,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
             }
             for(MethodRep mtd: cf.classMap.get(clsName).getAllMethods()){
                 int p=mtd.purity();
+                p = p & (~Purity.Native);
                 if(mtd.getInsnNode().name.equals("equals") && mtd.getInsnNode().desc.equals("(Ljava/lang/Object;)Z")){
                     emethod++;
                     if(p == Purity.Unknown){
@@ -147,6 +148,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
             for(MethodRep mtd: cls.getAllMethods()){
                 method++;
                 int p=mtd.purity();
+                p = p & (~Purity.Native);
                 if(p == Purity.Unknown){
                     unknown ++;
                 }

@@ -295,7 +295,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case IFNE:
         	if(!method.getDesc().getReturnType().equals("void")){
 	        	for(FieldDep fd: value.getDeps().getFields()){
-	        		if(findCacheSemantic && method.checkCacheSematic(fd)) continue;
+	        		if(findCacheSemantic && method.checkCacheSematic(fd)) 
+	        			{}
+//	        			continue;
 	        		effect.getReturnDep().getDeps().getFields().add(fd);
 	        	}
 	        	effect.getReturnDep().getDeps().getLocals().addAll(value.getDeps().getLocals());
@@ -406,7 +408,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         		Set<FieldDep> fds = new HashSet<>(value.getDeps().getFields());
         		for(FieldDep fd: fds){
         			if(method.checkCacheSematic(fd)){
-        				value.getDeps().getFields().remove(fd);
+//        				value.getDeps().getFields().remove(fd);
         			}
         		}
         	}
@@ -491,14 +493,14 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	        		if(value1.isConstant()){
 	        			for(FieldDep fd: value2.getDeps().getFields()){
 	    	        		if(findCacheSemantic && method.checkCacheSematic(fd)) {
-	    	        			deps.getFields().remove(fd);
+//	    	        			deps.getFields().remove(fd);
 	    	        		}
 	    	        	}
 	        		}
 	        		if(value2.isConstant()){
 	        			for(FieldDep fd: value1.getDeps().getFields()){
 	    	        		if(findCacheSemantic && method.checkCacheSematic(fd)) {
-	    	        			deps.getFields().remove(fd);
+//	    	        			deps.getFields().remove(fd);
 	    	        		}
 	    	        	}
 	        		}
