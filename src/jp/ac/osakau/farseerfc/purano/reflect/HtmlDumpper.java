@@ -255,6 +255,8 @@ public class HtmlDumpper implements ClassFinderDumpper {
     							.map(e -> table.dumpMethodDesc(e.getInsnNode().desc, e.getInsnNode().name))
     							.collect(Collectors.toList())))
     			.collect(Collectors.toList()));
+    	
+//    	result.put("source", cls.getSource());
 
 //    	result.put("caches", cls.getFieldWrite().entrySet().stream()
 //    			.map(entry -> entry.getKey().dump(table) + ": " +
@@ -310,7 +312,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
             
 
 			result.put("asm", dumpMethodAsm(method));
-			
+			result.put("source", method.getSource()==null?"":method.getSource());
 			
             
 		}else{

@@ -9,6 +9,7 @@
 }
 .method{
 	margin-left: 20px;
+	clear: both;
 }
 .purity{
 	margin-left: 20px;
@@ -21,6 +22,19 @@
 }
 .clazz{
 	margin-left: 20px;
+	clear: both;
+}
+.source{
+	float: left;
+	width: 34%;
+}
+.methodMember{
+	float: left;
+	width: 33%;
+}
+.asm{
+	float: left;
+	width: 33%;
 }
 </style>
 </head>

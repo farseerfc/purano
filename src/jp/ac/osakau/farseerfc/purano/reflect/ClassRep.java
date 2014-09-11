@@ -39,7 +39,8 @@ public class ClassRep extends ClassVisitor {
 	private final @Getter Map<FieldDep,Set<MethodRep>> fieldWrite= new HashMap<>();
 //	private final @Getter DepSet cacheFields = new DepSet();
 	
-
+	private @Getter final String source;
+	
 	public ClassRep(@NotNull String className, ClassFinder cf){
 		super(Opcodes.ASM5);
 		this.name = className;
@@ -58,6 +59,11 @@ public class ClassRep extends ClassVisitor {
 			Types.notFound(className,e);
 		}
 
+		this.source = classFinder.findSource(name);
+		
+		if(source!=null){
+			new ASTClassVisitor(this).parse(source);
+		}
 	}
 	
 	public Set<FieldDep> getCacheFields(){
@@ -161,5 +167,15 @@ public class ClassRep extends ClassVisitor {
                 }
                 return classFinder.loadClass(Types.binaryName2NormalName(name));
             }}));
+	}
+	
+	public String getBaseName(){
+		int index= name.lastIndexOf(".");
+		if(index == -1){
+			return name;
+		}else{
+			return name.substring(index+1);
+		}
+			
 	}
 }

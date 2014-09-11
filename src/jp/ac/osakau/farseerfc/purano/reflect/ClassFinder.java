@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +29,24 @@ import com.google.common.base.Joiner;
 
 @Slf4j
 public class ClassFinder {
+
+	public String findSource(String name) {
+		for(String srcPrefix : sourcePrefix){
+			String className = name.replace(".", "/") + ".java";
+			Path path = Paths.get(srcPrefix, className);
+			File file = path.toFile();
+			if(file.exists() && file.isFile()){
+				try {
+					return Joiner.on("\n").join(Files.readAllLines(path));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		log.info("Not found source for {}", name);
+		return null;
+	} 
+	
 	@Getter final Map<String, ClassRep> classMap= new HashMap<>();
 
 	final Set<String> classTargets = new HashSet<>() ;
@@ -35,10 +56,16 @@ public class ClassFinder {
     
     private final boolean examChangedSignatures = true;
     private final boolean breakForloop = true;
+	private @NotNull final List<String> sourcePrefix;
 
-	public ClassFinder(@NotNull List<String> prefix){
-        findTargetClasses(prefix);
+	public ClassFinder(@NotNull List<String> prefix, @NotNull List<String> sourcePrefix){
+		this.sourcePrefix = sourcePrefix;
+		findTargetClasses(prefix);
         this.prefix=prefix;
+	}
+	
+	public ClassFinder(@NotNull List<String> prefix){
+        this(prefix, Arrays.asList());
 	}
 	
 	public ClassFinder(String string) {
@@ -133,8 +160,8 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-//        		"mit.jolden"};
-        		"jp.ac.osakau.farseerfc.purano.test"};
+        		"mit.jolden",
+        		"jp.ac.osakau.farseerfc.purano"};
 //                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
@@ -144,8 +171,15 @@ public class ClassFinder {
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
-		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage));
+		
+		String targetSource [] = {
+				"/home/farseerfc/workspace/purano/src"
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
 		cf.resolveMethods();
+		
+		
 
 //        ClassFinderDumpper dumpper = new DumyDumpper();
 //      ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getTerm());

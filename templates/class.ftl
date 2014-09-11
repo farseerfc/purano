@@ -5,8 +5,10 @@
 		<p>${cache}</p>
 	</#list> 
 </div>
+<div>
 <div class="members">
 	<#list methods as m>
 		${m}
 	</#list> 
+</div>
 </div>

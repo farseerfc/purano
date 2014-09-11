@@ -1,14 +1,18 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Objects;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import jp.ac.osakau.farseerfc.purano.ano.Purity;
-import jp.ac.osakau.farseerfc.purano.ano.StaticField;
 import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
-import jp.ac.osakau.farseerfc.purano.dep.DepSet;
 import jp.ac.osakau.farseerfc.purano.dep.FieldDep;
 import jp.ac.osakau.farseerfc.purano.effect.NativeEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
@@ -21,13 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 
-import java.io.IOException;
-import java.util.*;
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 
 @Slf4j
 public class MethodRep extends MethodVisitor implements Purity {
@@ -60,6 +68,8 @@ public class MethodRep extends MethodVisitor implements Purity {
     private final @Getter ClassRep classRep;
     
     private final @Getter Set<FieldDep> cacheSemantic= new HashSet<>();
+    
+    private @Getter @Setter String source = "";
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);
