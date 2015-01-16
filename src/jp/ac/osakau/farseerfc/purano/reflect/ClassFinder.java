@@ -178,11 +178,12 @@ public class ClassFinder {
 		
 
 //        ClassFinderDumpper dumpper = new DumyDumpper();
-//      ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getTerm());
+//		  ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
 //        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
-        File output = new File("/tmp/output.html");
+        File output = new File("/tmp/output.log");
         PrintStream ps = new PrintStream(new FileOutputStream(output));
-        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+//        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+		ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
         dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));

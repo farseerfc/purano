@@ -206,6 +206,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 		if(getMethodNode() != null){
 			
 			result.add("    "+esc.methodName(toString(table)));
+			result.add("            "+String.format("%s(%d-%d)", sourceFile, sourceBegin, sourceEnd));
 			for(MethodRep rep : overrided.values()){
 				result.add(String.format("        # %s", rep.toString(table)));
 			}
