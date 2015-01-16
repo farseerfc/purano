@@ -18,6 +18,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,6 +43,8 @@ public class ClassRep extends ClassVisitor {
 //	private final @Getter DepSet cacheFields = new DepSet();
 	
 	private @Getter final String source;
+	private @Getter final Path sourcePath;
+	private @Getter final String sourceFile;
 	
 	public ClassRep(@NotNull String className, ClassFinder cf){
 		super(Opcodes.ASM5);
@@ -58,11 +63,27 @@ public class ClassRep extends ClassVisitor {
 //			throw new RuntimeException("Cannot load "+className ,e);
 			Types.notFound(className,e);
 		}
-
-		this.source = classFinder.findSource(name);
 		
-		if(source!=null){
-			new ASTClassVisitor(this).parse(source);
+		this.sourcePath = classFinder.findSourcePath(name);
+		if(sourcePath!=null){
+			String src;
+			String srcFile;
+			try {
+				src = new String(Files.readAllBytes(this.sourcePath), StandardCharsets.UTF_8);
+				srcFile = sourcePath.toFile().getCanonicalPath();
+			} catch (IOException e) {
+				src = null;
+				srcFile = null;
+			}
+			this.source = src;
+			this.sourceFile = srcFile;
+			
+			if(source!=null){
+				new ASTClassVisitor(this).parse(source);
+			}
+		}else{
+			this.source = null;
+			this.sourceFile = null;
 		}
 	}
 	

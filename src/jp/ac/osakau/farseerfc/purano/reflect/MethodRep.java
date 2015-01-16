@@ -70,6 +70,9 @@ public class MethodRep extends MethodVisitor implements Purity {
     private final @Getter Set<FieldDep> cacheSemantic= new HashSet<>();
     
     private @Getter @Setter String source = "";
+    private @Getter @Setter String sourceFile = "";
+    private @Getter @Setter int sourceBegin = 0;
+    private @Getter @Setter int sourceEnd = 0;
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);

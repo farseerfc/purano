@@ -38,6 +38,9 @@ public class ASTClassVisitor extends ASTVisitor {
 				if(methodRep.isInit()){
 					if(getMethodRepSignature(methodRep).equals(getMethodSignature(node))){
 						methodRep.setSource(node.toString());
+						methodRep.setSourceFile(classRep.getSourceFile());
+						methodRep.setSourceBegin(unit.getLineNumber(node.getStartPosition()));
+						methodRep.setSourceEnd(unit.getLineNumber(node.getStartPosition()+node.getLength()));
 					}
 				}
 			}
@@ -46,6 +49,9 @@ public class ASTClassVisitor extends ASTVisitor {
 				if(methodRep.getInsnNode().name .equals(node.getName().toString())){
 					if(getMethodRepSignature(methodRep).equals(getMethodSignature(node))){
 						methodRep.setSource(node.toString());
+						methodRep.setSourceFile(classRep.getSourceFile());
+						methodRep.setSourceBegin(unit.getLineNumber(node.getStartPosition()));
+						methodRep.setSourceEnd(unit.getLineNumber(node.getStartPosition()+node.getLength()));
 					}
 				}
 			}

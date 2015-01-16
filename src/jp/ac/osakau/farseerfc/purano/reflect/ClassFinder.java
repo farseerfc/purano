@@ -30,17 +30,13 @@ import com.google.common.base.Joiner;
 @Slf4j
 public class ClassFinder {
 
-	public String findSource(String name) {
+	public Path findSourcePath(String name) {
 		for(String srcPrefix : sourcePrefix){
 			String className = name.replace(".", "/") + ".java";
 			Path path = Paths.get(srcPrefix, className);
 			File file = path.toFile();
 			if(file.exists() && file.isFile()){
-				try {
-					return Joiner.on("\n").join(Files.readAllLines(path));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				return path;
 			}
 		}
 		log.info("Not found source for {}", name);

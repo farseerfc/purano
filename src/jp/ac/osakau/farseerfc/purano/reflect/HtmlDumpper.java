@@ -313,6 +313,9 @@ public class HtmlDumpper implements ClassFinderDumpper {
 
 			result.put("asm", dumpMethodAsm(method));
 			result.put("source", method.getSource()==null?"":method.getSource());
+			result.put("sourceFile", method.getSourceFile()==null?"":method.getSourceFile());
+			result.put("sourceBegin", method.getSource()==null?0:method.getSourceBegin());
+			result.put("sourceEnd", method.getSource()==null?0:method.getSourceEnd());
 			
             
 		}else{
