@@ -254,6 +254,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case LSTORE:
         case FSTORE:
         case DSTORE:
+        case SWAP:
         	return new DepValue(value);
         default:
         	System.err.println("Unknown copyOperation "+opcode2string(insn.getOpcode()));

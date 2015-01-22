@@ -142,6 +142,9 @@ public class Types {
 				return name;
 			}
 		} else {
+			if(name.lastIndexOf('.') == -1){
+				return name;
+			}
 			if (packageName == null) {
 				// first package name is class package
 				packageName = name.substring(0, name.lastIndexOf('.'));
