@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -25,7 +26,7 @@ import com.google.common.base.Joiner;
 public class ASTClassVisitor extends ASTVisitor {
 
 	private final @NotNull ClassRep classRep;
-	private CompilationUnit unit;
+	private @Getter CompilationUnit unit;
 
 	public ASTClassVisitor(@NotNull ClassRep classRep) {
 		this.classRep = classRep;
@@ -37,6 +38,7 @@ public class ASTClassVisitor extends ASTVisitor {
 			for(MethodRep methodRep : classRep.getAllMethods()){
 				if(methodRep.isInit()){
 					if(getMethodRepSignature(methodRep).equals(getMethodSignature(node))){
+						methodRep.setSourceNode(node);
 						methodRep.setSource(node.toString());
 						methodRep.setSourceFile(classRep.getSourceFile());
 						methodRep.setSourceBegin(unit.getLineNumber(node.getStartPosition()));
@@ -48,6 +50,7 @@ public class ASTClassVisitor extends ASTVisitor {
 			for(MethodRep methodRep : classRep.getAllMethods()){
 				if(methodRep.getInsnNode().name .equals(node.getName().toString())){
 					if(getMethodRepSignature(methodRep).equals(getMethodSignature(node))){
+						methodRep.setSourceNode(node);
 						methodRep.setSource(node.toString());
 						methodRep.setSourceFile(classRep.getSourceFile());
 						methodRep.setSourceBegin(unit.getLineNumber(node.getStartPosition()));

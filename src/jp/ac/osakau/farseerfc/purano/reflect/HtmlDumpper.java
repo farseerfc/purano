@@ -312,10 +312,22 @@ public class HtmlDumpper implements ClassFinderDumpper {
             
 
 			result.put("asm", dumpMethodAsm(method));
-			result.put("source", method.getSource()==null?"":method.getSource());
+			
+			String sourceCode = method.getSource();
+			
+			if(sourceCode != null){
+				int begin = method.getSourceBegin();
+				String [] lines =  sourceCode.split("\\r?\\n");
+				for(int i=0;i<lines.length;++i){
+					lines[i] = String.format("%4d: %s", begin+i, lines[i]); 
+				}
+				sourceCode = Joiner.on("\n").join(lines);
+			}
+			
+			result.put("source", sourceCode);
 			result.put("sourceFile", method.getSourceFile()==null?"":method.getSourceFile());
-			result.put("sourceBegin", method.getSource()==null?0:method.getSourceBegin());
-			result.put("sourceEnd", method.getSource()==null?0:method.getSourceEnd());
+			result.put("sourceBegin", sourceCode == null ? 0 : method.getSourceBegin());
+			result.put("sourceEnd", sourceCode == null ? 0 : method.getSourceEnd());
 			
             
 		}else{

@@ -13,6 +13,7 @@ import jp.ac.osakau.farseerfc.purano.ano.Purity;
 import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
+import jp.ac.osakau.farseerfc.purano.dep.DepValue;
 import jp.ac.osakau.farseerfc.purano.dep.FieldDep;
 import jp.ac.osakau.farseerfc.purano.effect.NativeEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
@@ -23,6 +24,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassReader;
@@ -33,6 +35,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
+import org.objectweb.asm.tree.analysis.Frame;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
@@ -73,6 +76,8 @@ public class MethodRep extends MethodVisitor implements Purity {
     private @Getter @Setter String sourceFile = "";
     private @Getter @Setter int sourceBegin = 0;
     private @Getter @Setter int sourceEnd = 0;
+    private @Getter @Setter MethodDeclaration sourceNode = null;
+    private @Getter Frame<DepValue> [] frames = null;
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);
@@ -292,7 +297,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 									methodNode = this;
 									DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, thisRep, cf));
 									try {
-										/*Frame<DepValue> [] frames =*/ ana.analyze("dep", this);
+										frames = ana.analyze("dep", this);
 									} catch (AnalyzerException e) {
 										//throw new RuntimeException("Error when analyzing",e);
                                         log.warn("Error when analyzing {}",e);
@@ -305,7 +310,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 				}else{
                     DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, this,cf));
 					try {
-						/*Frame<DepValue> [] frames =*/ ana.analyze("dep", methodNode);
+						frames = ana.analyze("dep", methodNode);
 					} catch (AnalyzerException e) {
 //						throw new RuntimeException("Error when analyzing",e);
                         log.warn("Error when analyzing {}",e);

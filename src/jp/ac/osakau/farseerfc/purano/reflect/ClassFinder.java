@@ -112,11 +112,11 @@ public class ClassFinder {
 	                    if(i>=maxdump)break;
 		                    top[i++]=mid;
 	                }
-	            	log.info(Joiner.on(", ").join(top));
+//	            	log.info(Joiner.on(", ").join(top));
 	            }else{
-	                for(MethodRep m:changedSignatures){
-	                	log.info(Joiner.on("\n").join(m.dump(this, new Types(), Escaper.getDummy())));
-	                }
+//	                for(MethodRep m:changedSignatures){
+//	                	log.info(Joiner.on("\n").join(m.dump(this, new Types(), Escaper.getDummy())));
+//	                }
 	                if(breakForloop){
 	                	break;
 	                }
@@ -163,7 +163,8 @@ public class ClassFinder {
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
 //        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
-//        "jp.ac.osakau.farseerfc.purano","java.lang"};
+//        "jp.ac.osakau.farseerfc.purano","java.lang"}
+        
 		if(argv.length > 1){
 			targetPackage=argv;
 		}
@@ -180,10 +181,10 @@ public class ClassFinder {
 //        ClassFinderDumpper dumpper = new DumyDumpper();
 //		  ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
 //        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
-        File output = new File("/tmp/output.log");
+        File output = new File("/tmp/output.html");
         PrintStream ps = new PrintStream(new FileOutputStream(output));
-//        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
-		ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+//		ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
         dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));
