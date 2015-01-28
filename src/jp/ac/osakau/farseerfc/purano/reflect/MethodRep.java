@@ -12,6 +12,7 @@ import java.util.Set;
 import jp.ac.osakau.farseerfc.purano.ano.Purity;
 import jp.ac.osakau.farseerfc.purano.dep.DepAnalyzer;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
+import jp.ac.osakau.farseerfc.purano.dep.DepFrame;
 import jp.ac.osakau.farseerfc.purano.dep.DepInterpreter;
 import jp.ac.osakau.farseerfc.purano.dep.DepValue;
 import jp.ac.osakau.farseerfc.purano.dep.FieldDep;
@@ -24,6 +25,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,7 +79,8 @@ public class MethodRep extends MethodVisitor implements Purity {
     private @Getter @Setter int sourceBegin = 0;
     private @Getter @Setter int sourceEnd = 0;
     private @Getter @Setter MethodDeclaration sourceNode = null;
-    private @Getter Frame<DepValue> [] frames = null;
+    private @Getter @Setter CompilationUnit unit = null;
+    private @Getter DepFrame<DepValue> [] frames = null;
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);

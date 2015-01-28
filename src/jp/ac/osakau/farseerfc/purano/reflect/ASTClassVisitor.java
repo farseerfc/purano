@@ -39,6 +39,7 @@ public class ASTClassVisitor extends ASTVisitor {
 				if(methodRep.isInit()){
 					if(getMethodRepSignature(methodRep).equals(getMethodSignature(node))){
 						methodRep.setSourceNode(node);
+						methodRep.setUnit(unit);
 						methodRep.setSource(node.toString());
 						methodRep.setSourceFile(classRep.getSourceFile());
 						methodRep.setSourceBegin(unit.getLineNumber(node.getStartPosition()));
@@ -51,6 +52,7 @@ public class ASTClassVisitor extends ASTVisitor {
 				if(methodRep.getInsnNode().name .equals(node.getName().toString())){
 					if(getMethodRepSignature(methodRep).equals(getMethodSignature(node))){
 						methodRep.setSourceNode(node);
+						methodRep.setUnit(unit);
 						methodRep.setSource(node.toString());
 						methodRep.setSourceFile(classRep.getSourceFile());
 						methodRep.setSourceBegin(unit.getLineNumber(node.getStartPosition()));

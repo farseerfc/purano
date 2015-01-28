@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 
 import jp.ac.osakau.farseerfc.purano.ano.Purity;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
+import jp.ac.osakau.farseerfc.purano.dep.DepFrame;
+import jp.ac.osakau.farseerfc.purano.dep.DepValue;
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
 import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
 import jp.ac.osakau.farseerfc.purano.effect.Effect;
@@ -27,7 +29,9 @@ import jp.ac.osakau.farseerfc.purano.util.Types;
 
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
@@ -359,6 +363,23 @@ public class HtmlDumpper implements ClassFinderDumpper {
         };
         TraceMethodVisitor tmv = new TraceMethodVisitor(text);
         method.getMethodNode().accept(tmv);
+        
+        pw.append("<<<<<<<<<<<<<<\n");
+        
+        for(DepFrame<DepValue> frame: method.getFrames()){
+        	if(frame==null) continue;
+        	int line = -1;
+        	if (frame.getLine() != null){
+        		line = frame.getLine().line;
+        	}
+        	AbstractInsnNode node = frame.getNode();
+        	if(node.getOpcode()>0 && node.getOpcode()< Printer.OPCODES.length){
+	        	String opcode = Printer.OPCODES[node.getOpcode()];
+	        	pw.append(String.format("%5d: %s\n", line, opcode));
+	        	pw.flush();
+        	}
+        }
+        
         try {
 			return out.toString("utf-8");
 		} catch (UnsupportedEncodingException e) {

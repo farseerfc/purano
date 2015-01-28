@@ -41,12 +41,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * A semantic bytecode analyzer. <i>This class does not fully check that JSR and
  * RET instructions are valid.</i>
  *
  * @author Eric Bruneton
  */
+@Slf4j
 public class DepAnalyzer implements Opcodes {
 
     private final DepInterpreter interpreter;
@@ -57,7 +62,7 @@ public class DepAnalyzer implements Opcodes {
 
     private List<TryCatchBlockNode>[] handlers;
 
-    private Frame<DepValue>[] frames;
+    private DepFrame<DepValue>[] frames;
 
     private Subroutine[] subroutines;
 
@@ -93,16 +98,16 @@ public class DepAnalyzer implements Opcodes {
      * @throws org.objectweb.asm.tree.analysis.AnalyzerException
      *             if a problem occurs during the analysis.
      */
-    public Frame<DepValue>[] analyze(@NotNull final String owner, @NotNull final MethodNode m)
+    public DepFrame<DepValue>[] analyze(@NotNull final String owner, @NotNull final MethodNode m)
             throws AnalyzerException {
         if ((m.access & (ACC_ABSTRACT | ACC_NATIVE)) != 0) {
-            frames = new Frame[0];
+            frames = new DepFrame[0];
             return frames;
         }
         n = m.instructions.size();
         insns = m.instructions;
         handlers = new List[n];
-        frames = new Frame[n];
+        frames = new DepFrame[n];
         subroutines = new Subroutine[n];
         queued = new boolean[n];
         queue = new int[n];
@@ -154,9 +159,10 @@ public class DepAnalyzer implements Opcodes {
         init(owner, m);
 
         // control flow analysis
+        LineNumberNode currentLine = null;
         while (top > 0) {
             int insn = queue[--top];
-            Frame<DepValue> f = frames[insn];
+            DepFrame<DepValue> f = frames[insn];
             Subroutine subroutine = subroutines[insn];
             queued[insn] = false;
 
@@ -165,12 +171,20 @@ public class DepAnalyzer implements Opcodes {
                 insnNode = m.instructions.get(insn);
                 int insnOpcode = insnNode.getOpcode();
                 int insnType = insnNode.getType();
+                frames[insn].setNode(insnNode);
+                
+                if(insnType == AbstractInsnNode.LINE){
+                	currentLine = (LineNumberNode) insnNode;
+                }
+                
+                frames[insn].setLine(currentLine);
 
                 if (insnType == AbstractInsnNode.LABEL
                         || insnType == AbstractInsnNode.LINE
                         || insnType == AbstractInsnNode.FRAME) {
                     merge(insn + 1, f, subroutine);
                     newControlFlowEdge(insn, insn + 1);
+                   
                 } else {
                     current.init(f).execute(insnNode, interpreter);
                     subroutine = subroutine == null ? null : subroutine.copy();
@@ -430,8 +444,8 @@ public class DepAnalyzer implements Opcodes {
      * @return the created frame.
      */
     @NotNull
-    protected Frame<DepValue> newFrame(@NotNull final Frame<DepValue> src) {
-        return new Frame<DepValue>(src);
+    protected DepFrame<DepValue> newFrame(@NotNull final Frame<DepValue> src) {
+        return new DepFrame<DepValue>(src);
     }
 
     /**
