@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jp.ac.osakau.farseerfc.purano.ano.Purity;
@@ -27,6 +28,8 @@ import jp.ac.osakau.farseerfc.purano.effect.StaticEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -316,24 +319,8 @@ public class HtmlDumpper implements ClassFinderDumpper {
             
 
 			result.put("asm", dumpMethodAsm(method));
+			result.put("source", dumpMethodSource(method));
 			
-			String sourceCode = method.getSource();
-			
-			if(sourceCode != null){
-				int begin = method.getSourceBegin();
-				String [] lines =  sourceCode.split("\\r?\\n");
-				for(int i=0;i<lines.length;++i){
-					lines[i] = String.format("%4d: %s", begin+i, lines[i]); 
-				}
-				sourceCode = Joiner.on("\n").join(lines);
-			}
-			
-			result.put("source", sourceCode);
-			result.put("sourceFile", method.getSourceFile()==null?"":method.getSourceFile());
-			result.put("sourceBegin", sourceCode == null ? 0 : method.getSourceBegin());
-			result.put("sourceEnd", sourceCode == null ? 0 : method.getSourceEnd());
-			
-            
 		}else{
 			return "";
 		}
@@ -349,6 +336,39 @@ public class HtmlDumpper implements ClassFinderDumpper {
 		}
     	return "";
     }
+
+
+	private String dumpMethodSource(MethodRep method) {
+		String sourceCode= method.getSource();
+		
+		MethodDeclaration sourceNode = method.getSourceNode();
+		CompilationUnit unit = method.getUnit();
+		
+		if(sourceNode != null){
+			ASTStatementVisitor visitor = new ASTStatementVisitor(unit);
+			sourceNode.accept(visitor);
+		
+			sourceCode += "\n<<<<<<<<<<<<<<<<<<<<\n";
+			
+			List<String> sourcelines = new ArrayList<>();
+			for(int line : new TreeSet<Integer>(visitor.getLineMap().keySet())){
+				sourcelines.add(String.format("%d: [%s]", line,
+						visitor.getLineMap().get(line)
+						.stream()
+						.map( (x) -> String.format("\"%s\"", x.toString().trim() ))
+						.collect(Collectors.joining(", "))));
+			}
+			sourceCode += Joiner.on("\n").join(sourcelines);
+			
+			String position = String.format("%s: (%d-%d):\n", 
+					method.getSourceFile()==null?"":method.getSourceFile(),
+							method.getSourceBegin(),
+							method.getSourceEnd()
+			);
+			return position + sourceCode;
+		}
+		return "";
+	}
     
     public String dumpMethodAsm(@NotNull MethodRep method){
     	ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -366,7 +386,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
         
         pw.append("<<<<<<<<<<<<<<\n");
         
-        for(DepFrame<DepValue> frame: method.getFrames()){
+        for(DepFrame frame: method.getFrames()){
         	if(frame==null) continue;
         	int line = -1;
         	if (frame.getLine() != null){
@@ -376,6 +396,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
         	if(node.getOpcode()>0 && node.getOpcode()< Printer.OPCODES.length){
 	        	String opcode = Printer.OPCODES[node.getOpcode()];
 	        	pw.append(String.format("%5d: %s\n", line, opcode));
+	        	pw.append(String.format("%s\n",frame.getEffects().dump(method, table, "", esc)));
 	        	pw.flush();
         	}
         }

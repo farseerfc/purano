@@ -116,7 +116,7 @@ public class DepValue implements Value {
         return result;
     }
 
-    public void modify(@NotNull DepEffect effect, @NotNull MethodRep method, MethodRep from) {
+    public void modify(@NotNull IDepEffect effect, @NotNull MethodRep method, MethodRep from) {
         for(FieldDep fd: lvalue.getFields()){
             assert(!method.isStatic());
             if(method.isStatic()){
@@ -131,7 +131,7 @@ public class DepValue implements Value {
             assert(method.isArg(local) || local == 0);
 
             if (method.isStatic() || local != 0) {
-                effect.getArgumentEffects().add(new ArgumentEffect(local, deps, from));
+                effect.addArgumentEffect(new ArgumentEffect(local, deps, from));
             }
         }
     }

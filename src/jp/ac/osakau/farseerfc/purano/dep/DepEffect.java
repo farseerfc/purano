@@ -13,7 +13,7 @@ import org.objectweb.asm.Type;
 import java.util.*;
 
 //@EqualsAndHashCode(callSuper=false)
-public class DepEffect {
+public class DepEffect implements IDepEffect {
 	@Nullable
     private final @Getter DepValue returnDep = new DepValue((Type)null);
 	private final @Getter Map<String,FieldEffect> thisField = new HashMap<>();
@@ -49,6 +49,7 @@ public class DepEffect {
 		}
 	}
 
+	@Override
 	public void addThisField(@NotNull FieldEffect tfe){
 		if(thisField.containsKey(tfe.getKey())){
 			DepSet ds = new DepSet();
@@ -61,6 +62,7 @@ public class DepEffect {
 		}
 	}
 	
+	@Override
 	public void addOtherField(@NotNull OtherFieldEffect ofe){
         if (!otherField.containsKey(ofe.getKey())) {
             otherField.put(ofe.getKey(), ofe);
@@ -74,6 +76,22 @@ public class DepEffect {
 //        }
     }
 	
+	@Override
+	public void addOtherEffect(@NotNull Effect oe){
+       otherEffects.add(oe);
+    }
+	
+	@Override
+	public void addArgumentEffect(@NotNull ArgumentEffect ae){
+		argumentEffects.add(ae);
+    }
+	
+	@Override
+	public void addCallEffect(@NotNull CallEffect ce){
+		callEffects.add(ce);
+    }
+	
+	@Override
 	public void addStaticField(@NotNull StaticEffect sfe){
 		if(staticField.containsKey(sfe.getKey())){
 			DepSet ds = new DepSet();

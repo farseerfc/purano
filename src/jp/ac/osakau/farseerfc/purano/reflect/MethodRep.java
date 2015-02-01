@@ -80,7 +80,7 @@ public class MethodRep extends MethodVisitor implements Purity {
     private @Getter @Setter int sourceEnd = 0;
     private @Getter @Setter MethodDeclaration sourceNode = null;
     private @Getter @Setter CompilationUnit unit = null;
-    private @Getter DepFrame<DepValue> [] frames = null;
+    private @Getter DepFrame [] frames = null;
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);

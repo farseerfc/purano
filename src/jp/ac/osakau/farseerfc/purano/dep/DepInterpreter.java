@@ -6,6 +6,8 @@ import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Types;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +29,47 @@ import java.util.Set;
 @Slf4j
 public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	
-	private final DepEffect effect;
+	private final IDepEffect effect= new IDepEffect(){
+
+		@Override
+		public void addThisField(FieldEffect tfe) {
+			methodEffect.addThisField(tfe);
+			currentFrame.getEffects().addThisField(tfe);
+		}
+
+		@Override
+		public void addOtherField(OtherFieldEffect ofe) {
+			methodEffect.addOtherField(ofe);
+			currentFrame.getEffects().addOtherField(ofe);
+		}
+
+		@Override
+		public void addOtherEffect(Effect oe) {
+			methodEffect.addOtherEffect(oe);
+			currentFrame.getEffects().addOtherEffect(oe);
+		}
+		
+		@Override
+		public void addCallEffect(CallEffect ce) {
+			methodEffect.addCallEffect(ce);
+			currentFrame.getEffects().addCallEffect(ce);
+		}
+		
+		@Override
+		public void addArgumentEffect(ArgumentEffect ae) {
+			methodEffect.addArgumentEffect(ae);
+			currentFrame.getEffects().addArgumentEffect(ae);
+		}
+
+		@Override
+		public void addStaticField(StaticEffect sfe) {
+			methodEffect.addStaticField(sfe);
+			currentFrame.getEffects().addStaticField(sfe);
+		}
+	};
+			
+	private final DepEffect methodEffect;
+	private @Getter @Setter DepFrame currentFrame;
 	private final MethodRep method;
 	
 	private static final boolean findCacheSemantic = true;
@@ -39,17 +81,19 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 
 	public DepInterpreter(DepEffect effect, MethodRep method) {
 		super(ASM4);
-		this.effect = effect;
+		this.methodEffect = effect;
 		this.method = method;
 		this.classFinder = null;
 	}
 	
 	public DepInterpreter(DepEffect effect, MethodRep method, ClassFinder classFinder) {
 		super(ASM4);
-		this.effect = effect;
+		this.methodEffect = effect;
 		this.method = method;
 		this.classFinder = classFinder;
 	}
+	
+	
     
     private String opcode2string(int opcode){
     	List<String> result = new ArrayList<>();
@@ -299,10 +343,10 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	        		if(findCacheSemantic && method.checkCacheSematic(fd)) 
 	        			{}
 //	        			continue;
-	        		effect.getReturnDep().getDeps().getFields().add(fd);
+	        		methodEffect.getReturnDep().getDeps().getFields().add(fd);
 	        	}
-	        	effect.getReturnDep().getDeps().getLocals().addAll(value.getDeps().getLocals());
-	        	effect.getReturnDep().getDeps().getStatics().addAll(value.getDeps().getStatics());
+	        	methodEffect.getReturnDep().getDeps().getLocals().addAll(value.getDeps().getLocals());
+	        	methodEffect.getReturnDep().getDeps().getStatics().addAll(value.getDeps().getStatics());
         	}
         	return null;
         case IFLT:
@@ -312,18 +356,18 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case TABLESWITCH:
         case LOOKUPSWITCH:
             if(!method.getDesc().getReturnType().equals("void")){
-                effect.getReturnDep().getDeps().merge(value.getDeps());
+            	methodEffect.getReturnDep().getDeps().merge(value.getDeps());
             }
         	return null;
         case IRETURN:
         case LRETURN:
         case FRETURN:
         case DRETURN:
-        	effect.getReturnDep().getDeps().merge(value.getDeps());
+        	methodEffect.getReturnDep().getDeps().merge(value.getDeps());
         	return null;
         case ARETURN:{
-        	effect.getReturnDep().getDeps().merge(value.getDeps());
-            effect.getReturnDep().getLvalue().merge(value.getLvalue());
+        	methodEffect.getReturnDep().getDeps().merge(value.getDeps());
+        	methodEffect.getReturnDep().getLvalue().merge(value.getLvalue());
         	return null;
         }
 		case PUTSTATIC: {
@@ -506,7 +550,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 	    	        	}
 	        		}
 	        	}
-        		effect.getReturnDep().getDeps().merge(deps);
+	        	methodEffect.getReturnDep().getDeps().merge(deps);
         	}
         	return null;
         case IF_ICMPLT:
@@ -514,8 +558,8 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case IF_ICMPGT:
         case IF_ICMPLE:
             if(!method.getDesc().getReturnType().equals("void")){
-                effect.getReturnDep().getDeps().merge(value1.getDeps());
-                effect.getReturnDep().getDeps().merge(value2.getDeps());
+            	methodEffect.getReturnDep().getDeps().merge(value1.getDeps());
+            	methodEffect.getReturnDep().getDeps().merge(value2.getDeps());
             }
         	return null;
         case PUTFIELD:{
@@ -589,7 +633,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     private DepValue addCallEffect(DepSet deps, String callType,
 			 @NotNull MethodInsnNode min) {
 		CallEffect ce=new CallEffect(callType,min.desc,min.owner,min.name, deps, null);
-		effect.getCallEffects().add(ce);
+		effect.addCallEffect(ce);
 		return new DepValue(Type.getReturnType(min.desc), deps);
 	}
 	
@@ -607,7 +651,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
     	case MULTIANEWARRAY:
     		return new DepValue(Type.getType(((MultiANewArrayInsnNode) insn).desc), deps);
     	case INVOKEDYNAMIC:
-    		effect.getOtherEffects().add(new InvokeDynamicEffect(null));
+    		effect.addOtherEffect(new InvokeDynamicEffect(null));
     		return new DepValue(Type.getReturnType(((InvokeDynamicInsnNode) insn).desc), deps);
     	case INVOKEVIRTUAL:
     		callType="VIRTUAL";
@@ -669,7 +713,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         result.getDeps().merge(deps);
 
         if (rep.isNative() && findNative) {
-            effect.getOtherEffects().add(new NativeEffect(rep));
+            effect.addOtherEffect(new NativeEffect(rep));
             return result;
         }
 
@@ -683,7 +727,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         }
 
         for(Effect e :callEffect.getOtherEffects()){
-            effect.getOtherEffects().add(e.duplicate(rep));
+            effect.addOtherEffect(e.duplicate(rep));
         }
 
         if(callEffect.getOtherField().size()>0){

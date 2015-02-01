@@ -62,7 +62,7 @@ public class DepAnalyzer implements Opcodes {
 
     private List<TryCatchBlockNode>[] handlers;
 
-    private DepFrame<DepValue>[] frames;
+    private DepFrame[] frames;
 
     private Subroutine[] subroutines;
 
@@ -98,7 +98,7 @@ public class DepAnalyzer implements Opcodes {
      * @throws org.objectweb.asm.tree.analysis.AnalyzerException
      *             if a problem occurs during the analysis.
      */
-    public DepFrame<DepValue>[] analyze(@NotNull final String owner, @NotNull final MethodNode m)
+    public DepFrame[] analyze(@NotNull final String owner, @NotNull final MethodNode m)
             throws AnalyzerException {
         if ((m.access & (ACC_ABSTRACT | ACC_NATIVE)) != 0) {
             frames = new DepFrame[0];
@@ -162,7 +162,7 @@ public class DepAnalyzer implements Opcodes {
         LineNumberNode currentLine = null;
         while (top > 0) {
             int insn = queue[--top];
-            DepFrame<DepValue> f = frames[insn];
+            DepFrame f = frames[insn];
             Subroutine subroutine = subroutines[insn];
             queued[insn] = false;
 
@@ -432,8 +432,8 @@ public class DepAnalyzer implements Opcodes {
      * @return the created frame.
      */
     @NotNull
-    protected Frame<DepValue> newFrame(final int nLocals, final int nStack) {
-        return new Frame<DepValue>(nLocals, nStack);
+    protected DepFrame newFrame(final int nLocals, final int nStack) {
+        return new DepFrame(nLocals, nStack);
     }
 
     /**
@@ -444,8 +444,8 @@ public class DepAnalyzer implements Opcodes {
      * @return the created frame.
      */
     @NotNull
-    protected DepFrame<DepValue> newFrame(@NotNull final Frame<DepValue> src) {
-        return new DepFrame<DepValue>(src);
+    protected DepFrame newFrame(@NotNull final Frame<DepValue> src) {
+        return new DepFrame(src);
     }
 
     /**
