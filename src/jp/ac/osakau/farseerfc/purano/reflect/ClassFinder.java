@@ -40,6 +40,31 @@ public class ClassFinder {
 		return null;
 	} 
 	
+	private void dumpForResult() {
+	     for(String clsName : classMap.keySet()){
+	            boolean isTarget = classTargets.contains(clsName);
+	            for(String p:prefix){
+	                if(clsName.startsWith(p)){
+	                    isTarget = true;
+	                }
+	            }
+
+	            if (!isTarget) {
+	                continue;
+	            }
+	            
+	            ClassRep classRep = classMap.get(clsName);
+	            
+	            for(MethodRep methodRep: classRep.getAllMethods()){
+	            	ASTForVisitor forv = new ASTForVisitor(methodRep);
+	            	if(methodRep.getSourceNode() != null){
+	            		methodRep.getSourceNode().accept(forv);
+	            	}
+	            }
+	     }
+		
+	}
+
 	@Getter final Map<String, ClassRep> classMap= new HashMap<>();
 
 	final Set<String> classTargets = new HashSet<>() ;
@@ -153,8 +178,8 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-        		"mit.jolden",
-        		"jp.ac.osakau.farseerfc.purano"};
+//        		"mit.jolden",
+        		"jp.ac.osakau.farseerfc.purano.test"};
 //                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
@@ -174,15 +199,18 @@ public class ClassFinder {
 		cf.resolveMethods();
 		
 		
+		cf.dumpForResult();
+		
 
-//        ClassFinderDumpper dumpper = new DumyDumpper();
-//		  ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
-//        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
-        File output = new File("/tmp/output.html");
-        PrintStream ps = new PrintStream(new FileOutputStream(output));
-        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
-//		ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
-        dumpper.dump();
+////        ClassFinderDumpper dumpper = new DumyDumpper();
+////		  ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
+////        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
+//		
+//        File output = new File("/tmp/output.html");
+//        PrintStream ps = new PrintStream(new FileOutputStream(output));
+//        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+////		ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
+//        dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));
 	}
