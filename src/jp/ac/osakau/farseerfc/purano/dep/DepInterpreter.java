@@ -34,42 +34,42 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 		@Override
 		public void addThisField(FieldEffect tfe) {
 			methodEffect.addThisField(tfe);
-			currentFrame.getEffects().addThisField(tfe);
+			currentFrameEffect.addThisField(tfe);
 		}
 
 		@Override
 		public void addOtherField(OtherFieldEffect ofe) {
 			methodEffect.addOtherField(ofe);
-			currentFrame.getEffects().addOtherField(ofe);
+			currentFrameEffect.addOtherField(ofe);
 		}
 
 		@Override
 		public void addOtherEffect(Effect oe) {
 			methodEffect.addOtherEffect(oe);
-			currentFrame.getEffects().addOtherEffect(oe);
+			currentFrameEffect.addOtherEffect(oe);
 		}
 		
 		@Override
 		public void addCallEffect(CallEffect ce) {
 			methodEffect.addCallEffect(ce);
-			currentFrame.getEffects().addCallEffect(ce);
+			currentFrameEffect.addCallEffect(ce);
 		}
 		
 		@Override
 		public void addArgumentEffect(ArgumentEffect ae) {
 			methodEffect.addArgumentEffect(ae);
-			currentFrame.getEffects().addArgumentEffect(ae);
+			currentFrameEffect.addArgumentEffect(ae);
 		}
 
 		@Override
 		public void addStaticField(StaticEffect sfe) {
 			methodEffect.addStaticField(sfe);
-			currentFrame.getEffects().addStaticField(sfe);
+			currentFrameEffect.addStaticField(sfe);
 		}
 	};
 			
 	private final DepEffect methodEffect;
-	private @Getter @Setter DepFrame currentFrame;
+	private @Getter @Setter DepEffect currentFrameEffect;
 	private final MethodRep method;
 	
 	private static final boolean findCacheSemantic = true;

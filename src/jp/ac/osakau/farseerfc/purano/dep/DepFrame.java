@@ -14,39 +14,24 @@ import org.objectweb.asm.tree.analysis.Value;
 public class DepFrame extends Frame<DepValue> {
 	private @Getter @Setter AbstractInsnNode node ;
 	private @Getter @Setter LineNumberNode line;
-	private @Getter @Setter DepEffect effects; 
+	private final DepAnalyzer analyzer;
 	
-    public DepFrame(final int nLocals, final int nStack) {
+    public DepFrame(final int nLocals, final int nStack, final DepAnalyzer ana) {
         super(nLocals, nStack);
-        effects = new DepEffect();
+        this.analyzer = ana;
     }
 
-    public DepFrame(final Frame<DepValue> src) {
+    public DepFrame(final Frame<DepValue> src, final DepAnalyzer ana) {
         super(src);
-        effects = new DepEffect();
-        effects.merge(((DepFrame)src).getEffects(), null);
+        this.analyzer = ana;
     }
-    
-    @Override     
+     
     public void execute(final AbstractInsnNode insn,
-            final Interpreter<DepValue> interpreter) throws AnalyzerException {
+            final Interpreter<DepValue> interpreter, int insnNum) throws AnalyzerException {
     	assert(interpreter instanceof DepInterpreter);
     	DepInterpreter depint = (DepInterpreter) interpreter;
-    	depint.setCurrentFrame(this);
+    	depint.setCurrentFrameEffect(analyzer.getEffects()[insnNum]);
     	super.execute(insn, depint);
-    }
-    
-    @Override
-    public boolean merge(final Frame<? extends DepValue> frame,
-            final Interpreter<DepValue> interpreter) throws AnalyzerException {
-        effects.merge(((DepFrame)frame).getEffects(), null);
-        return super.merge(frame, interpreter);
-    }
-    
-    @Override
-    public boolean merge(final Frame<? extends DepValue> frame, final boolean[] access) {
-    	effects.merge(((DepFrame)frame).getEffects(), null);
-        return super.merge(frame, access);
     }
 
 }

@@ -386,7 +386,9 @@ public class HtmlDumpper implements ClassFinderDumpper {
         
         pw.append("<<<<<<<<<<<<<<\n");
         
-        for(DepFrame frame: method.getFrames()){
+        for(int i =0; i< method.getFrames().length ;++i){
+        	DepFrame frame = method.getFrames()[i];
+        	DepEffect effect = method.getFrameEffects()[i];
         	if(frame==null) continue;
         	int line = -1;
         	if (frame.getLine() != null){
@@ -396,7 +398,10 @@ public class HtmlDumpper implements ClassFinderDumpper {
         	if(node.getOpcode()>0 && node.getOpcode()< Printer.OPCODES.length){
 	        	String opcode = Printer.OPCODES[node.getOpcode()];
 	        	pw.append(String.format("%5d: %s\n", line, opcode));
-	        	pw.append(String.format("%s\n",frame.getEffects().dump(method, table, "", esc)));
+	        	String effectDumps = effect.dump(method, table, "", esc);
+	        	if(effectDumps.trim().length() > 0){
+	        		pw.append(String.format("%s\n", effectDumps));
+	        	}
 	        	pw.flush();
         	}
         }

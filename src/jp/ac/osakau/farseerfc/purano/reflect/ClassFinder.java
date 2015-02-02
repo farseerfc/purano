@@ -153,8 +153,8 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-//        		"mit.jolden",
-        		"jp.ac.osakau.farseerfc.purano.test"};
+        		"mit.jolden",
+        		"jp.ac.osakau.farseerfc.purano"};
 //                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};

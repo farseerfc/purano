@@ -81,6 +81,7 @@ public class MethodRep extends MethodVisitor implements Purity {
     private @Getter @Setter MethodDeclaration sourceNode = null;
     private @Getter @Setter CompilationUnit unit = null;
     private @Getter DepFrame [] frames = null;
+    private @Getter DepEffect[] frameEffects = null;
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);
@@ -294,6 +295,8 @@ public class MethodRep extends MethodVisitor implements Purity {
 							}
 						
 							return new MethodNode(Opcodes.ASM5,access,name,desc,signature,exceptions){
+								
+
 								@Override
 								public void visitEnd() {
 									super.visitEnd();
@@ -301,6 +304,7 @@ public class MethodRep extends MethodVisitor implements Purity {
 									DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, thisRep, cf));
 									try {
 										frames = ana.analyze("dep", this);
+										frameEffects = ana.getEffects();
 									} catch (AnalyzerException e) {
 										//throw new RuntimeException("Error when analyzing",e);
                                         log.warn("Error when analyzing {}",e);
@@ -314,6 +318,7 @@ public class MethodRep extends MethodVisitor implements Purity {
                     DepAnalyzer ana = new DepAnalyzer(new DepInterpreter(analyzeResult, this,cf));
 					try {
 						frames = ana.analyze("dep", methodNode);
+						frameEffects = ana.getEffects();
 					} catch (AnalyzerException e) {
 //						throw new RuntimeException("Error when analyzing",e);
                         log.warn("Error when analyzing {}",e);

@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
+import lombok.Getter;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,6 +64,8 @@ public class DepAnalyzer implements Opcodes {
     private List<TryCatchBlockNode>[] handlers;
 
     private DepFrame[] frames;
+
+    private @Getter DepEffect[] effects;
 
     private Subroutine[] subroutines;
 
@@ -108,11 +111,16 @@ public class DepAnalyzer implements Opcodes {
         insns = m.instructions;
         handlers = new List[n];
         frames = new DepFrame[n];
+        effects = new DepEffect[n];
         subroutines = new Subroutine[n];
         queued = new boolean[n];
         queue = new int[n];
         top = 0;
 
+        for(int i=0;i<n;++i){
+        	effects[i] = new DepEffect();
+        }
+        
         // computes exception handlers for each instruction
         for (int i = 0; i < m.tryCatchBlocks.size(); ++i) {
             TryCatchBlockNode tcb = m.tryCatchBlocks.get(i);
@@ -186,7 +194,7 @@ public class DepAnalyzer implements Opcodes {
                     newControlFlowEdge(insn, insn + 1);
                    
                 } else {
-                    current.init(f).execute(insnNode, interpreter);
+                    ((DepFrame)(current.init(f))).execute(insnNode, interpreter, insn);
                     subroutine = subroutine == null ? null : subroutine.copy();
 
                     if (insnNode instanceof JumpInsnNode) {
@@ -433,7 +441,7 @@ public class DepAnalyzer implements Opcodes {
      */
     @NotNull
     protected DepFrame newFrame(final int nLocals, final int nStack) {
-        return new DepFrame(nLocals, nStack);
+        return new DepFrame(nLocals, nStack, this);
     }
 
     /**
@@ -445,7 +453,7 @@ public class DepAnalyzer implements Opcodes {
      */
     @NotNull
     protected DepFrame newFrame(@NotNull final Frame<DepValue> src) {
-        return new DepFrame(src);
+        return new DepFrame(src, this);
     }
 
     /**
