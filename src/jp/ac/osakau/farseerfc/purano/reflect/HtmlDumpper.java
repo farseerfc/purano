@@ -281,8 +281,9 @@ public class HtmlDumpper implements ClassFinderDumpper {
     	return null;
     }
 
-    
-    public String dumpMethod(MethodRep method){
+    // Suppress Warning because we put different things (string and list) in a single list
+    @SuppressWarnings("unchecked")
+	public String dumpMethod(MethodRep method){
     	Map<String, Object> result = new HashMap<>();
     	    	
     	if(method.getMethodNode() != null){
@@ -302,16 +303,17 @@ public class HtmlDumpper implements ClassFinderDumpper {
                         MethodRep mr = cf.loadClass(Types.binaryName2NormalName(insn.owner)).
                                 getMethodVirtual(MethodRep.getId(insn));
                         if(mr != null){
-                            ((List)result.get("resolvedCalls")).add(mr.toString(table));
+                            ((List<String>)result.get("resolvedCalls")).add(mr.toString(table));
                         }
                     }else{
-                    	((List)result.get("unknownCalls")).add(table.dumpMethodDesc(insn.desc,
+                    	((List<String>)result.get("unknownCalls")).add(table.dumpMethodDesc(insn.desc,
                                         String.format("%s#%s",table.fullClassName(insn.owner),
                                         		insn.name)));
                     }
                 }
                 result.put("purity", esc.purity(method.dumpPurity()));
                 result.put("effects", dumpEffects(method.getDynamicEffects(), method, table, "", esc));
+                result.put("forResults", dumpForResults(method, table, "", esc));
             }else{
             	result.put("purity", Arrays.asList(""));
             	result.put("effects", Arrays.asList(""));
@@ -336,6 +338,28 @@ public class HtmlDumpper implements ClassFinderDumpper {
 		}
     	return "";
     }
+
+
+	private String dumpForResults(MethodRep methodRep, Types table,
+			String string, Escaper esc) {
+		List<String> result = new ArrayList< >();
+		ASTForVisitor forv = new ASTForVisitor(methodRep);
+		if (methodRep.getSourceNode() != null) {
+			methodRep.getSourceNode().accept(forv);
+		}
+
+		for (RefactoringCandidate can : methodRep.getCandidates()) {
+			result.add(String.format(
+					"pure for-loop at line (%d-%d)",
+					methodRep.getUnit().getLineNumber(
+							can.getNode().getStartPosition()),
+					methodRep.getUnit().getLineNumber(
+							can.getNode().getStartPosition()
+									+ can.getNode().getLength())));
+			result.add(can.getNode().toString());
+		}
+		return Joiner.on("\n").join(result);
+	}
 
 
 	private String dumpMethodSource(MethodRep method) {

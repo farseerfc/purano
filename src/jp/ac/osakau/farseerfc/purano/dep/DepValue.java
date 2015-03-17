@@ -2,11 +2,13 @@ package jp.ac.osakau.farseerfc.purano.dep;
 
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
 import jp.ac.osakau.farseerfc.purano.effect.FieldEffect;
+import jp.ac.osakau.farseerfc.purano.effect.LocalVariableEffect;
 import jp.ac.osakau.farseerfc.purano.effect.StaticEffect;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.analysis.Value;
@@ -116,7 +118,7 @@ public class DepValue implements Value {
         return result;
     }
 
-    public void modify(@NotNull IDepEffect effect, @NotNull MethodRep method, MethodRep from) {
+    public void modify(@NotNull IDepEffect effect,@NotNull DepEffect currentFrameEffect, @NotNull MethodRep method, MethodRep from) {
         for(FieldDep fd: lvalue.getFields()){
             assert(!method.isStatic());
             if(method.isStatic()){
@@ -128,11 +130,16 @@ public class DepValue implements Value {
             effect.addStaticField(new StaticEffect(fd.getDesc(), fd.getOwner(), fd.getName(), deps, from));
         }
         for(int local: lvalue.getLocals()){
-            assert(method.isArg(local) || local == 0);
-
-            if (method.isStatic() || local != 0) {
-                effect.addArgumentEffect(new ArgumentEffect(local, deps, from));
+//            assert(method.isArg(local) || local == 0);
+            if(method.isArg(local) || local == 0){
+	            if (method.isStatic() || local != 0) {
+	                effect.addArgumentEffect(new ArgumentEffect(local, deps, from));
+	            }
+            }else{
+            	currentFrameEffect.addLocalVariableEffect(new LocalVariableEffect(local, deps, from));
             }
+            
+            
         }
     }
 }

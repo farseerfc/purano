@@ -279,12 +279,12 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             int local = ((VarInsnNode) insn).var;
         	deps.getLocals().add(local);
             DepValue dv = new DepValue(Type.getObjectType("java/lang/Object"), deps, value.getLvalue());
-            if(method.isArg(local)){
+//            if(method.isArg(local)){
                 dv.getLvalue().getLocals().add(local);
-            }
-            if(!method.isStatic() && local == 0){
-                dv.getLvalue().getLocals().add(0); // this pointer
-            }
+//            }
+//            if(!method.isStatic() && local == 0){
+//                dv.getLvalue().getLocals().add(0); // this pointer
+//            }
         	return dv;
         }
         case DUP:
@@ -293,12 +293,15 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
         case DUP2:
         case DUP2_X1:
         case DUP2_X2:
+        case SWAP:
+        	return new DepValue(value);
         case ASTORE:
         case ISTORE:
         case LSTORE:
         case FSTORE:
         case DSTORE:
-        case SWAP:
+        	int local = ((VarInsnNode) insn).var;
+            currentFrameEffect.addLocalVariableEffect(new LocalVariableEffect(local, deps, null));
         	return new DepValue(value);
         default:
         	System.err.println("Unknown copyOperation "+opcode2string(insn.getOpcode()));
@@ -378,7 +381,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //							value.getDeps(),null));
             DepValue dv = new DepValue(value);
             dv.getLvalue().getStatics().add(new FieldDep(fin.desc,fin.owner,fin.name));
-            dv.modify(effect, method, null);
+            dv.modify(effect, currentFrameEffect, method, null);
 			return null;
 		}
         case GETFIELD:{
@@ -579,17 +582,17 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                 DepValue dv = new DepValue(value2.getType(), value2.getDeps());
                 dv.getLvalue().merge(value1.getLvalue());
                 dv.getLvalue().getFields().add(new FieldDep(fin.desc, fin.owner, fin.name));
-                dv.modify(effect, method, null);
+                dv.modify(effect, currentFrameEffect, method, null);
             } else {
                 // sth.name == v2
                 // sth maybe arg or this.otherField or staticField
                 value1.setDeps(new DepSet(value2.getDeps()));
-                value1.modify(effect, method, null);
+                value1.modify(effect, currentFrameEffect, method, null);
             }
         	return null;
         }
         default:
-        	System.err.println("Unknow copyOperation "+opcode2string(insn.getOpcode()));
+        	System.err.println("Unknown binaryOperation "+opcode2string(insn.getOpcode()));
 			throw new Error("Internal error.");
         	//return null;
         }
@@ -616,11 +619,11 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
             depset.merge(index.getDeps());
             depset.merge(value.getDeps());
             arrayref.setDeps(depset);
-            arrayref.modify(effect,method,null);
+            arrayref.modify(effect, currentFrameEffect,method,null);
 			return null;
 		}
 		default:
-			System.err.println("Unknow copyOperation "
+			System.err.println("Unknown ternaryOperation "
 					+ opcode2string(insn.getOpcode()));
 			throw new Error("Internal error.");
 			// return null;
@@ -752,7 +755,7 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 //            log.info("Rep dump {}",rep);
 
             DepValue dv = values.get(rep.localToArgumentPos(ae.getArgPos()));
-            dv.modify(effect,method,rep);
+            dv.modify(effect, currentFrameEffect,method,rep);
 
         }
 
@@ -762,9 +765,9 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
                 for(FieldEffect tfe: callEffect.getThisField().values()){
                     dv.getLvalue().getFields().add(new FieldDep(tfe.getDesc(),tfe.getOwner(),tfe.getName()));
                 }
-                dv.modify(effect,method,rep);
+                dv.modify(effect, currentFrameEffect,method,rep);
             }else if(!method.isStatic()){
-                obj.modify(effect,method,rep);
+                obj.modify(effect, currentFrameEffect,method,rep);
             }
         }
 
@@ -772,15 +775,15 @@ public class DepInterpreter extends Interpreter<DepValue> implements Opcodes{
 
         for(int arg:ret.getLvalue().getLocals()){
             if(!rep.isStatic() && arg == 0) continue;
-            if(!rep.isArg(arg)){
-//                boolean re = rep.isArg(arg);
-                log.info("Getting local beyond argument {} return lvalue \nmethod {} \nrep {} ", arg, method,rep);
-                log.info("Rep dump {}",rep);
-                log.info("ReturnLvalue dump {}", ret.getLvalue());
-                throw new RuntimeException("Getting local beyond argument return lvalue ");
+            if(rep.isArg(arg)){
+////                boolean re = rep.isArg(arg);
+//                log.info("Getting local beyond argument {} return lvalue \nmethod {} \nrep {} ", arg, method,rep);
+//                log.info("Rep dump {}",rep);
+//                log.info("ReturnLvalue dump {}", ret.getLvalue());
+//                throw new RuntimeException("Getting local beyond argument return lvalue ");
+                result.getLvalue().merge(values.get(rep.localToArgumentPos(arg)).getLvalue());
+                result.getDeps().merge(values.get(rep.localToArgumentPos(arg)).getDeps());
             }
-            result.getLvalue().merge(values.get(rep.localToArgumentPos(arg)).getLvalue());
-            result.getDeps().merge(values.get(rep.localToArgumentPos(arg)).getDeps());
         }
 
         if(!method.isStatic() ){

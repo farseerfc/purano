@@ -40,30 +40,7 @@ public class ClassFinder {
 		return null;
 	} 
 	
-	private void dumpForResult() {
-	     for(String clsName : classMap.keySet()){
-	            boolean isTarget = classTargets.contains(clsName);
-	            for(String p:prefix){
-	                if(clsName.startsWith(p)){
-	                    isTarget = true;
-	                }
-	            }
 
-	            if (!isTarget) {
-	                continue;
-	            }
-	            
-	            ClassRep classRep = classMap.get(clsName);
-	            
-	            for(MethodRep methodRep: classRep.getAllMethods()){
-	            	ASTForVisitor forv = new ASTForVisitor(methodRep);
-	            	if(methodRep.getSourceNode() != null){
-	            		methodRep.getSourceNode().accept(forv);
-	            	}
-	            }
-	     }
-		
-	}
 
 	@Getter final Map<String, ClassRep> classMap= new HashMap<>();
 
@@ -174,12 +151,56 @@ public class ClassFinder {
 		return classMap.get(classname);
 	}
 
+	
+	private void dumpForResult() {
+		log.info("<<<<<<<<<<<<<<<<< Refactoring Candidates <<<<<<<<<<<<<<<<<<<");
+		int count = 0;
+		for (String clsName : classMap.keySet()) {
+			boolean isTarget = classTargets.contains(clsName);
+			for (String p : prefix) {
+				if (clsName.startsWith(p)) {
+					isTarget = true;
+				}
+			}
+
+			if (!isTarget) {
+				continue;
+			}
+
+			ClassRep classRep = classMap.get(clsName);
+
+			for (MethodRep methodRep : classRep.getAllMethods()) {
+				ASTForVisitor forv = new ASTForVisitor(methodRep);
+				if (methodRep.getSourceNode() != null) {
+					methodRep.getSourceNode().accept(forv);
+				}
+
+				for (RefactoringCandidate can : methodRep.getCandidates()) {
+					log.info(String.format(
+							"\"%s.%s\" has pure for-loop at line (%d-%d)",
+							methodRep.getClassRep().getBaseName(),
+							MethodRep.getId(methodRep.getInsnNode()),
+							methodRep.getUnit().getLineNumber(
+									can.getNode().getStartPosition()),
+							methodRep.getUnit().getLineNumber(
+									can.getNode().getStartPosition()
+											+ can.getNode().getLength())));
+					log.info(can.getNode().toString());
+					
+					count ++;
+
+				}
+			}
+		}
+		log.info(String.format("Found %d refactoring candidates", count));
+	}
 
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-//        		"mit.jolden",
-        		"jp.ac.osakau.farseerfc.purano.test"};
+        		"mit.jolden",
+        		"jp.ac.osakau.farseerfc.purano"};
+//        "test"};
 //                "java.time.format.DateTimeFormatterBuilder"};
 //        "org.htmlparser","java.lang.Object"dolphin };
         // "org.argouml"};
@@ -202,15 +223,15 @@ public class ClassFinder {
 		cf.dumpForResult();
 		
 
-////        ClassFinderDumpper dumpper = new DumyDumpper();
-////		  ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
-////        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
-//		
-//        File output = new File("/tmp/output.html");
-//        PrintStream ps = new PrintStream(new FileOutputStream(output));
-//        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
-////		ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
-//        dumpper.dump();
+//        ClassFinderDumpper dumpper = new DumyDumpper();
+//		  ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
+//        ClassFinderDumpper dumpper = new LegacyDumpper(cf);
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+//		ClassFinderDumpper dumpper = new StreamDumpper(ps,cf, Escaper.getDummy());
+        dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));
 	}

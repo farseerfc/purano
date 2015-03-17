@@ -1,11 +1,13 @@
 package jp.ac.osakau.farseerfc.purano.dep;
 
 import com.google.common.base.Joiner;
+
 import jp.ac.osakau.farseerfc.purano.effect.*;
 import jp.ac.osakau.farseerfc.purano.reflect.MethodRep;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 import lombok.Getter;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Type;
@@ -20,6 +22,7 @@ public class DepEffect implements IDepEffect {
 	private final @Getter Map<String,OtherFieldEffect> otherField = new HashMap<>();
 	private final @Getter Map<String,StaticEffect> staticField = new HashMap<>();
 	private final @Getter Set<ArgumentEffect> argumentEffects = new HashSet<>();
+	private final @Getter Set<LocalVariableEffect> localVariableEffects = new HashSet<>();
 	private final @Getter Set<CallEffect> callEffects = new HashSet<>();
 	private final @Getter Set<Effect> otherEffects = new HashSet<>();
 	
@@ -40,6 +43,9 @@ public class DepEffect implements IDepEffect {
 		}
 		for(ArgumentEffect effect: other.getArgumentEffects()){
 			argumentEffects.add(effect.duplicate(from));
+		}
+		for(LocalVariableEffect effect: other.getLocalVariableEffects()){
+			localVariableEffects.add(effect.duplicate(from));
 		}
 		for(CallEffect effect: other.getCallEffects()){
 			callEffects.add(effect.duplicate(from));
@@ -91,6 +97,10 @@ public class DepEffect implements IDepEffect {
 		callEffects.add(ce);
     }
 	
+	public void addLocalVariableEffect(LocalVariableEffect localVariableEffect) {
+		localVariableEffects.add(localVariableEffect);
+	}
+	
 	@Override
 	public void addStaticField(@NotNull StaticEffect sfe){
 		if(staticField.containsKey(sfe.getKey())){
@@ -122,6 +132,11 @@ public class DepEffect implements IDepEffect {
 		for(ArgumentEffect effect: argumentEffects){
 			deps.add(effect.dump(rep, table, prefix, esc));
 		}
+		
+		for(LocalVariableEffect effect: localVariableEffects){
+			deps.add(effect.dump(rep, table, prefix, esc));
+		}
+		
 		
 		for(FieldEffect effect: thisField.values()){
 			deps.add(effect.dump(rep, table, prefix, esc));
@@ -163,6 +178,8 @@ public class DepEffect implements IDepEffect {
 			}
 		}
 		
+		
+		
 		for(StaticEffect e:staticField.values()){
 			if(! dec.getStaticField().containsValue(e)){
 				return false;
@@ -171,6 +188,18 @@ public class DepEffect implements IDepEffect {
 		
 		for(CallEffect e:callEffects){
 			if(! dec.getCallEffects().contains(e)){
+				return false;
+			}
+		}
+		
+		for(ArgumentEffect e:argumentEffects){
+			if(! dec.getArgumentEffects().contains(e)){
+				return false;
+			}
+		}
+		
+		for(LocalVariableEffect e: localVariableEffects){
+			if(!dec.getLocalVariableEffects().contains(e)){
 				return false;
 			}
 		}
@@ -193,6 +222,7 @@ public class DepEffect implements IDepEffect {
         DepEffect depEffect = (DepEffect) o;
 
         return argumentEffects.equals(depEffect.argumentEffects) &&
+        		localVariableEffects.equals(depEffect.localVariableEffects) &&
                 callEffects.equals(depEffect.callEffects) &&
                 otherEffects.equals(depEffect.otherEffects) &&
                 otherField.equals(depEffect.otherField) &&
@@ -209,6 +239,7 @@ public class DepEffect implements IDepEffect {
         result = 31 * result + otherField.hashCode();
         result = 31 * result + staticField.hashCode();
         result = 31 * result + argumentEffects.hashCode();
+        result = 31 * result + localVariableEffects.hashCode();
         result = 31 * result + callEffects.hashCode();
         result = 31 * result + otherEffects.hashCode();
         return result;

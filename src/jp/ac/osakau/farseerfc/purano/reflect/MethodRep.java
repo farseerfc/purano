@@ -82,6 +82,7 @@ public class MethodRep extends MethodVisitor implements Purity {
     private @Getter @Setter CompilationUnit unit = null;
     private @Getter DepFrame [] frames = null;
     private @Getter DepEffect[] frameEffects = null;
+    private @Getter Set<RefactoringCandidate> candidates = new HashSet<>();
 	
 	public MethodRep(@NotNull MethodInsnNode methodInsnNode, int access, ClassRep cr){
 		super(Opcodes.ASM5);

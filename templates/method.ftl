@@ -31,6 +31,8 @@
 			</div>
 		</#list>
 		</div>
+		
+		<pre><code>${forResults}</code></pre>
 	</div>		
 	<div class="asm">
 <pre><code>${asm}</code></pre>
