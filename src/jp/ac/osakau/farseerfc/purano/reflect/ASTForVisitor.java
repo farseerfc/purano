@@ -67,18 +67,20 @@ public class ASTForVisitor extends ASTVisitor {
 			
 			int frameLineNo = frame.getLine().line;
 			
-			if(frameLineNo <= startLine || frameLineNo >= endLine){
+			if(frameLineNo < startLine || frameLineNo > endLine){
 				continue;
 			}
 			
 			if(!effect.isSubset(empty)){
 				isCandidate = false;
 			}
+			
 		}
 		
 		if(isCandidate){
 			RefactoringCandidate candidate = new RefactoringCandidate();
 			candidate.setNode(forNode);
+			candidate.setLoopVariables(loopVariables);
 			mr.getCandidates().add(candidate);
 		}
 		return true;

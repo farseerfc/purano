@@ -356,6 +356,8 @@ public class HtmlDumpper implements ClassFinderDumpper {
 					methodRep.getUnit().getLineNumber(
 							can.getNode().getStartPosition()
 									+ can.getNode().getLength())));
+			result.add(String.format("loop-vars: %s", 
+					Joiner.on(", ").join(can.getLoopVariables())));
 			result.add(can.getNode().toString());
 		}
 		return Joiner.on("\n").join(result);
@@ -410,24 +412,26 @@ public class HtmlDumpper implements ClassFinderDumpper {
         
         pw.append("<<<<<<<<<<<<<<\n");
         
-        for(int i =0; i< method.getFrames().length ;++i){
-        	DepFrame frame = method.getFrames()[i];
-        	DepEffect effect = method.getFrameEffects()[i];
-        	if(frame==null) continue;
-        	int line = -1;
-        	if (frame.getLine() != null){
-        		line = frame.getLine().line;
-        	}
-        	AbstractInsnNode node = frame.getNode();
-        	if(node.getOpcode()>0 && node.getOpcode()< Printer.OPCODES.length){
-	        	String opcode = Printer.OPCODES[node.getOpcode()];
-	        	pw.append(String.format("%5d: %s\n", line, opcode));
-	        	String effectDumps = effect.dump(method, table, "", esc);
-	        	if(effectDumps.trim().length() > 0){
-	        		pw.append(String.format("%s\n", effectDumps));
+        if(method.getFrames() != null){
+	        for(int i =0; i< method.getFrames().length ;++i){
+	        	DepFrame frame = method.getFrames()[i];
+	        	DepEffect effect = method.getFrameEffects()[i];
+	        	if(frame==null) continue;
+	        	int line = -1;
+	        	if (frame.getLine() != null){
+	        		line = frame.getLine().line;
 	        	}
-	        	pw.flush();
-        	}
+	        	AbstractInsnNode node = frame.getNode();
+	        	if(node.getOpcode()>0 && node.getOpcode()< Printer.OPCODES.length){
+		        	String opcode = Printer.OPCODES[node.getOpcode()];
+		        	pw.append(String.format("%5d: %s\n", line, opcode));
+		        	String effectDumps = effect.dump(method, table, "", esc);
+		        	if(effectDumps.trim().length() > 0){
+		        		pw.append(String.format("%s\n", effectDumps));
+		        	}
+		        	pw.flush();
+	        	}
+	        }
         }
         
         try {

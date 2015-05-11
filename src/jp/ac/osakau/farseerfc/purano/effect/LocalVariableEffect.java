@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper=false)
+//@EqualsAndHashCode(callSuper=false)
 public class LocalVariableEffect extends Effect<LocalVariableEffect> {
 
 	private final @Getter int argPos;
@@ -42,5 +42,26 @@ public class LocalVariableEffect extends Effect<LocalVariableEffect> {
             return result;
 		}
 	}
+	
+	@Override
+	public String toString(){
+		return String.format("LocalVariableEffect: %d", argPos);
+	}
 
+	@Override
+	public boolean equals(Object other){
+		if(other instanceof LocalVariableEffect){
+			return equals((LocalVariableEffect)other);
+		}
+		return false;
+	}
+	
+	public boolean equals(LocalVariableEffect other){
+		return argPos == other.argPos;
+	}
+	
+	@Override
+	public int hashCode(){
+		return argPos*61;
+	}
 }

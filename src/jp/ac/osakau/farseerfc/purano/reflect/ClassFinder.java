@@ -198,11 +198,11 @@ public class ClassFinder {
 	public static void main(@NotNull String [] argv) throws IOException {
 		long start=System.currentTimeMillis();
         String targetPackage []={
-        		"mit.jolden",
-        		"jp.ac.osakau.farseerfc.purano"};
+//        		"mit.jolden",
+//        		"jp.ac.osakau.farseerfc.purano"};
 //        "test"};
 //                "java.time.format.DateTimeFormatterBuilder"};
-//        "org.htmlparser","java.lang.Object"dolphin };
+        		"org.htmlparser" };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
 //        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
@@ -213,7 +213,14 @@ public class ClassFinder {
 		}
 		
 		String targetSource [] = {
-				"/home/farseerfc/workspace/purano/src"
+				"/home/farseerfc/purano_target/htmlparser-code/lexer/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/parser/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/filterbuilder/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/sitecapturer/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/thumbelina/src/main/java",
+				
+//				"/home/farseerfc/workspace/purano/lib/target/src/src",
+//				"/home/farseerfc/workspace/purano/src",
 			};
 		
 		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
