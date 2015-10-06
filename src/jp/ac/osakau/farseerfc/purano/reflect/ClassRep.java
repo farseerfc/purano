@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
 @Slf4j
 public class ClassRep extends ClassVisitor {
@@ -88,10 +88,18 @@ public class ClassRep extends ClassVisitor {
 	}
 	
 	public Set<FieldDep> getCacheFields(){
-		return fieldWrite.entrySet().stream()
-				.filter( entry -> entry.getValue().size() == 1)
-				.map(entry -> entry.getKey())
-				.collect(Collectors.toSet());
+//		return fieldWrite.entrySet().stream()
+//				.filter( entry -> entry.getValue().size() == 1)
+//				.map(entry -> entry.getKey())
+//				.collect(Collectors.toSet());
+		
+		Set<FieldDep> result = new HashSet<>();
+		for(Entry<FieldDep, Set<MethodRep>> entry: fieldWrite.entrySet()){
+			if(entry.getValue().size() == 1){
+				result.add(entry.getKey());
+			}
+		}
+		return result;
 	}
 
 	public MethodRep getMethodVirtual(String methodId){

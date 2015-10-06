@@ -9,7 +9,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinder;
 import jp.ac.osakau.farseerfc.purano.reflect.ClassFinderDumpper;

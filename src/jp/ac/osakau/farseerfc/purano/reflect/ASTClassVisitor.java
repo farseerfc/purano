@@ -1,8 +1,8 @@
 package jp.ac.osakau.farseerfc.purano.reflect;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import jp.ac.osakau.farseerfc.purano.util.MethodDesc;
 import jp.ac.osakau.farseerfc.purano.util.Types;
@@ -94,9 +94,13 @@ public class ASTClassVisitor extends ASTVisitor {
 		String returnType = typeToString(node.getReturnType2()) ;
 		List<SingleVariableDeclaration> paras = (List<SingleVariableDeclaration>) node.parameters();
 		
-		List<String> param = paras.stream()
-				.map( vd -> typeToString(vd.getType()))
-				.collect(Collectors.toList());
+//		List<String> param = paras.stream()
+//				.map( vd -> typeToString(vd.getType()))
+//				.collect(Collectors.toList());
+		List<String> param = new ArrayList<>();
+		for (SingleVariableDeclaration svd: paras){
+			param.add(typeToString(svd.getType()));
+		}
 		
 		return String.format("%s (%s)", returnType, Joiner.on(", ").join(param));
 		

@@ -12,13 +12,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import jp.ac.osakau.farseerfc.purano.ano.Purity;
 import jp.ac.osakau.farseerfc.purano.dep.DepEffect;
 import jp.ac.osakau.farseerfc.purano.dep.DepFrame;
-import jp.ac.osakau.farseerfc.purano.dep.DepValue;
+import jp.ac.osakau.farseerfc.purano.dep.FieldDep;
 import jp.ac.osakau.farseerfc.purano.effect.ArgumentEffect;
 import jp.ac.osakau.farseerfc.purano.effect.CallEffect;
 import jp.ac.osakau.farseerfc.purano.effect.Effect;
@@ -28,6 +29,7 @@ import jp.ac.osakau.farseerfc.purano.effect.StaticEffect;
 import jp.ac.osakau.farseerfc.purano.util.Escaper;
 import jp.ac.osakau.farseerfc.purano.util.Types;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +57,10 @@ public class HtmlDumpper implements ClassFinderDumpper {
     private final Types table;
     
     private static final boolean includeNonTargetEH = true;
+    private static final boolean ignoreNative = false;
+    private static final boolean dumpSourceCode = false;
+    private static final boolean dumpAsmCode = true;
+    private static final boolean dumpEffects = true;
 
     public HtmlDumpper(PrintStream out, ClassFinder cf) throws IOException {
         this.out = out;
@@ -68,7 +74,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
         cfg.setIncompatibleImprovements(new Version(2, 3, 20));
         
-        this.table = new Types();
+        this.table = new Types(false);
     }
     
 
@@ -95,7 +101,8 @@ public class HtmlDumpper implements ClassFinderDumpper {
             }
             for(MethodRep mtd: cf.classMap.get(clsName).getAllMethods()){
                 int p=mtd.purity();
-                p = p & (~Purity.Native);
+                if(ignoreNative)
+                	p = p & (~Purity.Native);
                 if(mtd.getInsnNode().name.equals("equals") && mtd.getInsnNode().desc.equals("(Ljava/lang/Object;)Z")){
                     emethod++;
                     if(p == Purity.Unknown){
@@ -155,7 +162,8 @@ public class HtmlDumpper implements ClassFinderDumpper {
             for(MethodRep mtd: cls.getAllMethods()){
                 method++;
                 int p=mtd.purity();
-                p = p & (~Purity.Native);
+                if(ignoreNative)
+                	p = p & (~Purity.Native);
                 if(p == Purity.Unknown){
                     unknown ++;
                 }
@@ -219,10 +227,17 @@ public class HtmlDumpper implements ClassFinderDumpper {
     @Override
     public void dump() {
         Map<String, List<String>> result = new HashMap<>();
-        result.put("classes", new ArrayList<>());
+        result.put("classes", new ArrayList<String>());
         for (String clsName : cf.classMap.keySet()) {
-            boolean isTarget = cf.classTargets.contains(clsName) || 
-            		cf.prefix.stream().anyMatch(p -> clsName.startsWith(p));
+//            boolean isTarget = cf.classTargets.contains(clsName) || 
+//            		cf.prefix.stream().anyMatch(p -> clsName.startsWith(p));
+        	boolean isTarget = cf.classTargets.contains(clsName);
+        	for(String prefix: cf.prefix){
+        		if(clsName.startsWith(prefix)){
+        			isTarget = true;
+        			break;
+        		}
+        	}
             if (!isTarget) {
                 continue;
             }
@@ -248,20 +263,39 @@ public class HtmlDumpper implements ClassFinderDumpper {
     public String dumpClass(ClassRep cls){
     	Map<String, Object> result = new HashMap<>();
     	result.put("name", table.fullClassName(cls.getName()));
-    	result.put("methods", cls.getAllMethods().stream()
-    			.map(method -> dumpMethod(method))
-    			.collect(Collectors.toList()));
+//    	result.put("methods", cls.getAllMethods().stream()
+//    			.map(method -> dumpMethod(method))
+//    			.collect(Collectors.toList()));
+    	
+    	List<String> methodsDump = new ArrayList<>();
+    	for(MethodRep m: cls.getAllMethods()){
+    		methodsDump.add( dumpMethod(m));
+    	}
+    	result.put("methods", methodsDump);
     	
 //    	result.put("cache", Joiner.on(",").join(
 //    			cls.getCacheFields().stream()
 //    			.map(fd -> fd.dump(table))
 //    			.collect(Collectors.toList())));
-    	result.put("caches", cls.getFieldWrite().entrySet().stream()
-    			.map(entry -> entry.getKey().dump(table) + ": " +
-    					Joiner.on("<br/>").join(entry.getValue().stream()
-    							.map(e -> table.dumpMethodDesc(e.getInsnNode().desc, e.getInsnNode().name))
-    							.collect(Collectors.toList())))
-    			.collect(Collectors.toList()));
+    	
+//    	result.put("caches", cls.getFieldWrite().entrySet().stream()
+//    			.map(entry -> entry.getKey().dump(table) + ": " +
+//    					Joiner.on("<br/>").join(entry.getValue().stream()
+//    							.map(e -> table.dumpMethodDesc(e.getInsnNode().desc, e.getInsnNode().name))
+//    							.collect(Collectors.toList())))
+//    			.collect(Collectors.toList()));
+    	
+    	List<String> caches = new ArrayList<>();
+    	for(Entry<FieldDep, Set<MethodRep>> f: cls.getFieldWrite().entrySet()){
+    		List<String> lines = new ArrayList<>();
+    		for (MethodRep e: f.getValue()){
+    			lines.add(table.dumpMethodDesc(e.getInsnNode().desc, e.getInsnNode().name));
+    		}
+    		caches.add(f.getKey().dump(table) + ": " + Joiner.on("<br/>"));
+    	}
+    	result.put("caches", caches);
+    	
+    	
     	
 //    	result.put("source", cls.getSource());
 
@@ -285,12 +319,17 @@ public class HtmlDumpper implements ClassFinderDumpper {
     @SuppressWarnings("unchecked")
 	public String dumpMethod(MethodRep method){
     	Map<String, Object> result = new HashMap<>();
+    	List<String> emptyList=new ArrayList<>();
     	    	
     	if(method.getMethodNode() != null){
 			result.put("name", esc.methodName(method.toString(table)));
-			List<String> overrides=method.getOverrided().values().stream()
-					.map( rep -> rep.toString(table))
-					.collect(Collectors.toList());
+//			List<String> overrides=method.getOverrided().values().stream()
+//					.map( rep -> rep.toString(table))
+//					.collect(Collectors.toList());
+			List<String> overrides= new ArrayList<>();
+			for(MethodRep m: method.getOverrided().values()){
+				overrides.add(m.toString(table));
+			}
 			result.put("overrides", overrides == null ? "" : overrides);
 			
 			
@@ -312,16 +351,31 @@ public class HtmlDumpper implements ClassFinderDumpper {
                     }
                 }
                 result.put("purity", esc.purity(method.dumpPurity()));
-                result.put("effects", dumpEffects(method.getDynamicEffects(), method, table, "", esc));
+                
+                if(dumpEffects){
+                	result.put("effects", dumpEffects(method.getDynamicEffects(), method, table, "", esc));
+                }else{
+                	result.put("effects", emptyList);
+                }
+                
                 result.put("forResults", dumpForResults(method, table, "", esc));
+                
             }else{
             	result.put("purity", Arrays.asList(""));
             	result.put("effects", Arrays.asList(""));
             }
             
-
-			result.put("asm", dumpMethodAsm(method));
-			result.put("source", dumpMethodSource(method));
+            if(dumpAsmCode){
+            	result.put("asm", dumpMethodAsm(method));
+            }else{
+            	result.put("asm", "");
+            }
+            
+            if(dumpSourceCode){
+            	result.put("source", dumpMethodSource(method));
+            }else{
+            	result.put("source", "");
+            }
 			
 		}else{
 			return "";
@@ -378,11 +432,18 @@ public class HtmlDumpper implements ClassFinderDumpper {
 			
 			List<String> sourcelines = new ArrayList<>();
 			for(int line : new TreeSet<Integer>(visitor.getLineMap().keySet())){
+				List<String> sourceLines = new ArrayList<>();
+				for(ASTNode node: visitor.getLineMap().get(line)){
+					sourceLines.add(String.format("\"%s\"", node.toString().trim()));
+				}
 				sourcelines.add(String.format("%d: [%s]", line,
-						visitor.getLineMap().get(line)
-						.stream()
-						.map( (x) -> String.format("\"%s\"", x.toString().trim() ))
-						.collect(Collectors.joining(", "))));
+						Joiner.on(", ").join(sourceLines)));
+				
+//				sourcelines.add(String.format("%d: [%s]", line,
+//						visitor.getLineMap().get(line)
+//						.stream()
+//						.map( (x) -> String.format("\"%s\"", x.toString().trim() ))
+//						.collect(Collectors.joining(", "))));
 			}
 			sourceCode += Joiner.on("\n").join(sourcelines);
 			
@@ -398,7 +459,7 @@ public class HtmlDumpper implements ClassFinderDumpper {
     
     public String dumpMethodAsm(@NotNull MethodRep method){
     	ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintWriter pw = new PrintWriter(out);
+        final PrintWriter pw = new PrintWriter(out);
         
         Textifier text = new Textifier(Opcodes.ASM5){
         	@Override public void visitMethodEnd(){

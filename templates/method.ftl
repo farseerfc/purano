@@ -32,11 +32,11 @@
 		</#list>
 		</div>
 		
-		<pre><code>${forResults}</code></pre>
+		<pre><code>${forResults?html}</code></pre>
 	</div>		
 	<div class="asm">
 <pre><code>${asm}</code></pre>
 	</div>
 	<div class="source">
-<pre><code>${source}</code></pre></div>
+<pre><code>${source?html}</code></pre></div>
 </div>

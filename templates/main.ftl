@@ -39,6 +39,14 @@
 </style>
 </head>
 <body>
+
+<#list stat as s>
+	<div class="clazz">
+		${s}
+	</div>
+</#list>
+<hr/>
+
 <div>
 <#list package as p>
 package ${p} ;
@@ -54,10 +62,6 @@ package ${p} ;
 		${class}
 	</div>
 </#list>
-<#list stat as s>
-	<div class="clazz">
-		${s}
-	</div>
-</#list>
+
 </body>
 </html>

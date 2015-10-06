@@ -47,7 +47,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 2;
+    private static final int MAX_LOAD_PASS = 10;
     
     private final boolean examChangedSignatures = true;
     private final boolean breakForloop = true;
@@ -60,7 +60,7 @@ public class ClassFinder {
 	}
 	
 	public ClassFinder(@NotNull List<String> prefix){
-        this(prefix, Arrays.asList());
+        this(prefix, new ArrayList<String>());
 	}
 	
 	public ClassFinder(String string) {
@@ -194,15 +194,190 @@ public class ClassFinder {
 		}
 		log.info(String.format("Found %d refactoring candidates", count));
 	}
-
-	public static void main(@NotNull String [] argv) throws IOException {
+	
+	public static void mainHtmlParser() throws IOException{
 		long start=System.currentTimeMillis();
         String targetPackage []={
-//        		"mit.jolden",
-//        		"jp.ac.osakau.farseerfc.purano"};
+        		"org.htmlparser" };
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/htmlparser-code/lexer/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/parser/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/filterbuilder/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/sitecapturer/src/main/java",
+				"/home/farseerfc/purano_target/htmlparser-code/thumbelina/src/main/java",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/htmlparser.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+	
+	public static void mainTomcat() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.apache.catalina" };
+
+		
+		String targetSource [] = {
+				
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/tomcat.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+
+	public static void mainArgoUML() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.argouml" };
+
+		
+		String targetSource [] = {
+				
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/argouml.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+
+	
+	public static void mainTrove() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"gnu.trove" };
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/trove/3.0.3/src",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+	
+	public static void mainPcollections() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.pcollections" };
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/pcollections/src/main/java",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+	
+	public static void mainMapdb() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.mapdb" };
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/mapdb/src/main/java",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+	
+	public static void mainJodaTime() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.joda" };
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/joda-time/src/main/java",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+
+	public static void main(@NotNull String [] argv) throws IOException {
+		mainHtmlParser();
+//		mainPcollections();
+//		mainJodaTime();
+//		mainMapdb();
+//		mainTomcat();
+//		mainArgoUML();
+		
+//		return;
+		/*
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"mit.jolden.treeadd"};
+//        		"jp.ac.osakau.farseerfc.purano", "org.objectweb.asm"};
 //        "test"};
 //                "java.time.format.DateTimeFormatterBuilder"};
-        		"org.htmlparser" };
+//        		"org.htmlparser" };
         // "org.argouml"};
 //        "org.apache.catalina","java.lang.Object"};
 //        "jp.ac.osakau.farseerfc.purano","org.objectweb.asm","java.lang.Object"};
@@ -213,12 +388,12 @@ public class ClassFinder {
 		}
 		
 		String targetSource [] = {
-				"/home/farseerfc/purano_target/htmlparser-code/lexer/src/main/java",
-				"/home/farseerfc/purano_target/htmlparser-code/parser/src/main/java",
-				"/home/farseerfc/purano_target/htmlparser-code/filterbuilder/src/main/java",
-				"/home/farseerfc/purano_target/htmlparser-code/sitecapturer/src/main/java",
-				"/home/farseerfc/purano_target/htmlparser-code/thumbelina/src/main/java",
-				
+//				"/home/farseerfc/purano_target/htmlparser-code/lexer/src/main/java",
+//				"/home/farseerfc/purano_target/htmlparser-code/parser/src/main/java",
+//				"/home/farseerfc/purano_target/htmlparser-code/filterbuilder/src/main/java",
+//				"/home/farseerfc/purano_target/htmlparser-code/sitecapturer/src/main/java",
+//				"/home/farseerfc/purano_target/htmlparser-code/thumbelina/src/main/java",
+//				
 //				"/home/farseerfc/workspace/purano/lib/target/src/src",
 //				"/home/farseerfc/workspace/purano/src",
 			};
@@ -241,5 +416,7 @@ public class ClassFinder {
         dumpper.dump();
 
         log.info("Runtime :"+(System.currentTimeMillis() - start));
+        */
+        
 	}
 }

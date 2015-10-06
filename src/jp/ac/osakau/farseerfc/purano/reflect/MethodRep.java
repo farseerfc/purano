@@ -438,14 +438,17 @@ public class MethodRep extends MethodVisitor implements Purity {
         if(p == Unknown){
             result.add("Unknown");
         }
+        
+        boolean nonPure = (p & ArgumentModifier) > 0 || (p & FieldModifier) > 0 || (p & StaticModifier) > 0 || (p & Native) > 0;
 
-        if(p == Stateless){
+        if(p == Stateless && ! nonPure){
             result.add("Stateless");
         }
 
-        if((p & Stateful) > 0){
+        if((p & Stateful) > 0 && ! nonPure){
             result.add("Stateful");
         }
+        
         if((p & ArgumentModifier) > 0){
             result.add("ArgumentModifier");
         }
