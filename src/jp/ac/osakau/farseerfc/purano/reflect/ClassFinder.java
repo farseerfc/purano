@@ -47,7 +47,7 @@ public class ClassFinder {
 	final Set<String> classTargets = new HashSet<>() ;
     final List<String> prefix;
 
-    private static final int MAX_LOAD_PASS = 10;
+    private static final int MAX_LOAD_PASS = 2;
     
     private final boolean examChangedSignatures = true;
     private final boolean breakForloop = true;
@@ -360,9 +360,138 @@ public class ClassFinder {
         dumpper.dump();
         log.info("Runtime :"+(System.currentTimeMillis() - start));
 	}
+	
+	public static void mainTest() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"test" };
 
+		
+		String targetSource [] = {
+				"/home/farseerfc/workspace/purano/src",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+	
+	public static void mainDacapoFop() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.dacapo","org.apache.fop" };
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/dacapo-src/benchmarks/bms/fop/build/fop-0.95/src/java",
+				"/home/farseerfc/workspace/purano/lib/target/dacapo-src/benchmarks/bms/fop/src",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+
+	public static void mainDacapoAvrora() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.dacapo","avrora" };
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/dacapo-src/benchmarks/bms/avrora/src",
+				"/home/farseerfc/workspace/purano/lib/target/dacapo-src/benchmarks/bms/avrora/src",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+
+	public static void mainDacapoXalan() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.dacapo",
+        		"org.apache.xalan",
+        		"org.apache.xml",
+        		"org.apache.xpath",
+        		};
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/dacapo-src/benchmarks/bms/xalan/build/xalan-j_2_7_1/src",
+				"/home/farseerfc/workspace/purano/lib/target/dacapo-src/benchmarks/bms/xalan/src",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+
+	public static void mainDacapoPmd() throws IOException{
+		long start=System.currentTimeMillis();
+        String targetPackage []={
+        		"org.dacapo",
+        		"net.sourceforge.pmd",
+        		};
+
+		
+		String targetSource [] = {
+				"/home/farseerfc/purano_target/dacapo-src/benchmarks/bms/pmd/build/pmd-4.2.5/src",
+				"/home/farseerfc/workspace/purano/lib/target/dacapo-src/benchmarks/bms/pmd/src",
+			};
+		
+		ClassFinder cf = new ClassFinder(Arrays.asList(targetPackage), Arrays.asList(targetSource));
+		cf.resolveMethods();
+		
+		
+		cf.dumpForResult();
+		
+        File output = new File("/tmp/output.html");
+        PrintStream ps = new PrintStream(new FileOutputStream(output));
+        ClassFinderDumpper dumpper = new HtmlDumpper(ps,cf);
+        dumpper.dump();
+        log.info("Runtime :"+(System.currentTimeMillis() - start));
+	}
+	
 	public static void main(@NotNull String [] argv) throws IOException {
-		mainHtmlParser();
+		mainDacapoPmd();
+//		mainDacapoAvrora();
+//		mainDacapoFop();
+//		mainTest();
+//		mainHtmlParser();
 //		mainPcollections();
 //		mainJodaTime();
 //		mainMapdb();
